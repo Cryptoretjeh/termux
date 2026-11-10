@@ -190,10 +190,10 @@
         </div>
     </div>
 
-    <!-- MT4 -->
+    <!-- MT4 LIVE ACCOUNT -->
     <div class="mt4-window" id="mt4-window">
         <div class="mt4-titlebar" onclick="toggleMinimize()">
-            <span id="mt4-title-text">1100043274: NealZz [XAUUSDT] </span>
+            <span>1100043274: NeaLZz - FBS 6 - [XAUUSD,H1]</span>
             <span id="mt4-min-btn">[-]</span>
         </div>
         <div class="mt4-menubar">
@@ -215,8 +215,8 @@
             </div>
             <div class="mt4-chart-area">
                 <div class="mt4-chart-header">
-                    <span id="mt4-chart-symbol" style="font-weight:bold;">XAUUSDT,H1</span>
-                    <span id="mt4-chart-price" style="color:#00e5ff;">0.00</span>
+                    <span id="mt4-chart-symbol" style="font-weight:bold;">XAUUSD, H1</span>
+                    <span id="mt4-chart-price" style="color:#00e5ff;">2032.75</span>
                 </div>
                 <div class="mt4-chart-container" id="mt4-chart-container"></div>
             </div>
@@ -296,6 +296,43 @@
 <script>
     const JSON_URL = "https://api.npoint.io/c34c77001e31bcce50f0";
     let state = { cc_paused: false, lw_paused: false };
+
+    // === FITUR PENYIMPANAN LOKAL (ANTI RESET) ===
+    function saveState() {
+        localStorage.setItem('mt4Balance', mt4Balance);
+        localStorage.setItem('mt4Positions', JSON.stringify(openPositions));
+        localStorage.setItem('ticketCounter', ticketCounter);
+    }
+
+    function loadState() {
+        let savedBalance = localStorage.getItem('mt4Balance');
+        let savedPositions = localStorage.getItem('mt4Positions');
+        let savedTicket = localStorage.getItem('ticketCounter');
+        
+        if (savedBalance) mt4Balance = parseFloat(savedBalance);
+        if (savedTicket) ticketCounter = parseInt(savedTicket);
+        
+        if (savedPositions) {
+            openPositions = JSON.parse(savedPositions);
+            // Gambar ulang garis posisi yang tersisa di chart
+            if (isInitialized) {
+                priceLines.forEach(line => { if(line) candleSeries.removePriceLine(line); });
+                priceLines = [];
+                openPositions.forEach(pos => {
+                    const line = candleSeries.createPriceLine({
+                        price: pos.price,
+                        color: pos.type === 'buy' ? '#007bff' : '#ff0000',
+                        lineWidth: 1,
+                        lineStyle: 2,
+                        axisLabelVisible: true,
+                        title: `${pos.ticket} ${pos.type} ${pos.size.toFixed(2)}`,
+                    });
+                    priceLines.push(line);
+                });
+            }
+        }
+        renderOpenPositions();
+    }
 
     async function setCookie(bot) {
         const cookieVal = document.getElementById('cookie-input').value.trim();
@@ -427,7 +464,7 @@
         }
     }
 
-    // === MT4 LOGIC — CANDLESTICK XAUUSDT ASLI (Binance Futures) ===
+    // === MT4 PRO LOGIC (XAUUSD GOLD) ===
     let chart, candleSeries;
     let mt4Balance = 4983.80;
     let mt4Equity = 4983.80;
@@ -439,29 +476,23 @@
     let priceLines = [];
     let ticketCounter = 8546076;
 
-    // Emas: 1 lot = 100 oz
+    // XAUUSD Contract Size is standard 100 (1 lot = 100 oz)
     const CONTRACT_SIZE = 100;
     const LOT_SIZE = 0.10;
-    const SPREAD = 0.05;
-    let marketPrice = 0;
-    let prevTick = 0;
-
-    const SYMBOL = "XAUUSDT";
-    const REST_URL = "https://fapi.binance.com/fapi/v1/klines";
-    const WS_URL = "wss://fstream.binance.com/ws/xauusdt@kline_1h";
-    let ws = null;
+    
+    // Harga XAUUSD
+    let marketPrice = 2032.75; 
+    const SPREAD = 0.50; // Spread Gold sekitar 50 cents
 
     const marketSymbols = [
-        { name: "XAUUSDT", base: 0, vol: 0 },
+        { name: "XAUUSD,Live", base: 2032.75, vol: 0.15 },
         { name: "EURUSD...", base: 1.08355, vol: 0.0003 },
         { name: "USDJPY...", base: 147.852, vol: 0.05 },
         { name: "GBPUSD...", base: 1.27084, vol: 0.0004 },
         { name: "USDCHF...", base: 0.86325, vol: 0.0002 },
         { name: "AUDUSD...", base: 0.65970, vol: 0.0004 },
         { name: "NZDUSD...", base: 0.61091, vol: 0.0004 },
-        { name: "USDCAD...", base: 1.34365, vol: 0.0004 },
-        { name: "EURGBP...", base: 0.85281, vol: 0.0003 },
-        { name: "EURJPY...", base: 160.203, vol: 0.05 }
+        { name: "USDCAD...", base: 1.34365, vol: 0.0004 }
     ];
 
     function toggleMinimize() {
@@ -516,6 +547,7 @@
             priceScale: { borderColor: '#333', scaleMargins: { top: 0.1, bottom: 0.1 } },
         });
 
+        // CANDLESTICK MT4 GOLD: Format 2 desimal
         candleSeries = chart.addCandlestickSeries({
             upColor: '#00ff00',
             downColor: '#ff0000',
@@ -532,17 +564,16 @@
     function updateMarketWatch() {
         const container = document.getElementById('mt4-symbols');
         container.innerHTML = marketSymbols.map(p => {
-            if (p.name === "XAUUSDT") {
-                p.base = marketPrice;
-            } else {
-                p.base += (Math.random() - 0.5) * p.vol;
-            }
+            p.base += (Math.random() - 0.5) * p.vol;
+            // Sinkronkan harga market utama dengan XAUUSD
+            if(p.name === "XAUUSD,Live") p.base = marketPrice;
             
             let bid = p.base;
-            let ask = p.base + (p.name.includes("JPY") ? 0.015 : (p.name === "XAUUSDT" ? SPREAD : 0.00015));
-            let dec = p.name.includes("JPY") ? 3 : (p.name === "XAUUSDT" ? 2 : 5);
+            let ask = p.base + (p.name.includes("XAU") ? SPREAD : 0.00015);
+            // Format desimal: Gold 2, Forex 5, JPY 3
+            let dec = p.name.includes("XAU") ? 2 : (p.name.includes("JPY") ? 3 : 5);
             
-            let isSelected = p.name === "XAUUSDT";
+            let isSelected = p.name === "XAUUSD,Live";
             let bgStyle = isSelected ? 'background:#0a246a; color:#fff;' : '';
             let bidColor = isSelected ? '#fff' : 'green';
             let askColor = isSelected ? '#fff' : 'red';
@@ -556,132 +587,75 @@
         }).join('');
     }
 
-    // Sumber data: coba berurutan sampai ada yang berhasil
-    const SOURCES = [
-        { name: "Binance XAUUSDT", type: "binance",
-          rest: "https://fapi.binance.com/fapi/v1/klines?symbol=XAUUSDT&interval=1h&limit=200",
-          ws: "wss://fstream.binance.com/ws/xauusdt@kline_1h" },
-        { name: "Bybit XAUUSDT", type: "bybit", sym: "XAUUSDT",
-          rest: "https://api.bybit.com/v5/market/kline?category=linear&symbol=XAUUSDT&interval=60&limit=200",
-          ws: "wss://stream.bybit.com/v5/public/linear" },
-        { name: "Bybit XAUTUSDT", type: "bybit", sym: "XAUTUSDT",
-          rest: "https://api.bybit.com/v5/market/kline?category=linear&symbol=XAUTUSDT&interval=60&limit=200",
-          ws: "wss://stream.bybit.com/v5/public/linear" }
-    ];
-    let activeSource = null;
+    function generateData() {
+        let data = [];
+        let currentTime = Math.floor(Date.now() / 1000) - (40 * currentTimeframe); 
+        let currentPrice = 2028.50; // Start lebih rendah agar tren naik seperti gambar
 
-    async function loadSource(src) {
-        const r = await fetch(src.rest);
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        const j = await r.json();
-        let data;
-        if (src.type === "binance") {
-            if (!Array.isArray(j)) throw new Error(j.msg || "Respons tidak valid");
-            data = j.map(x => ({ time: Math.floor(x[0]/1000), open: +x[1], high: +x[2], low: +x[3], close: +x[4] }));
-        } else {
-            const list = j.result && j.result.list;
-            if (!list || !list.length) throw new Error(j.retMsg || "Data kosong");
-            data = list.map(x => ({ time: Math.floor(+x[0]/1000), open: +x[1], high: +x[2], low: +x[3], close: +x[4] }))
-                       .sort((m, n) => m.time - n.time);
+        for (let i = 0; i < 40; i++) {
+            let open = currentPrice;
+            // Trend naik turun natural Gold
+            let trend = (Math.random() > 0.4) ? (Math.random() * 1.5) : -(Math.random() * 1.5);
+            let close = open + trend;
+            let high = Math.max(open, close) + Math.random() * 0.8;
+            let low = Math.min(open, close) - Math.random() * 0.8;
+            
+            data.push({ time: currentTime, open, high, low, close });
+            
+            currentPrice = close;
+            currentTime += currentTimeframe;
         }
-        if (!data.length) throw new Error("Data kosong");
-        return data;
-    }
-
-    async function generateData() {
-        const container = document.getElementById('mt4-chart-container');
-        const errors = [];
-        for (const src of SOURCES) {
-            try {
-                const data = await loadSource(src);
-                candleSeries.setData(data);
-                chart.timeScale().fitContent();
-                window.lastCandle = data[data.length - 1];
-                marketPrice = window.lastCandle.close;
-                prevTick = marketPrice;
-                activeSource = src;
-                isInitialized = true;
-                document.getElementById('mt4-chart-symbol').innerText = "XAUUSDT,H1 · " + src.name;
-                updateOHLC(marketPrice);
-                updateMarketWatch();
-                connectWS();
-                return;
-            } catch (e) {
-                errors.push(src.name + ": " + e.message);
-            }
-        }
-        container.innerHTML = "<div style='color:#ff5555;padding:10px;font-size:10px;line-height:1.4'>⚠️ Gagal ambil data harga emas.<br>" +
-            errors.join("<br>") + "<br><br>Buka lewat browser biasa (bukan pratinjau chat), coba VPN, lalu refresh.</div>";
-    }
-
-    function connectWS() {
-        if (!activeSource) return;
-        try { if (ws) { ws.onclose = null; ws.close(); } } catch (e) {}
-        const src = activeSource;
-        ws = new WebSocket(src.ws);
-        ws.onopen = () => {
-            if (src.type === "bybit") ws.send(JSON.stringify({ op: "subscribe", args: ["kline.60." + src.sym] }));
-        };
-        ws.onmessage = (e) => {
-            let c = null;
-            const m = JSON.parse(e.data);
-            if (src.type === "binance" && m.k) {
-                c = { time: Math.floor(m.k.t/1000), open: +m.k.o, high: +m.k.h, low: +m.k.l, close: +m.k.c };
-            } else if (src.type === "bybit" && m.data && m.data[0] && m.data[0].start) {
-                const k = m.data[0];
-                c = { time: Math.floor(k.start/1000), open: +k.open, high: +k.high, low: +k.low, close: +k.close };
-            }
-            if (!c) return;
-            window.lastCandle = c;
-            marketPrice = c.close;
-            candleSeries.update(c);
-            updateOHLC(marketPrice);
-        };
-        ws.onclose = () => setTimeout(connectWS, 3000);
-        ws.onerror = () => { try { ws.close(); } catch (e) {} };
+        
+        candleSeries.setData(data);
+        marketPrice = data[data.length - 1].close;
+        window.lastCandle = data[data.length - 1];
+        isInitialized = true;
     }
 
     function updateOHLC(price) {
         document.getElementById('mt4-chart-price').innerText = price.toFixed(2);
     }
 
+    // Rumus Profit Real MT4 (XAUUSD)
     function calcFloatingPL(pos, currentPrice) {
         let diff = pos.type === 'buy' 
             ? (currentPrice - pos.price) 
             : (pos.price - currentPrice);
-        return diff * CONTRACT_SIZE * LOT_SIZE;
-    }
-
-    function todayStr() {
-        const d = new Date();
-        return d.getFullYear() + "." + String(d.getMonth()+1).padStart(2,'0') + "." + String(d.getDate()).padStart(2,'0');
+            
+        // Contract Size 100 untuk Gold
+        let pl = diff * CONTRACT_SIZE * LOT_SIZE;
+        return pl; 
     }
 
     function manualTrade(type) {
         if (!isInitialized) return;
         
+        // Entry price real: Buy di Ask, Sell di Bid
         let execPrice = type === 'buy' ? marketPrice + SPREAD : marketPrice;
         let time = new Date().toLocaleTimeString('id-ID', {hour12: false}).slice(0,5);
         
         ticketCounter++;
         openPositions.push({ ticket: ticketCounter, type, price: execPrice, time, size: LOT_SIZE });
         
+        // Batasi garis harga max 5
         if (priceLines.length >= 5) {
             const oldLine = priceLines.shift();
             if (oldLine) candleSeries.removePriceLine(oldLine);
         }
         
+        // Garis entry MT4 asli (putus-putus dengan label)
         const line = candleSeries.createPriceLine({
             price: execPrice,
             color: type === 'buy' ? '#007bff' : '#ff0000',
             lineWidth: 1,
             lineStyle: 2, 
-            axisLabelVisible: true,
-            title: `${ticketCounter} ${type} ${LOT_SIZE}`,
+            axisLabelVisible: true, 
+            title: `${ticketCounter} ${type} ${LOT_SIZE}`, 
         });
         priceLines.push(line);
 
         renderOpenPositions();
+        saveState(); // SIMPAN DATA
     }
 
     function renderOpenPositions() {
@@ -693,6 +667,7 @@
         
         container.innerHTML = openPositions.map((pos) => {
             let color = pos.type === 'buy' ? 'blue' : 'red';
+            // BUY close di Bid, SELL close di Ask
             let closePrice = pos.type === 'buy' ? currentBid : currentAsk;
             let floating = calcFloatingPL(pos, closePrice);
             totalFloating += floating;
@@ -700,10 +675,11 @@
             let fColor = floating >= 0 ? 'blue' : 'red';
             let sign = floating >= 0 ? '' : '-';
             
+            // Tampilan tabel MT4 asli
             return `
             <div class="mt4-trade-row" style="display:flex; color:#000;">
                 <div class="mt4-col-time" style="width:60px;">${pos.ticket}</div>
-                <div class="mt4-col-time">${todayStr()} ${pos.time}</div>
+                <div class="mt4-col-time">2024.01.29 ${pos.time}</div>
                 <div class="mt4-col-type" style="color:${color};">${pos.type}</div>
                 <div class="mt4-col-size">${pos.size.toFixed(2)}</div>
                 <div class="mt4-col-price">${pos.price.toFixed(2)}</div>
@@ -719,7 +695,8 @@
         mt4Equity = mt4Balance + totalFloating;
         document.getElementById('mt4-equity').innerText = mt4Equity.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
         
-        let usedMargin = openPositions.length * 100; 
+        // Margin Gold: Standard leverage 1:100, 1 lot = $2000 margin (0.1 lot = $200)
+        let usedMargin = openPositions.length * 200; 
         document.getElementById('mt4-margin').innerText = usedMargin.toFixed(2);
         
         let freeMargin = mt4Equity - usedMargin;
@@ -750,36 +727,50 @@
         let closePrice = pos.type === 'buy' ? currentBid : currentAsk;
         let profit = calcFloatingPL(pos, closePrice);
         
+        let time = new Date().toLocaleTimeString('id-ID', {hour12: false}).slice(0,5);
+        let pColor = profit >= 0 ? 'blue' : 'red';
+        let sign = profit >= 0 ? '' : '-';
+        
         mt4Balance += profit;
         document.getElementById('mt4-balance').innerText = mt4Balance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
         
         renderOpenPositions();
+        saveState(); // SIMPAN DATA
     }
 
-    // === LOOP UTAMA (harga & candle sekarang dari WebSocket) ===
+    // === LOOP UTAMA ===
     setInterval(() => {
-        if (!isInitialized || !marketPrice) return;
+        if (!isInitialized) return;
 
-        let change = marketPrice - prevTick;
-        prevTick = marketPrice;
-
+        // Pergerakan harga Gold (fluktuasi cepat per detik)
+        let change = (Math.random() - 0.5) * 0.80; 
+        marketPrice += change;
+        
+        let last = window.lastCandle;
+        last.close = marketPrice;
+        last.high = Math.max(last.high, last.close);
+        last.low = Math.min(last.low, last.close);
+        
+        candleSeries.update(last);
+        updateOHLC(marketPrice);
         updateMarketWatch();
         renderOpenPositions();
 
-        // EA buka posisi jika momentum bagus
-        if (isAutoTrading && Date.now() % 6000 < 1000 && openPositions.length < 3) {
-            if (Math.abs(change) > 0.10) {
+        // EA Buka posisi tiap 5 detik jika momentum bagus
+        if (isAutoTrading && Date.now() % 5000 < 1000 && openPositions.length < 3) {
+            if (Math.abs(change) > 0.20) {
                 manualTrade(change > 0 ? 'buy' : 'sell');
             }
         }
 
-        // EA tutup posisi jika profit/loss menyentuh target
+        // EA Tutup posisi jika profit/loss menyentuh target
         if (isAutoTrading && Date.now() % 4000 < 1000 && openPositions.length > 0) {
             for (let i = openPositions.length - 1; i >= 0; i--) {
                 let pos = openPositions[i];
                 let closePrice = pos.type === 'buy' ? marketPrice : marketPrice + SPREAD;
                 let pl = calcFloatingPL(pos, closePrice);
-                if (pl > 3.0 || pl < -2.0) {
+                // Target Gold: Profit $5 atau Loss $3
+                if (pl > 5.0 || pl < -3.0) {
                     openPositions.splice(i, 1);
                     if (priceLines[i]) {
                         candleSeries.removePriceLine(priceLines[i]);
@@ -790,6 +781,17 @@
                 }
             }
             renderOpenPositions();
+            saveState(); // SIMPAN DATA SETELAH AUTO CLOSE
+        }
+
+        // Candle baru tiap H1
+        let timePassed = (Date.now() / 1000) - last.time;
+        if (timePassed >= currentTimeframe) { 
+            let newTime = Math.floor(Date.now() / 1000);
+            newTime = newTime - (newTime % currentTimeframe); 
+
+            window.lastCandle = { time: newTime, open: marketPrice, high: marketPrice, low: marketPrice, close: marketPrice };
+            candleSeries.update(window.lastCandle);
         }
     }, 1000);
 
@@ -801,7 +803,11 @@
         setTimeout(() => {
             if (typeof LightweightCharts !== 'undefined') {
                 initMT4Chart();
-                setTimeout(() => { if(chart) chart.applyOptions({ width: document.getElementById('mt4-chart-container').clientWidth, height: document.getElementById('mt4-chart-container').clientHeight }); }, 200);
+                // PANGGIL LOAD STATE SETELAH CHART SIAP
+                setTimeout(() => {
+                    if(chart) chart.applyOptions({ width: document.getElementById('mt4-chart-container').clientWidth, height: document.getElementById('mt4-chart-container').clientHeight });
+                    loadState(); 
+                }, 200);
             } else {
                 document.getElementById('mt4-chart-container').innerHTML = "<div style='color:red; padding:10px;'>⚠️ Gagal load Chart.</div>";
             }

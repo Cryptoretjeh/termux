@@ -193,7 +193,7 @@
     <!-- MT4 -->
     <div class="mt4-window" id="mt4-window">
         <div class="mt4-titlebar" onclick="toggleMinimize()">
-            <span id="mt4-title-text">1100043274: NealZz [XAUUSDT] - Simulasi</span>
+            <span id="mt4-title-text">1100043274: NealZz [XAUUSDT] </span>
             <span id="mt4-min-btn">[-]</span>
         </div>
         <div class="mt4-menubar">
@@ -556,38 +556,82 @@
         }).join('');
     }
 
-    // Ambil 200 candle H1 asli, lalu sambung live via WebSocket
-    async function generateData() {
-        try {
-            const r = await fetch(`${REST_URL}?symbol=${SYMBOL}&interval=1h&limit=200`);
-            const k = await r.json();
-            if (!Array.isArray(k)) throw new Error("Respons tidak valid");
-            const data = k.map(x => ({
-                time: Math.floor(x[0] / 1000),
-                open: +x[1], high: +x[2], low: +x[3], close: +x[4]
-            }));
-            candleSeries.setData(data);
-            window.lastCandle = data[data.length - 1];
-            marketPrice = window.lastCandle.close;
-            prevTick = marketPrice;
-            isInitialized = true;
-            updateOHLC(marketPrice);
-            updateMarketWatch();
-            connectWS();
-        } catch (e) {
-            console.error(e);
-            document.getElementById('mt4-chart-container').innerHTML =
-                "<div style='color:red;padding:10px'>⚠️ Gagal ambil data XAUUSDT (cek koneksi/wilayah)</div>";
+    // Sumber data: coba berurutan sampai ada yang berhasil
+    const SOURCES = [
+        { name: "Binance XAUUSDT", type: "binance",
+          rest: "https://fapi.binance.com/fapi/v1/klines?symbol=XAUUSDT&interval=1h&limit=200",
+          ws: "wss://fstream.binance.com/ws/xauusdt@kline_1h" },
+        { name: "Bybit XAUUSDT", type: "bybit", sym: "XAUUSDT",
+          rest: "https://api.bybit.com/v5/market/kline?category=linear&symbol=XAUUSDT&interval=60&limit=200",
+          ws: "wss://stream.bybit.com/v5/public/linear" },
+        { name: "Bybit XAUTUSDT", type: "bybit", sym: "XAUTUSDT",
+          rest: "https://api.bybit.com/v5/market/kline?category=linear&symbol=XAUTUSDT&interval=60&limit=200",
+          ws: "wss://stream.bybit.com/v5/public/linear" }
+    ];
+    let activeSource = null;
+
+    async function loadSource(src) {
+        const r = await fetch(src.rest);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const j = await r.json();
+        let data;
+        if (src.type === "binance") {
+            if (!Array.isArray(j)) throw new Error(j.msg || "Respons tidak valid");
+            data = j.map(x => ({ time: Math.floor(x[0]/1000), open: +x[1], high: +x[2], low: +x[3], close: +x[4] }));
+        } else {
+            const list = j.result && j.result.list;
+            if (!list || !list.length) throw new Error(j.retMsg || "Data kosong");
+            data = list.map(x => ({ time: Math.floor(+x[0]/1000), open: +x[1], high: +x[2], low: +x[3], close: +x[4] }))
+                       .sort((m, n) => m.time - n.time);
         }
+        if (!data.length) throw new Error("Data kosong");
+        return data;
+    }
+
+    async function generateData() {
+        const container = document.getElementById('mt4-chart-container');
+        const errors = [];
+        for (const src of SOURCES) {
+            try {
+                const data = await loadSource(src);
+                candleSeries.setData(data);
+                chart.timeScale().fitContent();
+                window.lastCandle = data[data.length - 1];
+                marketPrice = window.lastCandle.close;
+                prevTick = marketPrice;
+                activeSource = src;
+                isInitialized = true;
+                document.getElementById('mt4-chart-symbol').innerText = "XAUUSDT,H1 · " + src.name;
+                updateOHLC(marketPrice);
+                updateMarketWatch();
+                connectWS();
+                return;
+            } catch (e) {
+                errors.push(src.name + ": " + e.message);
+            }
+        }
+        container.innerHTML = "<div style='color:#ff5555;padding:10px;font-size:10px;line-height:1.4'>⚠️ Gagal ambil data harga emas.<br>" +
+            errors.join("<br>") + "<br><br>Buka lewat browser biasa (bukan pratinjau chat), coba VPN, lalu refresh.</div>";
     }
 
     function connectWS() {
-        try { if (ws) ws.close(); } catch (e) {}
-        ws = new WebSocket(WS_URL);
+        if (!activeSource) return;
+        try { if (ws) { ws.onclose = null; ws.close(); } } catch (e) {}
+        const src = activeSource;
+        ws = new WebSocket(src.ws);
+        ws.onopen = () => {
+            if (src.type === "bybit") ws.send(JSON.stringify({ op: "subscribe", args: ["kline.60." + src.sym] }));
+        };
         ws.onmessage = (e) => {
-            const k = JSON.parse(e.data).k;
-            if (!k) return;
-            const c = { time: Math.floor(k.t / 1000), open: +k.o, high: +k.h, low: +k.l, close: +k.c };
+            let c = null;
+            const m = JSON.parse(e.data);
+            if (src.type === "binance" && m.k) {
+                c = { time: Math.floor(m.k.t/1000), open: +m.k.o, high: +m.k.h, low: +m.k.l, close: +m.k.c };
+            } else if (src.type === "bybit" && m.data && m.data[0] && m.data[0].start) {
+                const k = m.data[0];
+                c = { time: Math.floor(k.start/1000), open: +k.open, high: +k.high, low: +k.low, close: +k.close };
+            }
+            if (!c) return;
             window.lastCandle = c;
             marketPrice = c.close;
             candleSeries.update(c);

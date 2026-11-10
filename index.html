@@ -88,7 +88,6 @@
         .faucet-sidebar-item { margin-bottom: 6px; color: #888; }
         .faucet-sidebar-item span { color: var(--cyan); font-weight: bold; display: block; font-size: 11px; margin-top: 2px;}
         
-        /* UPDATE: Log Container agar bisa scroll */
         .faucet-log-container { 
             flex-grow: 1; 
             padding: 8px; 
@@ -400,20 +399,23 @@
                 }
             }
 
-            if (data.faucet_logs && data.faucet_logs.length > 0) {
+            // --- UPDATE LOG KHUSUS 99FAUCET (DARI PHP ARRAY) ---
+            if (data.faucet && data.faucet.logs && data.faucet.logs.length > 0) {
                 const fLog = document.getElementById('faucet-log');
                 let fHtml = "";
-                data.faucet_logs.forEach(log => {
+                
+                data.faucet.logs.forEach(log => {
                     let type = "log-info";
-                    if (log.includes("SUKSES") || log.includes("SUCCESS")) type = "log-success";
-                    else if (log.includes("Gagal") || log.includes("Error") || log.includes("ERROR")) type = "log-error";
-                    else if (log.includes("Cooldown") || log.includes("Skip") || log.includes("Butuh Shortlink")) type = "log-warning";
+                    if (log.includes("SUKSES")) type = "log-success";
+                    else if (log.includes("KOSONG") || log.includes("GAGAL")) type = "log-warning";
+                    else if (log.includes("SHORTLINK")) type = "log-error";
                     
                     fHtml += `<div class="log-entry"><span class="${type}">${log}</span></div>`;
                 });
+                
                 if(fLog.innerHTML !== fHtml) {
                     fLog.innerHTML = fHtml;
-                    fLog.scrollTop = fLog.scrollHeight;
+                    fLog.scrollTop = 0; // Auto scroll ke atas (karena log terbaru di atas)
                 }
             }
 

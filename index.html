@@ -28,7 +28,7 @@
     </div>
 
     <!-- Hidden iframe to bypass CORS -->
-    <iframe id="dataFrame" style="display:none;" src="https://cryptoretjeh.github.io/Termux/data.html"></iframe>
+    <iframe id="dataFrame" style="display:none;" src="https://cryptoretjeh.github.io/termux/data.html"></iframe>
 
     <script>
         const frame = document.getElementById('dataFrame');
@@ -40,20 +40,22 @@
                 // Ubah teks jadi JSON
                 const data = JSON.parse(text);
                 
-                // Update UI
+                // Update UI ClipCoin
                 document.getElementById('cc-status').innerText = data.clipcoin.status;
-                document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo).toFixed(5);
+                document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
                 
+                // Update UI LuckyWatch
                 document.getElementById('lw-status').innerText = data.luckywatch.status;
-                document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo).toFixed(5);
+                document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
+                
             } catch(e) {
                 console.log("Menunggu data update...", e);
             }
         }
         
-        // Reload iframe tiap 3 detik
+        // Reload iframe tiap 3 detik biar realtime
         setInterval(() => {
-            frame.src = "https://cryptoretjeh.github.io/Termux/data.html?t=" + new Date().getTime();
+            frame.src = "https://cryptoretjeh.github.io/termux/data.html?t=" + new Date().getTime();
         }, 3000);
     </script>
 </body>

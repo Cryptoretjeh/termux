@@ -54,9 +54,7 @@
         .title-area h1 { font-size: 12px; font-weight: 800; color: #fff; text-shadow: 1px 1px 3px #000; }
         .title-area h1 span.text-cyan { color: var(--cyan); }
         .title-area h1 span.text-purple { color: var(--purple); }
-        
         .admin-shield { font-size: 14px; margin-left: 5px; filter: drop-shadow(0 0 5px var(--purple)); }
-        
         .badge { font-size: 8px; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--green); color: var(--green); background: rgba(0,0,0,0.6); font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
         .badge.offline { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.2); }
         .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1s infinite alternate; }
@@ -106,9 +104,9 @@
         .bar-bg { background: rgba(0,0,0,0.8); height: 4px; border-radius: 3px; overflow: hidden; margin-top: 3px; border: 1px solid #222; }
         .bar-fill { height: 100%; }
 
-        /* === FAUCETPAY ENGINE BLOCK === */
+        /* === LIME FAUCET ENGINE BLOCK (PEMBATAS JELAS) === */
         .faucet-window { 
-            background: transparent;
+            background: #0a0a0a;
             border: 1px solid var(--border); 
             border-radius: 8px; 
             display: flex; 
@@ -116,8 +114,11 @@
             height: 360px; 
             overflow: hidden; 
             margin-top: 5px; 
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
         }
         
+        /* Background gambar */
         .faucet-window::before { 
             content: ''; 
             position: absolute; 
@@ -125,68 +126,86 @@
             background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg'); 
             background-size: cover; 
             background-position: center; 
-            opacity: 1; 
+            opacity: 0.6; 
             z-index: 0; 
         }
-        
-        /* LAPISAN REDUP */
+
+        /* Grid hijau neon yang jelas */
         .faucet-window::after {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: 0;
-        }
-
-        /* GARIS TEPI PEMBATAS (GRID) */
-        .faucet-body::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
             background-image: 
-                linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
-            z-index: 0;
+                linear-gradient(rgba(0, 255, 65, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.1) 1px, transparent 1px);
+            background-size: 25px 25px;
+            z-index: 1;
             pointer-events: none;
         }
         
-        .faucet-header { background: rgba(0, 0, 0, 0.6); border-bottom: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #fff; position: relative; z-index: 2; }
+        .faucet-header { 
+            background: rgba(17, 17, 17, 0.85); 
+            border-bottom: 2px solid var(--border); 
+            padding: 8px 12px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 10px; 
+            color: #aaa; 
+            position: relative; 
+            z-index: 2; 
+        }
         .faucet-title { font-weight: bold; color: var(--neon-matrix); text-shadow: 1px 1px 2px #000, 0 0 5px #000; }
         
-        .faucet-body { display: flex; flex-grow: 1; overflow: hidden; position: relative; z-index: 1; }
+        .faucet-body { display: flex; flex-grow: 1; overflow: hidden; position: relative; z-index: 2; }
         
-        /* Sidebar (Info) */
-        .faucet-sidebar { width: 110px; background: rgba(0,0,0,0.5); border-right: 1px solid rgba(255,255,255,0.1); padding: 10px; display: flex; flex-direction: column; gap: 12px; z-index: 2; position: relative;}
-        .fs-item { font-size: 8px; color: #fff; text-shadow: 1px 1px 2px #000, 0 0 5px #000;}
-        .fs-item span { display: block; font-size: 12px; color: var(--cyan); font-weight: bold; margin-top: 2px; text-shadow: 1px 1px 2px #000, 0 0 5px #000;}
+        /* Sidebar dengan border tegas */
+        .faucet-sidebar { 
+            width: 110px; 
+            background: rgba(0, 0, 0, 0.75); 
+            border-right: 2px solid var(--border); /* Garis pemisah tegas */
+            padding: 10px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            z-index: 2;
+        }
+        .fs-item { font-size: 8px; color: #bbb; }
+        .fs-item span { display: block; font-size: 12px; color: var(--cyan); font-weight: bold; margin-top: 2px; text-shadow: 1px 1px 2px #000; }
         
-        /* Log Container */
-        .faucet-log-container { flex-grow: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.4); position: relative; z-index: 2; }
+        /* Area log dengan border tegas */
+        .faucet-log-container { 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+            background: rgba(0, 0, 0, 0.55); 
+            z-index: 2;
+        }
         
-        /* Total Claim Header (Animasi Glow) */
         .faucet-total-header { 
-            background: linear-gradient(90deg, rgba(255,187,0,0.4), rgba(255,187,0,0.1)); 
-            border-bottom: 1px dashed #ffbb00; padding: 8px 10px; 
-            font-size: 11px; font-weight: bold; display: flex; justify-content: space-between;
+            background: linear-gradient(90deg, rgba(255,187,0,0.3), rgba(255,187,0,0.1)); 
+            border-bottom: 1px solid var(--border); 
+            padding: 8px 10px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            display: flex; 
+            justify-content: space-between;
             text-shadow: 1px 1px 2px #000;
         }
         .total-text { color: #ffbb00; text-shadow: 0 0 8px #ffbb00, 1px 1px 2px #000; animation: neonPulse 1.5s infinite alternate; }
         @keyframes neonPulse { from { opacity: 1; text-shadow: 0 0 12px #ffbb00; } to { opacity: 0.7; text-shadow: 0 0 4px #ffbb00; } }
 
-        /* Area List Koin & Log */
         .faucet-log-scroll { flex-grow: 1; overflow-y: auto; padding: 10px; font-family: 'Courier New', monospace; font-size: 10px; line-height: 1.4; }
         
-        .log-section-title { font-size: 9px; color: #fff; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 3px; display: flex; justify-content: space-between; text-shadow: 1px 1px 2px #000, 0 0 5px #000;}
+        .log-section-title { font-size: 9px; color: #fff; margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 3px; display: flex; justify-content: space-between; text-shadow: 1px 1px 2px #000;}
         
-        /* PERBAIKAN TABEL KOIN */
         .coin-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; background: rgba(0, 229, 255, 0.2); padding: 4px 8px; border-radius: 4px; align-items: center; border-left: 3px solid var(--cyan); box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .coin-name { color: var(--cyan); font-weight: bold; text-align: left; text-shadow: 1px 1px 2px #000, 0 0 5px #000;}
         .coin-amount { color: var(--green); text-align: right; font-family: monospace; font-size: 10px; letter-spacing: 0.5px; text-shadow: 1px 1px 2px #000, 0 0 5px #000; }
         
-        /* ANIMASI LOG MASUK */
         .log-incoming { color: var(--yellow); margin-bottom: 4px; text-shadow: 1px 1px 2px #000, 0 0 5px #000; background: rgba(255, 187, 0, 0.3); padding: 3px 6px; border-radius: 3px; border-left: 2px solid var(--yellow); animation: slideIn 0.3s ease-out forwards; opacity: 0; }
         .log-incoming.success { color: var(--green); border-left-color: var(--green); background: rgba(0,255,136,0.3); }
+        .log-incoming.error { color: var(--red); border-left-color: var(--red); background: rgba(255,51,51,0.3); }
         
         @keyframes slideIn {
             from { transform: translateX(-10px); opacity: 0; }
@@ -234,53 +253,42 @@
             <div class="stat-row"><span class="stat-label">Claims</span><span class="stat-val" id="cc-claims">0</span></div>
             <div class="stat-row"><span class="stat-label">Limit</span><span class="stat-val" id="cc-limit">540</span></div>
             <div class="bot-balance pink" id="cc-saldo">$0.00</div>
-            
-            <div class="bot-log" id="cc-log-container">
-                <div>Menunggu aktivitas...</div>
-            </div>
-            
+            <div class="bot-log" id="cc-log-container"><div>Menunggu aktivitas...</div></div>
             <button class="btn-pause" id="btn-pause-cc" onclick="togglePause('cc')">PAUSE</button>
         </div>
-        
         <div class="bot-card lucky">
             <div class="bot-header"><div class="bot-title">🎰 LuckyWatch</div><div class="bot-status idle" id="lw-status">IDLE</div></div>
             <div class="stat-row"><span class="stat-label">Claims</span><span class="stat-val" id="lw-claims">0</span></div>
             <div class="stat-row"><span class="stat-label">Limit</span><span class="stat-val" id="lw-limits">820</span></div>
             <div class="bot-balance cyan" id="lw-saldo">$0.00</div>
-
-            <div class="bot-log" id="lw-log-container">
-                <div>Menunggu aktivitas...</div>
-            </div>
-
+            <div class="bot-log" id="lw-log-container"><div>Menunggu aktivitas...</div></div>
             <button class="btn-pause" id="btn-pause-lw" onclick="togglePause('lw')">PAUSE</button>
         </div>
     </div>
 
-    <!-- FAUCETPAY ENGINE -->
+    <!-- LIME FAUCET ENGINE -->
     <div class="faucet-window">
         <div class="faucet-header">
-            <span class="faucet-title">💰 FAUCETPAY WALLET</span>
+            <span class="faucet-title">🌸 LIMEFAUCET ENGINE</span>
             <span id="faucet-engine-status" style="color:var(--green); font-weight:bold;">● RUNNING</span>
         </div>
         <div class="faucet-body">
             <div class="faucet-sidebar">
                 <div class="fs-item">Status <span id="faucet-status-text">IDLE</span></div>
                 <div class="fs-item">Coin <span id="faucet-current-coin">-</span></div>
-                <div class="fs-item">API Token <span id="faucet-api-token" style="color:#ffbb00;">0</span></div>
-                <div class="fs-item" style="border-top: 1px dashed #333; padding-top: 6px; margin-top: 4px;">Koin Masuk <span id="faucet-claims-24h" style="color:var(--green);">0</span></div>
+                <div class="fs-item">Claims <span id="faucet-claims-24h">0</span></div>
+                <div class="fs-item" style="border-top: 1px dashed #333; padding-top: 6px; margin-top: 4px;">API Token <span id="faucet-api-token" style="color:#ffbb00;">0</span></div>
                 <div class="fs-item">Web Ping <span id="faucet-web-ping" style="color:var(--cyan);">0ms</span></div>
             </div>
-            
             <div class="faucet-log-container">
                 <div class="faucet-total-header">
-                    <span>TOTAL SALDO (ESTIMASI)</span>
+                    <span>TOTAL CLAIM</span>
                     <span class="total-text" id="faucet-total-val">0.00000 USD</span>
                 </div>
-                
                 <div class="faucet-log-scroll" id="faucet-scroll-area">
-                    <div class="log-section-title"><span>📦 SALDO & LOG MASUK</span></div>
+                    <div class="log-section-title"><span>📦 LOG KLAIM LIME</span></div>
                     <div id="coin-data-list">
-                        <div style="color:#aaa; font-size:9px; text-align:center; margin:10px 0; text-shadow: 1px 1px 2px #000;">Belum ada data saldo...</div>
+                        <div style="color:#aaa; font-size:9px; text-align:center; margin:10px 0; text-shadow: 1px 1px 2px #000;">Menunggu log...</div>
                     </div>
                 </div>
             </div>
@@ -311,23 +319,20 @@
         <div style="font-size: 16px;">🏦</div>
     </div>
 
-    <!-- TOMBOL COOKIE (Hanya 3) -->
     <div class="cookie-box">
         <label>🍪 Update Cookie</label>
         <textarea class="cookie-input" id="cookie-input" placeholder="Paste cookie baru..."></textarea>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
             <button class="btn-cookie" style="font-size:8px; padding:4px;" onclick="setCookie('clipcoin')">ClipCoin</button>
             <button class="btn-cookie" style="background: var(--cyan); color: #000; font-size:8px; padding:4px;" onclick="setCookie('luckywatch')">LuckyWatch</button>
-            <button class="btn-cookie" style="background: var(--pink); color: #000; font-size:8px; padding:4px; grid-column: span 2;" onclick="setCookie('faucetpay')">💰 FaucetPay Wallet</button>
+            <button class="btn-cookie" style="background: var(--pink); color: #000; font-size:8px; padding:4px; grid-column: span 2;" onclick="setCookie('lime')">🌸 LimeFaucet</button>
         </div>
     </div>
-
 </div>
 
 <script>
     const JSON_URL = "https://api.npoint.io/c34c77001e31bcce50f0";
     let state = { cc_paused: false, lw_paused: false };
-    
     let lastCcSaldo = 0;
     let lastLwSaldo = 0;
 
@@ -351,7 +356,7 @@
             const data = await r.json();
             if(bot === 'clipcoin') data.cc_cookie = cookieVal;
             if(bot === 'luckywatch') data.lw_cookie = cookieVal;
-            if(bot === 'faucetpay') data.faucetpay_cookie = cookieVal;
+            if(bot === 'lime') data.lime_cookie = cookieVal;
             await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             alert(`Cookie ${bot.toUpperCase()} berhasil dikirim ke antrean.`);
             document.getElementById('cookie-input').value = "";
@@ -375,13 +380,10 @@
         const liveBadge = document.getElementById('live-badge');
         const liveDot = document.getElementById('live-dot');
         const serverStatus = document.getElementById('server-status');
-        
         const startPing = new Date().getTime();
-        
         try {
             const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
             const data = await res.json();
-            
             const endPing = new Date().getTime();
             document.getElementById('faucet-web-ping').innerText = (endPing - startPing) + "ms";
             
@@ -461,12 +463,11 @@
             }
             if(data.captcha) document.getElementById('cap-token').innerText = data.captcha.token;
 
-            // --- BLOK FAUCETPAY ---
+            // --- BLOK LIME ---
             if (data.faucet) {
                 document.getElementById('faucet-status-text').innerText = data.faucet.status || "IDLE";
-                document.getElementById('faucet-current-coin').innerText = data.faucet.coin ? data.faucet.coin.toUpperCase() : '-';
-                document.getElementById('faucet-claims-24h').innerText = data.faucet.claims || 0;
-
+                document.getElementById('faucet-current-coin').innerText = data.lime_coin ? data.lime_coin.toUpperCase() : '-';
+                document.getElementById('faucet-claims-24h').innerText = data.lime_claims || 0;
                 let fStatusEl = document.getElementById('faucet-engine-status');
                 if (data.faucet.status === "RUNNING") {
                     fStatusEl.innerText = "● RUNNING";
@@ -480,78 +481,17 @@
                 }
             }
 
-            if (data.captcha && data.captcha.token !== undefined) {
-                document.getElementById('faucet-api-token').innerText = data.captcha.token;
-            }
-
-            // --- HITUNG TOTAL REAL-TIME DARI DATA KOIN (FAUCETPAY) ---
-            if (data.faucet_data_koin && Object.keys(data.faucet_data_koin).length > 0) {
-                let coinIds = [];
-                let coinAmounts = {};
-                
-                let coinHtml = "";
-                for (const [coin, amountStr] of Object.entries(data.faucet_data_koin)) {
-                    let parts = amountStr.split(" ");
-                    let numVal = parseFloat(parts[0]);
-                    let symbol = parts[1] || "";
-                    
-                    let displayAmount = "0";
-                    if (numVal > 0) {
-                        if (numVal < 0.0000001) displayAmount = numVal.toExponential(4);
-                        else displayAmount = parseFloat(numVal.toFixed(10)).toString();
-                    }
-                    
-                    coinHtml += `<div class="coin-row">
-                        <span class="coin-name">${coin.toUpperCase()}</span>
-                        <span class="coin-amount">${displayAmount} ${symbol}</span>
-                    </div>`;
-
-                    let symbolUpper = coin.toUpperCase();
-                    coinAmounts[symbolUpper] = numVal;
-                    let cgId = getCoinGeckoId(symbolUpper);
-                    if (cgId) coinIds.push(cgId);
-                }
-                document.getElementById('coin-data-list').innerHTML = coinHtml;
-
-                if (coinIds.length > 0) {
-                    fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinIds.join(',')}&vs_currencies=usd`)
-                        .then(res => res.json())
-                        .then(prices => {
-                            let totalUsd = 0;
-                            let koinUtama = ['ADA', 'BNB', 'LTC', 'SOL', 'TRX', 'DOGE', 'XRP', 'TON', 'POL', 'BCH'];
-                            
-                            for (const [symbol, amount] of Object.entries(coinAmounts)) {
-                                if (!koinUtama.includes(symbol)) continue;
-                                let cgId = getCoinGeckoId(symbol);
-                                if (cgId && prices[cgId] && prices[cgId].usd) {
-                                    let cleanAmount = parseFloat(amount);
-                                    if(cleanAmount > 0 && cleanAmount < 1) {
-                                        totalUsd += cleanAmount * prices[cgId].usd;
-                                    }
-                                }
-                            }
-                            document.getElementById('faucet-total-val').innerText = totalUsd.toFixed(5) + " USD";
-                        })
-                        .catch(() => {
-                            document.getElementById('faucet-total-val').innerText = "0.00000 USD";
-                        });
-                }
-            }
-
-            // --- LOG MASUK FAUCETPAY (Dari aviso_logs yang dikirim monitor) ---
-            if (data.faucet_logs && data.faucet_logs.length > 0) {
+            // --- LOG LIME ---
+            if (data.lime_logs && data.lime_logs.length > 0) {
                 let logHtml = "";
-                data.faucet_logs.forEach((log, index) => {
+                data.lime_logs.forEach((log, index) => {
                     let cls = "log-incoming";
-                    if (log.includes("SUKSES") || log.includes("MASUK")) cls += " success";
-                    
+                    if (log.includes("SUKSES")) cls += " success";
+                    else if (log.includes("ERROR") || log.includes("Gagal")) cls += " error";
                     let delay = (index * 0.1).toFixed(1);
                     logHtml += `<div class="${cls}" style="animation-delay: ${delay}s;">${log}</div>`;
                 });
-                // Tampilkan di area bawah tabel koin (jika ada ruang)
-                // atau gabungkan ke log container
-                // (Di sini kita biarkan blok koin tetap bersih, log masuk di bawahnya)
-                document.getElementById('coin-data-list').innerHTML += `<div style="margin-top:10px;">${logHtml}</div>`;
+                document.getElementById('coin-data-list').innerHTML = logHtml;
             }
 
             // --- LOG INDIVIDUAL CLIPCOIN & LUCKYWATCH ---
@@ -569,7 +509,6 @@
                 });
                 document.getElementById('lw-log-container').innerHTML = logHtml;
             }
-
         } catch (e) {
             liveBadge.innerText = "OFFLINE";
             liveBadge.className = "badge offline";

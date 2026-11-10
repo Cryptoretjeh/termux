@@ -1,8 +1,8 @@
 {
   "clipcoin": {
-    "status": "WATCHING",
-    "saldo": 0.29689,
-    "claims": 8,
+    "status": "IDLE",
+    "saldo": 0.29711,
+    "claims": 9,
     "limit": 540
   },
   "luckywatch": {

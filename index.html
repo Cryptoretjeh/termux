@@ -268,6 +268,19 @@
     const JSON_URL = "https://api.npoint.io/c34c77001e31bcce50f0";
     let state = { cc_paused: false, lw_paused: false };
 
+    // Mapping Simbol ke ID CoinGecko
+    function getCoinGeckoId(symbol) {
+        const map = {
+            'BTC': 'bitcoin', 'ETH': 'ethereum', 'BNB': 'binancecoin',
+            'ADA': 'cardano', 'LTC': 'litecoin', 'DOGE': 'dogecoin',
+            'SOL': 'solana', 'TRX': 'tron', 'TON': 'the-open-network',
+            'POL': 'polygon-ecosystem-token', 'USDT': 'tether', 'PEPE': 'pepe',
+            'TRUMP': 'official-trump', 'XRP': 'ripple', 'DASH': 'dash',
+            'DGB': 'digibyte', 'BCH': 'bitcoin-cash'
+        };
+        return map[symbol] || null;
+    }
+
     async function setCookie(bot) {
         const cookieVal = document.getElementById('cookie-input').value.trim();
         if(!cookieVal) return alert("Cookie tidak boleh kosong!");
@@ -379,9 +392,6 @@
                 document.getElementById('faucet-status-text').innerText = data.faucet.status || "IDLE";
                 document.getElementById('faucet-current-coin').innerText = data.faucet.coin ? data.faucet.coin.toUpperCase() : '-';
                 
-                let totalUsd = parseFloat(data.faucet.saldo || 0).toFixed(5);
-                document.getElementById('faucet-total-val').innerText = totalUsd + " USD";
-
                 let fStatusEl = document.getElementById('faucet-engine-status');
                 if (data.faucet.status === "RUNNING") {
                     fStatusEl.innerText = "● RUNNING";
@@ -399,8 +409,12 @@
                 document.getElementById('faucet-api-token').innerText = data.captcha.token;
             }
 
-            // --- PERBAIKAN TAMPILAN KOIN (DETEKSI ANGKA SANGAT KECIL) ---
+            // --- HITUNG TOTAL REAL-TIME DENGAN HARGA ASLI (COINGECKO) ---
             if (data.faucet_data_koin && Object.keys(data.faucet_data_koin).length > 0) {
+                let coinIds = [];
+                let coinAmounts = {};
+                
+                // 1. Tampilkan list koin di UI
                 let coinHtml = "";
                 for (const [coin, amountStr] of Object.entries(data.faucet_data_koin)) {
                     let parts = amountStr.split(" ");
@@ -409,21 +423,42 @@
                     
                     let displayAmount = "0";
                     if (numVal > 0) {
-                        // Jika angka sangat kecil (di bawah 0.0000001), pakai notasi ilmiah (contoh: 1.2e-9)
-                        if (numVal < 0.0000001) {
-                            displayAmount = numVal.toExponential(4);
-                        } else {
-                            // Jika angka normal, buang nol berlebih di belakang
-                            displayAmount = parseFloat(numVal.toFixed(10)).toString();
-                        }
+                        if (numVal < 0.0000001) displayAmount = numVal.toExponential(4);
+                        else displayAmount = parseFloat(numVal.toFixed(10)).toString();
                     }
                     
                     coinHtml += `<div class="coin-row">
                         <span class="coin-name">${coin.toUpperCase()}</span>
                         <span class="coin-amount">${displayAmount} ${symbol}</span>
                     </div>`;
+
+                    // 2. Kumpulkan data untuk hitung harga
+                    let symbolUpper = coin.toUpperCase();
+                    coinAmounts[symbolUpper] = numVal;
+                    let cgId = getCoinGeckoId(symbolUpper);
+                    if (cgId) coinIds.push(cgId);
                 }
                 document.getElementById('coin-data-list').innerHTML = coinHtml;
+
+                // 3. Fetch harga dari CoinGecko
+                if (coinIds.length > 0) {
+                    fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinIds.join(',')}&vs_currencies=usd`)
+                        .then(res => res.json())
+                        .then(prices => {
+                            let totalUsd = 0;
+                            for (const [symbol, amount] of Object.entries(coinAmounts)) {
+                                let cgId = getCoinGeckoId(symbol);
+                                if (cgId && prices[cgId] && prices[cgId].usd) {
+                                    totalUsd += amount * prices[cgId].usd;
+                                }
+                            }
+                            document.getElementById('faucet-total-val').innerText = totalUsd.toFixed(5) + " USD";
+                        })
+                        .catch(() => {
+                            // Fallback jika API CoinGecko error
+                            document.getElementById('faucet-total-val').innerText = parseFloat(data.faucet.saldo || 0).toFixed(5) + " USD";
+                        });
+                }
             }
 
             if (data.aviso_logs && data.aviso_logs.length > 0) {

@@ -98,7 +98,7 @@
             line-height: 1.4; 
             display: flex; 
             flex-direction: column;
-            max-height: 150px; /* Batas tinggi agar bisa di scroll */
+            max-height: 150px;
         }
         .log-entry { margin-bottom: 4px; }
         .log-time { color: #555; }
@@ -171,7 +171,7 @@
         </div>
     </div>
 
-    <!-- === BLOK 99FAUCET (PENGGANTI MT4) === -->
+    <!-- === BLOK 99FAUCET === -->
     <div class="faucet-window">
         <div class="faucet-header">
             <span class="faucet-title">📟 99FAUCET AUTO-CLAIM ENGINE</span>
@@ -185,8 +185,7 @@
                 <div class="faucet-sidebar-item">API Token <span id="faucet-api-token" style="font-size:9px; color:#ffbb00;">0</span></div>
             </div>
             <div class="faucet-log-container" id="faucet-log">
-                <!-- Log Bot akan muncul di sini -->
-                <div class="log-entry"><span class="log-time">[System]</span> <span class="log-info">Menunggu koneksi bot PHP...</span></div>
+                <div class="log-entry"><span class="log-time">[System]</span> <span class="log-info">Menunggu koneksi bot...</span></div>
             </div>
         </div>
         <div class="faucet-footer">
@@ -226,13 +225,15 @@
         <div style="font-size: 16px;">🏦</div>
     </div>
 
+    <!-- 4 TOMBOL COOKIE -->
     <div class="cookie-box">
         <label>🍪 Update Cookie</label>
         <textarea class="cookie-input" id="cookie-input" placeholder="Paste cookie baru..."></textarea>
-        <div style="display: flex; gap: 6px;">
-            <button class="btn-cookie" style="flex: 1; font-size:8px; padding:4px;" onclick="setCookie('clipcoin')">ClipCoin</button>
-            <button class="btn-cookie" style="flex: 1; background: var(--cyan); color: #000; font-size:8px; padding:4px;" onclick="setCookie('luckywatch')">LuckyWatch</button>
-            <button class="btn-cookie" style="flex: 1; background: var(--green); color: #000; font-size:8px; padding:4px;" onclick="setCookie('faucet')">99Faucet</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <button class="btn-cookie" style="font-size:8px; padding:4px;" onclick="setCookie('clipcoin')">ClipCoin</button>
+            <button class="btn-cookie" style="background: var(--cyan); color: #000; font-size:8px; padding:4px;" onclick="setCookie('luckywatch')">LuckyWatch</button>
+            <button class="btn-cookie" style="background: var(--green); color: #000; font-size:8px; padding:4px;" onclick="setCookie('faucet')">99Faucet</button>
+            <button class="btn-cookie" style="background: var(--yellow); color: #000; font-size:8px; padding:4px;" onclick="setCookie('aviso')">Aviso (Mini99)</button>
         </div>
     </div>
 
@@ -243,7 +244,6 @@
     let state = { cc_paused: false, lw_paused: false };
     let uptimeSeconds = 0;
 
-    // Timer Uptime untuk Faucet
     setInterval(() => {
         uptimeSeconds++;
         let h = Math.floor(uptimeSeconds / 3600).toString().padStart(2, '0');
@@ -261,6 +261,7 @@
             if(bot === 'clipcoin') data.cc_cookie = cookieVal;
             if(bot === 'luckywatch') data.lw_cookie = cookieVal;
             if(bot === 'faucet') data.faucet_cookie = cookieVal;
+            if(bot === 'aviso') data.aviso_cookie = cookieVal;
             await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             alert(`Cookie ${bot.toUpperCase()} berhasil dikirim ke antrean.`);
             document.getElementById('cookie-input').value = "";
@@ -288,7 +289,6 @@
             const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
             const data = await res.json();
             
-            // --- UPDATE HEADER & BOT GRID ---
             liveBadge.innerText = "LIVE SYNC";
             liveBadge.className = "badge";
             liveBadge.prepend(liveDot);
@@ -358,7 +358,6 @@
             }
             if(data.captcha) document.getElementById('cap-token').innerText = data.captcha.token;
 
-            // --- UPDATE KHUSUS BLOK 99FAUCET ---
             if (data.faucet) {
                 document.getElementById('faucet-current-coin').innerText = data.faucet.coin ? data.faucet.coin.toUpperCase() : '-';
                 document.getElementById('faucet-claims').innerText = data.faucet.claims || 0;
@@ -378,7 +377,6 @@
                 }
             }
 
-            // --- UPDATE LOG TERMINAL BAWAH ---
             if (data.logs && data.logs.length > 0) {
                 const term = document.getElementById('terminal');
                 let newHtml = "";
@@ -402,28 +400,19 @@
                 }
             }
 
-            // --- UPDATE LOG KHUSUS 99FAUCET (SCROLLABLE) ---
             if (data.faucet_logs && data.faucet_logs.length > 0) {
                 const fLog = document.getElementById('faucet-log');
                 let fHtml = "";
-                
                 data.faucet_logs.forEach(log => {
                     let type = "log-info";
-                    // Pewarnaan berdasarkan kata kunci
-                    if (log.includes("SUKSES") || log.includes("SUCCESS")) {
-                        type = "log-success";
-                    } else if (log.includes("Gagal") || log.includes("Error") || log.includes("ERROR")) {
-                        type = "log-error";
-                    } else if (log.includes("Cooldown") || log.includes("Skip") || log.includes("Butuh Shortlink")) {
-                        type = "log-warning";
-                    }
+                    if (log.includes("SUKSES") || log.includes("SUCCESS")) type = "log-success";
+                    else if (log.includes("Gagal") || log.includes("Error") || log.includes("ERROR")) type = "log-error";
+                    else if (log.includes("Cooldown") || log.includes("Skip") || log.includes("Butuh Shortlink")) type = "log-warning";
                     
                     fHtml += `<div class="log-entry"><span class="${type}">${log}</span></div>`;
                 });
-                
                 if(fLog.innerHTML !== fHtml) {
                     fLog.innerHTML = fHtml;
-                    // Auto scroll ke paling bawah
                     fLog.scrollTop = fLog.scrollHeight;
                 }
             }

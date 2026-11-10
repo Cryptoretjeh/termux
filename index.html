@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CryptoRetjeh Terminal</title>
-    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap');
         
@@ -80,54 +79,24 @@
         .bar-bg { background: rgba(0,0,0,0.8); height: 4px; border-radius: 3px; overflow: hidden; margin-top: 3px; border: 1px solid #222; }
         .bar-fill { height: 100%; }
 
-        /* === MT4 KLASIK === */
-        .mt4-window { background: #d4d0c8; border: 2px solid #fff; border-right-color: #404040; border-bottom-color: #404040; font-family: Tahoma, Arial, sans-serif; color: #000; display: flex; flex-direction: column; height: 360px; transition: height 0.3s; }
-        .mt4-window.minimized { height: 26px; overflow: hidden; }
+        /* === 99FAUCET TERMINAL BLOCK (PENGGANTI MT4) === */
+        .faucet-window { background: #111; border: 2px solid #333; border-radius: 8px; font-family: 'Courier New', monospace; color: #ccc; display: flex; flex-direction: column; height: 280px; margin-top: 5px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+        .faucet-header { background: #1a1a1a; border-bottom: 1px solid #333; padding: 4px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #aaa; }
+        .faucet-title { font-weight: bold; color: var(--neon-matrix); }
+        .faucet-body { display: flex; flex-grow: 1; overflow: hidden; }
+        .faucet-sidebar { width: 110px; background: #0a0a0a; border-right: 1px solid #333; padding: 8px; overflow-y: auto; font-size: 9px; }
+        .faucet-sidebar-item { margin-bottom: 6px; color: #888; }
+        .faucet-sidebar-item span { color: var(--cyan); font-weight: bold; display: block; font-size: 11px; margin-top: 2px;}
+        .faucet-log-container { flex-grow: 1; padding: 8px; overflow-y: auto; background: #050505; font-size: 10px; line-height: 1.4; display: flex; flex-direction: column; }
+        .log-entry { margin-bottom: 4px; }
+        .log-time { color: #555; }
+        .log-success { color: var(--green); font-weight: bold; }
+        .log-error { color: var(--red); font-weight: bold; }
+        .log-info { color: #00e5ff; }
+        .log-warning { color: var(--yellow); }
         
-        .mt4-menubar { background: #d4d0c8; font-size: 9px; padding: 1px 5px; display: flex; gap: 8px; border-bottom: 1px solid #808080; color: #000; }
-        .mt4-menubar span { cursor: pointer; padding: 0 2px; }
-        .mt4-menubar span:hover { background: #0a246a; color: #fff; }
-        .mt4-titlebar { background: linear-gradient(90deg, #0a246a, #a6caf0); color: #fff; font-size: 9px; font-weight: bold; padding: 2px 5px; display: flex; justify-content: space-between; cursor: pointer; }
-        .mt4-titlebar span:last-child { cursor: pointer; padding: 0 4px; }
-        .mt4-titlebar span:last-child:hover { background: #ff3333; }
-        .mt4-toolbar { background: #d4d0c8; border-bottom: 1px solid #808080; padding: 1px 2px; display: flex; gap: 2px; align-items: center; font-size: 8px; }
-        .mt4-btn { background: #d4d0c8; border: 1px solid #fff; border-right-color: #404040; border-bottom-color: #404040; padding: 1px 3px; cursor: pointer; display: flex; align-items: center; gap: 2px; user-select: none; }
-        .mt4-btn:active, .mt4-btn.active { border: 1px solid #404040; border-right-color: #fff; border-bottom-color: #fff; background: #b0b0b0; }
-        .mt4-buy-sell { display: flex; gap: 2px; margin-left: 4px; border-left: 1px solid #808080; padding-left: 4px; }
-        .btn-buy { background: #d4d0c8; border: 1px solid #fff; border-right-color: #404040; border-bottom-color: #404040; padding: 1px 5px; font-weight: bold; color: blue; cursor: pointer; font-size: 8px;}
-        .btn-sell { background: #d4d0c8; border: 1px solid #fff; border-right-color: #404040; border-bottom-color: #404040; padding: 1px 5px; font-weight: bold; color: red; cursor: pointer; font-size: 8px;}
-        
-        .mt4-main { display: flex; flex-grow: 1; overflow: hidden; }
-        .mt4-market-watch { width: 100px; background: #fff; border-right: 1px solid #808080; overflow-y: auto; font-size: 9px; display: flex; flex-direction: column; }
-        .mt4-mw-header { background: #d4d0c8; border-bottom: 1px solid #808080; padding: 1px 2px; font-weight: bold; display: flex; justify-content: space-between; position: sticky; top: 0; }
-        .mt4-mw-list { flex-grow: 1; overflow-y: auto; }
-        .mt4-mw-row { display: flex; justify-content: space-between; padding: 1px 2px; border-bottom: 1px solid #eee; cursor: pointer; }
-        .mt4-mw-row:hover { background: #e0e0ff; }
-        
-        .mt4-chart-area { flex-grow: 1; background: #000; position: relative; display: flex; flex-direction: column; }
-        .mt4-chart-header { color: #fff; font-size: 9px; padding: 1px 4px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; background: #111; flex-wrap: wrap; }
-        .mt4-chart-container { flex-grow: 1; position: relative; overflow: hidden; background: #000; }
-        
-        .mt4-terminal { background: #d4d0c8; height: 100px; border-top: 1px solid #808080; display: flex; flex-direction: column; }
-        .mt4-tabs { display: flex; font-size: 8px; border-bottom: 1px solid #808080; }
-        .mt4-tab { padding: 1px 6px; border: 1px solid #d4d0c8; border-bottom: none; background: #e0e0e0; cursor: pointer; }
-        .mt4-tab.active { background: #d4d0c8; font-weight: bold; border-top: 2px solid #0a246a;}
-        
-        .mt4-tab-content { display: none; background: #fff; flex-grow: 1; overflow-y: auto; font-size: 9px; padding: 1px; }
-        .mt4-tab-content.active { display: block; }
-        
-        .mt4-terminal-header { background: #e0e0e0; border-bottom: 1px solid #808080; display: flex; font-weight: bold; position: sticky; top: 0; }
-        .mt4-terminal-header div, .mt4-trade-row div { padding: 1px 3px; border-right: 1px solid #c0c0c0; }
-        .mt4-col-time { width: 55px; }
-        .mt4-col-type { width: 45px; }
-        .mt4-col-size { width: 28px; }
-        .mt4-col-price { width: 55px; }
-        .mt4-col-profit { flex-grow: 1; text-align: right; }
-        
-        /* Baris Balance MT4 Asli */
-        .mt4-balance-bar { background: #d4d0c8; border-top: 1px solid #fff; padding: 3px 5px; font-size: 9px; display: flex; flex-wrap: wrap; gap: 8px; font-weight: bold; }
-        .mt4-balance-bar span { color: #000; }
-        .mt4-balance-bar span span { color: #000; }
+        .faucet-footer { background: #1a1a1a; border-top: 1px solid #333; padding: 4px 10px; font-size: 9px; display: flex; justify-content: space-between; color: #888; }
+        .faucet-footer span { color: #fff; font-weight: bold; }
 
         /* === WD & LOG & COOKIE === */
         .wd-box { background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -190,64 +159,27 @@
         </div>
     </div>
 
-    <!-- MT4 LIVE ACCOUNT -->
-    <div class="mt4-window" id="mt4-window">
-        <div class="mt4-titlebar" onclick="toggleMinimize()">
-            <span>1100043274: NeaLZz - FBS 6 - [XAUUSD,H1]</span>
-            <span id="mt4-min-btn">[-]</span>
+    <!-- === BLOK 99FAUCET (PENGGANTI MT4) === -->
+    <div class="faucet-window">
+        <div class="faucet-header">
+            <span class="faucet-title">📟 99FAUCET AUTO-CLAIM ENGINE</span>
+            <span id="faucet-engine-status" style="color:var(--green); font-weight:bold;">● RUNNING</span>
         </div>
-        <div class="mt4-menubar">
-            <span>File</span><span>View</span><span>Insert</span><span>Charts</span><span>Tools</span><span>Window</span><span>Help</span>
-        </div>
-        <div class="mt4-toolbar">
-            <div class="mt4-btn">📄 New Order</div>
-            <div class="mt4-btn mt4-btn-active" id="btn-auto" onclick="toggleAutoTrading()">🤖 AutoTrading</div>
-            <div class="mt4-buy-sell">
-                <div class="btn-buy" onclick="manualTrade('buy')">BUY</div>
-                <div class="btn-sell" onclick="manualTrade('sell')">SELL</div>
+        <div class="faucet-body">
+            <div class="faucet-sidebar">
+                <div class="faucet-sidebar-item">Current Coin <span id="faucet-current-coin">-</span></div>
+                <div class="faucet-sidebar-item">Claims Today <span id="faucet-claims">0</span></div>
+                <div class="faucet-sidebar-item">Faucet Balance <span id="faucet-balance">0.00</span></div>
+                <div class="faucet-sidebar-item">API Token <span id="faucet-api-token" style="font-size:9px; color:#ffbb00;">0</span></div>
             </div>
-            <div style="margin-left: auto; font-weight: bold; color: #0a246a;">P/L: <span id="mt4-profit" style="color: green;">+$0.00</span></div>
-        </div>
-        <div class="mt4-main">
-            <div class="mt4-market-watch">
-                <div class="mt4-mw-header"><span>Symbol</span><span>Bid</span><span>Ask</span></div>
-                <div class="mt4-mw-list" id="mt4-symbols"></div>
-            </div>
-            <div class="mt4-chart-area">
-                <div class="mt4-chart-header">
-                    <span id="mt4-chart-symbol" style="font-weight:bold;">XAUUSD, H1</span>
-                    <span id="mt4-chart-price" style="color:#00e5ff;">2032.75</span>
-                </div>
-                <div class="mt4-chart-container" id="mt4-chart-container"></div>
+            <div class="faucet-log-container" id="faucet-log">
+                <!-- Log Bot akan muncul di sini -->
+                <div class="log-entry"><span class="log-time">[System]</span> <span class="log-info">Menunggu koneksi bot PHP...</span></div>
             </div>
         </div>
-        <div class="mt4-terminal">
-            <div class="mt4-tabs">
-                <div class="mt4-tab active" onclick="switchTab('trade')">Trade</div>
-                <div class="mt4-tab" onclick="switchTab('exposure')">Exposure</div>
-                <div class="mt4-tab" onclick="switchTab('history')">Account History</div>
-            </div>
-            <div class="mt4-tab-content active" id="tab-trade">
-                <div class="mt4-terminal-header">
-                    <div class="mt4-col-time" style="width:60px;">Order</div>
-                    <div class="mt4-col-time">Time</div>
-                    <div class="mt4-col-type">Type</div>
-                    <div class="mt4-col-size">Size</div>
-                    <div class="mt4-col-price">Price</div>
-                    <div class="mt4-col-profit">Profit</div>
-                </div>
-                <div id="mt4-open-trades"></div>
-            </div>
-            <div class="mt4-tab-content" id="tab-exposure"></div>
-            <div class="mt4-tab-content" id="tab-history"></div>
-        </div>
-        <!-- BARIS BIRU KLASIK MT4 -->
-        <div class="mt4-balance-bar">
-            <span>Balance: <span id="mt4-balance">4,983.80</span> USD</span>
-            <span>Equity: <span id="mt4-equity">4,979.06</span></span>
-            <span>Margin: <span id="mt4-margin">100.00</span></span>
-            <span>Free margin: <span id="mt4-free">4,879.06</span></span>
-            <span style="margin-left:auto; color:#a00;">Margin level: 4979.06%</span>
+        <div class="faucet-footer">
+            <span>Status: <span id="faucet-status-text">IDLE</span></span>
+            <span>Uptime: <span id="faucet-uptime">00:00:00</span></span>
         </div>
     </div>
 
@@ -296,43 +228,16 @@
 <script>
     const JSON_URL = "https://api.npoint.io/c34c77001e31bcce50f0";
     let state = { cc_paused: false, lw_paused: false };
+    let uptimeSeconds = 0;
 
-    // === FITUR PENYIMPANAN LOKAL (ANTI RESET) ===
-    function saveState() {
-        localStorage.setItem('mt4Balance', mt4Balance);
-        localStorage.setItem('mt4Positions', JSON.stringify(openPositions));
-        localStorage.setItem('ticketCounter', ticketCounter);
-    }
-
-    function loadState() {
-        let savedBalance = localStorage.getItem('mt4Balance');
-        let savedPositions = localStorage.getItem('mt4Positions');
-        let savedTicket = localStorage.getItem('ticketCounter');
-        
-        if (savedBalance) mt4Balance = parseFloat(savedBalance);
-        if (savedTicket) ticketCounter = parseInt(savedTicket);
-        
-        if (savedPositions) {
-            openPositions = JSON.parse(savedPositions);
-            // Gambar ulang garis posisi yang tersisa di chart
-            if (isInitialized) {
-                priceLines.forEach(line => { if(line) candleSeries.removePriceLine(line); });
-                priceLines = [];
-                openPositions.forEach(pos => {
-                    const line = candleSeries.createPriceLine({
-                        price: pos.price,
-                        color: pos.type === 'buy' ? '#007bff' : '#ff0000',
-                        lineWidth: 1,
-                        lineStyle: 2,
-                        axisLabelVisible: true,
-                        title: `${pos.ticket} ${pos.type} ${pos.size.toFixed(2)}`,
-                    });
-                    priceLines.push(line);
-                });
-            }
-        }
-        renderOpenPositions();
-    }
+    // Timer Uptime untuk Faucet
+    setInterval(() => {
+        uptimeSeconds++;
+        let h = Math.floor(uptimeSeconds / 3600).toString().padStart(2, '0');
+        let m = Math.floor((uptimeSeconds % 3600) / 60).toString().padStart(2, '0');
+        let s = (uptimeSeconds % 60).toString().padStart(2, '0');
+        document.getElementById('faucet-uptime').innerText = `${h}:${m}:${s}`;
+    }, 1000);
 
     async function setCookie(bot) {
         const cookieVal = document.getElementById('cookie-input').value.trim();
@@ -368,6 +273,8 @@
         try {
             const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
             const data = await res.json();
+            
+            // --- UPDATE HEADER & BOT GRID ---
             liveBadge.innerText = "LIVE SYNC";
             liveBadge.className = "badge";
             liveBadge.prepend(liveDot);
@@ -375,12 +282,14 @@
             serverStatus.innerText = "ONLINE";
             serverStatus.style.color = "var(--green)";
             document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', {hour12:false});
+            
             state.cc_paused = data.cc_paused || false;
             state.lw_paused = data.lw_paused || false;
             const btnCC = document.getElementById('btn-pause-cc');
             const btnLW = document.getElementById('btn-pause-lw');
             const badgeCC = document.getElementById('cc-status');
             const badgeLW = document.getElementById('lw-status');
+            
             if (state.cc_paused) {
                 btnCC.innerText = "RESUME"; btnCC.classList.add('active');
                 badgeCC.innerText = "PAUSED"; badgeCC.style.color = "var(--red)"; badgeCC.style.borderColor = "var(--red)";
@@ -394,6 +303,7 @@
                     document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
                 }
             }
+            
             if (state.lw_paused) {
                 btnLW.innerText = "RESUME"; btnLW.classList.add('active');
                 badgeLW.innerText = "PAUSED"; badgeLW.style.color = "var(--red)"; badgeLW.style.borderColor = "var(--red)";
@@ -407,6 +317,7 @@
                     document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
                 }
             }
+            
             let ccSaldo = parseFloat(data.clipcoin?.saldo || 0);
             let lwSaldo = parseFloat(data.luckywatch?.saldo || 0);
             let ccClaims = parseInt(data.clipcoin?.claims || 0);
@@ -416,11 +327,13 @@
             document.getElementById('total-saldo').innerText = "$" + totalIncome.toFixed(5);
             document.getElementById('total-income').innerText = "$" + totalIncome.toFixed(5);
             document.getElementById('total-claims').innerText = totalClaims;
+            
             let wdStatus = data.wd_status || "BELUM ADA ANTREAN";
             document.getElementById('wd-status').innerText = wdStatus;
             if(wdStatus.toLowerCase().includes("sukses")) document.getElementById('wd-status').style.color = "var(--green)";
             else if(wdStatus.toLowerCase().includes("proses")) document.getElementById('wd-status').style.color = "var(--yellow)";
             else document.getElementById('wd-status').style.color = "var(--red)";
+            
             if(data.system) {
                 document.getElementById('cpu-val').innerText = data.system.cpu + "%";
                 document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
@@ -431,6 +344,27 @@
             }
             if(data.captcha) document.getElementById('cap-token').innerText = data.captcha.token;
 
+            // --- UPDATE KHUSUS BLOK 99FAUCET ---
+            if (data.faucet) {
+                document.getElementById('faucet-current-coin').innerText = data.faucet.coin ? data.faucet.coin.toUpperCase() : '-';
+                document.getElementById('faucet-claims').innerText = data.faucet.claims || 0;
+                document.getElementById('faucet-balance').innerText = "$" + parseFloat(data.faucet.saldo || 0).toFixed(5);
+                document.getElementById('faucet-status-text').innerText = data.faucet.status || "IDLE";
+                
+                let fStatusEl = document.getElementById('faucet-engine-status');
+                if (data.faucet.status === "RUNNING") {
+                    fStatusEl.innerText = "● RUNNING";
+                    fStatusEl.style.color = "var(--green)";
+                } else if (data.faucet.status === "PAUSED") {
+                    fStatusEl.innerText = "⏸ PAUSED";
+                    fStatusEl.style.color = "var(--yellow)";
+                } else {
+                    fStatusEl.innerText = "● IDLE";
+                    fStatusEl.style.color = "var(--red)";
+                }
+            }
+
+            // --- UPDATE LOG TERMINAL BAWAH ---
             if (data.logs && data.logs.length > 0) {
                 const term = document.getElementById('terminal');
                 let newHtml = "";
@@ -453,6 +387,25 @@
                     term.scrollTop = term.scrollHeight;
                 }
             }
+
+            // --- UPDATE LOG KHUSUS 99FAUCET ---
+            if (data.faucet_logs && data.faucet_logs.length > 0) {
+                const fLog = document.getElementById('faucet-log');
+                let fHtml = "";
+                data.faucet_logs.forEach(log => {
+                    let type = "log-info";
+                    if (log.includes("SUCCESS")) type = "log-success";
+                    else if (log.includes("Gagal") || log.includes("Error")) type = "log-error";
+                    else if (log.includes("wait") || log.includes("Cooldown")) type = "log-warning";
+                    
+                    fHtml += `<div class="log-entry"><span class="log-time">[${new Date().toLocaleTimeString('id-ID', {hour12:false})}]</span> <span class="${type}">${log}</span></div>`;
+                });
+                if(fLog.innerHTML !== fHtml) {
+                    fLog.innerHTML = fHtml;
+                    fLog.scrollTop = fLog.scrollHeight;
+                }
+            }
+
         } catch (e) {
             liveBadge.innerText = "OFFLINE";
             liveBadge.className = "badge offline";
@@ -463,356 +416,6 @@
             console.error(e);
         }
     }
-
-    // === MT4 PRO LOGIC (XAUUSD GOLD) ===
-    let chart, candleSeries;
-    let mt4Balance = 4983.80;
-    let mt4Equity = 4983.80;
-    let isInitialized = false;
-    let currentTimeframe = 3600; // H1
-    let isAutoTrading = true;
-    
-    let openPositions = []; 
-    let priceLines = [];
-    let ticketCounter = 8546076;
-
-    // XAUUSD Contract Size is standard 100 (1 lot = 100 oz)
-    const CONTRACT_SIZE = 100;
-    const LOT_SIZE = 0.10;
-    
-    // Harga XAUUSD
-    let marketPrice = 2032.75; 
-    const SPREAD = 0.50; // Spread Gold sekitar 50 cents
-
-    const marketSymbols = [
-        { name: "XAUUSD,Live", base: 2032.75, vol: 0.15 },
-        { name: "EURUSD...", base: 1.08355, vol: 0.0003 },
-        { name: "USDJPY...", base: 147.852, vol: 0.05 },
-        { name: "GBPUSD...", base: 1.27084, vol: 0.0004 },
-        { name: "USDCHF...", base: 0.86325, vol: 0.0002 },
-        { name: "AUDUSD...", base: 0.65970, vol: 0.0004 },
-        { name: "NZDUSD...", base: 0.61091, vol: 0.0004 },
-        { name: "USDCAD...", base: 1.34365, vol: 0.0004 }
-    ];
-
-    function toggleMinimize() {
-        document.getElementById('mt4-window').classList.toggle('minimized');
-        let btn = document.getElementById('mt4-min-btn');
-        btn.innerText = btn.innerText === '[-]' ? '[+]' : '[-]';
-        if (!document.getElementById('mt4-window').classList.contains('minimized')) {
-            setTimeout(() => { if(chart) chart.applyOptions({ width: document.getElementById('mt4-chart-container').clientWidth, height: document.getElementById('mt4-chart-container').clientHeight }); }, 300);
-        }
-    }
-
-    function toggleAutoTrading() {
-        isAutoTrading = !isAutoTrading;
-        let btn = document.getElementById('btn-auto');
-        btn.style.color = isAutoTrading ? 'green' : 'red';
-    }
-
-    function switchTab(tabName) {
-        document.querySelectorAll('.mt4-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.mt4-tab-content').forEach(t => t.classList.remove('active'));
-        if(tabName === 'trade') {
-            document.querySelectorAll('.mt4-tab')[0].classList.add('active');
-            document.getElementById('tab-trade').classList.add('active');
-        } else if(tabName === 'exposure') {
-            document.querySelectorAll('.mt4-tab')[1].classList.add('active');
-            document.getElementById('tab-exposure').classList.add('active');
-        } else {
-            document.querySelectorAll('.mt4-tab')[2].classList.add('active');
-            document.getElementById('tab-history').classList.add('active');
-        }
-    }
-
-    function initMT4Chart() {
-        const container = document.getElementById('mt4-chart-container');
-        
-        chart = LightweightCharts.createChart(container, {
-            width: container.clientWidth,
-            height: container.clientHeight,
-            layout: { backgroundColor: '#000000', textColor: '#d1d4dc' },
-            grid: { 
-                vertLines: { color: '#333', style: 1 }, 
-                horzLines: { color: '#333', style: 1 } 
-            },
-            crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
-            timeScale: { 
-                borderColor: '#333', 
-                timeVisible: true, 
-                secondsVisible: false,
-                rightOffset: 5, 
-                barSpacing: 8, 
-            },
-            priceScale: { borderColor: '#333', scaleMargins: { top: 0.1, bottom: 0.1 } },
-        });
-
-        // CANDLESTICK MT4 GOLD: Format 2 desimal
-        candleSeries = chart.addCandlestickSeries({
-            upColor: '#00ff00',
-            downColor: '#ff0000',
-            borderVisible: false,
-            wickUpColor: '#00ff00',
-            wickDownColor: '#ff0000',
-            priceFormat: { type: 'price', precision: 2, minMove: 0.01 }
-        });
-
-        generateData();
-        updateMarketWatch();
-    }
-
-    function updateMarketWatch() {
-        const container = document.getElementById('mt4-symbols');
-        container.innerHTML = marketSymbols.map(p => {
-            p.base += (Math.random() - 0.5) * p.vol;
-            // Sinkronkan harga market utama dengan XAUUSD
-            if(p.name === "XAUUSD,Live") p.base = marketPrice;
-            
-            let bid = p.base;
-            let ask = p.base + (p.name.includes("XAU") ? SPREAD : 0.00015);
-            // Format desimal: Gold 2, Forex 5, JPY 3
-            let dec = p.name.includes("XAU") ? 2 : (p.name.includes("JPY") ? 3 : 5);
-            
-            let isSelected = p.name === "XAUUSD,Live";
-            let bgStyle = isSelected ? 'background:#0a246a; color:#fff;' : '';
-            let bidColor = isSelected ? '#fff' : 'green';
-            let askColor = isSelected ? '#fff' : 'red';
-
-            return `
-            <div class="mt4-mw-row" style="${bgStyle}">
-                <span style="font-weight:bold;">${p.name}</span>
-                <span style="color:${bidColor};">${bid.toFixed(dec)}</span>
-                <span style="color:${askColor};">${ask.toFixed(dec)}</span>
-            </div>`;
-        }).join('');
-    }
-
-    function generateData() {
-        let data = [];
-        let currentTime = Math.floor(Date.now() / 1000) - (40 * currentTimeframe); 
-        let currentPrice = 2028.50; // Start lebih rendah agar tren naik seperti gambar
-
-        for (let i = 0; i < 40; i++) {
-            let open = currentPrice;
-            // Trend naik turun natural Gold
-            let trend = (Math.random() > 0.4) ? (Math.random() * 1.5) : -(Math.random() * 1.5);
-            let close = open + trend;
-            let high = Math.max(open, close) + Math.random() * 0.8;
-            let low = Math.min(open, close) - Math.random() * 0.8;
-            
-            data.push({ time: currentTime, open, high, low, close });
-            
-            currentPrice = close;
-            currentTime += currentTimeframe;
-        }
-        
-        candleSeries.setData(data);
-        marketPrice = data[data.length - 1].close;
-        window.lastCandle = data[data.length - 1];
-        isInitialized = true;
-    }
-
-    function updateOHLC(price) {
-        document.getElementById('mt4-chart-price').innerText = price.toFixed(2);
-    }
-
-    // Rumus Profit Real MT4 (XAUUSD)
-    function calcFloatingPL(pos, currentPrice) {
-        let diff = pos.type === 'buy' 
-            ? (currentPrice - pos.price) 
-            : (pos.price - currentPrice);
-            
-        // Contract Size 100 untuk Gold
-        let pl = diff * CONTRACT_SIZE * LOT_SIZE;
-        return pl; 
-    }
-
-    function manualTrade(type) {
-        if (!isInitialized) return;
-        
-        // Entry price real: Buy di Ask, Sell di Bid
-        let execPrice = type === 'buy' ? marketPrice + SPREAD : marketPrice;
-        let time = new Date().toLocaleTimeString('id-ID', {hour12: false}).slice(0,5);
-        
-        ticketCounter++;
-        openPositions.push({ ticket: ticketCounter, type, price: execPrice, time, size: LOT_SIZE });
-        
-        // Batasi garis harga max 5
-        if (priceLines.length >= 5) {
-            const oldLine = priceLines.shift();
-            if (oldLine) candleSeries.removePriceLine(oldLine);
-        }
-        
-        // Garis entry MT4 asli (putus-putus dengan label)
-        const line = candleSeries.createPriceLine({
-            price: execPrice,
-            color: type === 'buy' ? '#007bff' : '#ff0000',
-            lineWidth: 1,
-            lineStyle: 2, 
-            axisLabelVisible: true, 
-            title: `${ticketCounter} ${type} ${LOT_SIZE}`, 
-        });
-        priceLines.push(line);
-
-        renderOpenPositions();
-        saveState(); // SIMPAN DATA
-    }
-
-    function renderOpenPositions() {
-        if (!isInitialized) return;
-        const container = document.getElementById('mt4-open-trades');
-        const currentBid = marketPrice;
-        const currentAsk = marketPrice + SPREAD;
-        let totalFloating = 0;
-        
-        container.innerHTML = openPositions.map((pos) => {
-            let color = pos.type === 'buy' ? 'blue' : 'red';
-            // BUY close di Bid, SELL close di Ask
-            let closePrice = pos.type === 'buy' ? currentBid : currentAsk;
-            let floating = calcFloatingPL(pos, closePrice);
-            totalFloating += floating;
-            
-            let fColor = floating >= 0 ? 'blue' : 'red';
-            let sign = floating >= 0 ? '' : '-';
-            
-            // Tampilan tabel MT4 asli
-            return `
-            <div class="mt4-trade-row" style="display:flex; color:#000;">
-                <div class="mt4-col-time" style="width:60px;">${pos.ticket}</div>
-                <div class="mt4-col-time">2024.01.29 ${pos.time}</div>
-                <div class="mt4-col-type" style="color:${color};">${pos.type}</div>
-                <div class="mt4-col-size">${pos.size.toFixed(2)}</div>
-                <div class="mt4-col-price">${pos.price.toFixed(2)}</div>
-                <div class="mt4-col-price">0.00</div>
-                <div class="mt4-col-price">0.00</div>
-                <div class="mt4-col-price">${closePrice.toFixed(2)}</div>
-                <div class="mt4-col-price">-3.00</div>
-                <div class="mt4-col-price">0.00</div>
-                <div class="mt4-col-profit" style="color:${fColor};">${sign}${Math.abs(floating).toFixed(2)}</div>
-            </div>`;
-        }).join('');
-        
-        mt4Equity = mt4Balance + totalFloating;
-        document.getElementById('mt4-equity').innerText = mt4Equity.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-        
-        // Margin Gold: Standard leverage 1:100, 1 lot = $2000 margin (0.1 lot = $200)
-        let usedMargin = openPositions.length * 200; 
-        document.getElementById('mt4-margin').innerText = usedMargin.toFixed(2);
-        
-        let freeMargin = mt4Equity - usedMargin;
-        document.getElementById('mt4-free').innerText = freeMargin.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-        
-        let marginLevel = usedMargin > 0 ? (mt4Equity / usedMargin) * 100 : 0;
-        document.querySelector('.mt4-balance-bar span:last-child').innerText = `Margin level: ${marginLevel.toFixed(2)}%`;
-        
-        let profitEl = document.getElementById('mt4-profit');
-        profitEl.innerText = `${totalFloating >= 0 ? '+' : '-'}$${Math.abs(totalFloating).toFixed(2)}`;
-        profitEl.style.color = totalFloating >= 0 ? 'green' : 'red';
-    }
-
-    function closeRandomPosition() {
-        if(openPositions.length === 0) return;
-        let posIndex = Math.floor(Math.random() * openPositions.length);
-        let pos = openPositions.splice(posIndex, 1)[0];
-        
-        if(priceLines[posIndex]) {
-            candleSeries.removePriceLine(priceLines[posIndex]);
-            priceLines.splice(posIndex, 1);
-        } else {
-            priceLines.splice(posIndex, 1);
-        }
-
-        let currentBid = marketPrice;
-        let currentAsk = marketPrice + SPREAD;
-        let closePrice = pos.type === 'buy' ? currentBid : currentAsk;
-        let profit = calcFloatingPL(pos, closePrice);
-        
-        let time = new Date().toLocaleTimeString('id-ID', {hour12: false}).slice(0,5);
-        let pColor = profit >= 0 ? 'blue' : 'red';
-        let sign = profit >= 0 ? '' : '-';
-        
-        mt4Balance += profit;
-        document.getElementById('mt4-balance').innerText = mt4Balance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-        
-        renderOpenPositions();
-        saveState(); // SIMPAN DATA
-    }
-
-    // === LOOP UTAMA ===
-    setInterval(() => {
-        if (!isInitialized) return;
-
-        // Pergerakan harga Gold (fluktuasi cepat per detik)
-        let change = (Math.random() - 0.5) * 0.80; 
-        marketPrice += change;
-        
-        let last = window.lastCandle;
-        last.close = marketPrice;
-        last.high = Math.max(last.high, last.close);
-        last.low = Math.min(last.low, last.close);
-        
-        candleSeries.update(last);
-        updateOHLC(marketPrice);
-        updateMarketWatch();
-        renderOpenPositions();
-
-        // EA Buka posisi tiap 5 detik jika momentum bagus
-        if (isAutoTrading && Date.now() % 5000 < 1000 && openPositions.length < 3) {
-            if (Math.abs(change) > 0.20) {
-                manualTrade(change > 0 ? 'buy' : 'sell');
-            }
-        }
-
-        // EA Tutup posisi jika profit/loss menyentuh target
-        if (isAutoTrading && Date.now() % 4000 < 1000 && openPositions.length > 0) {
-            for (let i = openPositions.length - 1; i >= 0; i--) {
-                let pos = openPositions[i];
-                let closePrice = pos.type === 'buy' ? marketPrice : marketPrice + SPREAD;
-                let pl = calcFloatingPL(pos, closePrice);
-                // Target Gold: Profit $5 atau Loss $3
-                if (pl > 5.0 || pl < -3.0) {
-                    openPositions.splice(i, 1);
-                    if (priceLines[i]) {
-                        candleSeries.removePriceLine(priceLines[i]);
-                        priceLines.splice(i, 1);
-                    }
-                    mt4Balance += pl;
-                    document.getElementById('mt4-balance').innerText = mt4Balance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-                }
-            }
-            renderOpenPositions();
-            saveState(); // SIMPAN DATA SETELAH AUTO CLOSE
-        }
-
-        // Candle baru tiap H1
-        let timePassed = (Date.now() / 1000) - last.time;
-        if (timePassed >= currentTimeframe) { 
-            let newTime = Math.floor(Date.now() / 1000);
-            newTime = newTime - (newTime % currentTimeframe); 
-
-            window.lastCandle = { time: newTime, open: marketPrice, high: marketPrice, low: marketPrice, close: marketPrice };
-            candleSeries.update(window.lastCandle);
-        }
-    }, 1000);
-
-    window.addEventListener('resize', () => {
-        if(chart) chart.applyOptions({ width: document.getElementById('mt4-chart-container').clientWidth, height: document.getElementById('mt4-chart-container').clientHeight });
-    });
-
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            if (typeof LightweightCharts !== 'undefined') {
-                initMT4Chart();
-                // PANGGIL LOAD STATE SETELAH CHART SIAP
-                setTimeout(() => {
-                    if(chart) chart.applyOptions({ width: document.getElementById('mt4-chart-container').clientWidth, height: document.getElementById('mt4-chart-container').clientHeight });
-                    loadState(); 
-                }, 200);
-            } else {
-                document.getElementById('mt4-chart-container').innerHTML = "<div style='color:red; padding:10px;'>⚠️ Gagal load Chart.</div>";
-            }
-        }, 500);
-    });
     
     fetchDashboard();
     setInterval(fetchDashboard, 3000);

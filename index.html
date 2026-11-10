@@ -3,260 +3,446 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Command Center</title>
+    <title>CryptoRetjeh Terminal</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
-
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap');
+        
         :root {
-            --bg: #050505; --panel: #111116; --border: #2a2a35;
-            --text: #e2e8f0; --neon-cyan: #00e5ff; --neon-purple: #9d00ff;
-            --neon-pink: #ff007f; --neon-green: #00ff88; --neon-yellow: #ffbb00;
-            --grid-line: rgba(255, 255, 255, 0.03);
+            --bg: #09090b;
+            --panel: rgba(18, 18, 23, 0.85);
+            --border: #272732;
+            --text: #e2e8f0;
+            --text-dim: #8b8b9a;
+            --purple: #b026ff;
+            --pink: #ff007f;
+            --cyan: #00e5ff;
+            --green: #00ff88;
+            --yellow: #ffbb00;
+            --red: #ff3333;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background-color: var(--bg);
-            background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-            background-size: 20px 20px; color: var(--text); font-family: 'JetBrains Mono', monospace;
-            height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; padding: 10px; gap: 10px;
+            background-image: linear-gradient(rgba(9, 9, 11, 0.88), rgba(9, 9, 11, 0.95)), url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-main.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            min-height: 100vh;
+            padding: 10px;
         }
 
+        .cockpit {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* === HEADER === */
         .header {
-            display: flex; justify-content: space-between; align-items: center;
-            background: linear-gradient(90deg, #0a0a0f, #111116);
-            border: 1px solid var(--border); border-left: 4px solid var(--neon-cyan);
-            padding: 10px 15px; border-radius: 6px; height: 55px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--panel);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            border-left: 3px solid var(--purple);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .title { font-size: 15px; font-weight: 800; color: #fff; }
-        .title span { color: var(--neon-cyan); }
-        .total-balance { font-size: 22px; font-weight: 800; color: var(--neon-green); }
-
-        .main-grid {
-            display: grid; grid-template-columns: repeat(12, 1fr);
-            grid-template-rows: 1fr 1fr 1.2fr; gap: 10px; flex-grow: 1; min-height: 0;
-        }
-
-        .card {
-            background-color: var(--panel); border: 1px solid var(--border);
-            border-radius: 6px; padding: 12px; display: flex; flex-direction: column; position: relative;
-        }
-        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-        .card.cyan::before { background: var(--neon-cyan); }
-        .card.pink::before { background: var(--neon-pink); }
-        .card.purple::before { background: var(--neon-purple); }
-        .card.yellow::before { background: var(--neon-yellow); }
-
-        .card-title {
-            font-size: 10px; font-weight: bold; color: #aaa;
-            margin-bottom: 10px; display: flex; justify-content: space-between;
-            border-bottom: 1px dashed var(--border); padding-bottom: 6px;
+        
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .profile-pic {
+            width: 40px; height: 40px; border-radius: 8px;
+            object-fit: cover; border: 1px solid var(--purple);
+            background: #222;
         }
 
-        .data-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; }
-        .data-label { color: #777; } .data-val { font-weight: bold; color: #fff; }
-        .big-val { font-size: 18px; font-weight: 800; margin-top: 4px; }
-        .val-cyan { color: var(--neon-cyan); } .val-green { color: var(--neon-green); }
+        .title-area h1 { font-size: 13px; font-weight: 800; color: #fff; }
+        .title-area h1 span { color: var(--purple); }
+        
+        .badge { 
+            font-size: 9px; padding: 3px 8px; border-radius: 4px; 
+            border: 1px solid var(--green); color: var(--green); 
+            background: rgba(0,255,136,0.1); font-weight: bold;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .badge.offline { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.1); }
+        
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1s infinite alternate; }
+        .dot.offline { background: var(--red); }
+        @keyframes blink { from { opacity: 1; } to { opacity: 0.2; } }
 
-        .bar-bg { background: #1a1a2e; height: 5px; border-radius: 3px; margin-top: 4px; overflow: hidden; }
-        .bar-fill { height: 100%; background: var(--neon-cyan); }
+        .header-right { text-align: right; }
+        .total-balance { font-size: 18px; font-weight: 800; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.3); line-height: 1.2; }
+        .sync-text { font-size: 8px; color: var(--text-dim); margin-top: 3px; }
+
+        /* === INFO BAR === */
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            background: var(--panel);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 9px;
+            color: var(--text-dim);
+        }
+        .info-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .info-val { color: var(--cyan); font-weight: bold; font-size: 10px; }
+        .info-val.green { color: var(--green); }
+        .info-val.yellow { color: var(--yellow); }
+
+        /* === BOT GRID (PAKAI GAMBAR bg-card.jpg) === */
+        .bot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .bot-card {
+            background: var(--panel);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .bot-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg');
+            background-size: cover; background-position: center;
+            opacity: 0.15; z-index: 0;
+        }
+        .bot-card > * { position: relative; z-index: 1; }
+
+        .bot-card.clip { border-top: 3px solid var(--pink); }
+        .bot-card.lucky { border-top: 3px solid var(--cyan); }
+
+        .bot-header { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+        .bot-title { font-size: 11px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; }
+        .bot-status { font-size: 8px; padding: 2px 6px; border-radius: 10px; font-weight: bold; align-self: flex-start; }
+        .bot-status.idle { color: var(--green); border: 1px solid var(--green); background: rgba(0,255,136,0.1); }
+        .bot-status.watching { color: var(--yellow); border: 1px solid var(--yellow); background: rgba(255,187,0,0.1); }
+        
+        .stat-row { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 4px; }
+        .stat-label { color: var(--text-dim); }
+        .stat-val { font-weight: bold; color: #fff; }
+        
+        .bot-balance { font-size: 16px; font-weight: 800; margin-top: 8px; margin-bottom: 8px; }
+        .bot-balance.pink { color: var(--pink); }
+        .bot-balance.cyan { color: var(--cyan); }
+
+        .btn-pause {
+            width: 100%; padding: 8px; margin-top: auto;
+            background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: var(--text);
+            border-radius: 4px; font-family: inherit; font-size: 9px; font-weight: bold; cursor: pointer;
+        }
+        .btn-pause.active { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.1); }
+
+        /* === SYSTEM & NETWORK (PAKAI GAMBAR bg-card.jpg) === */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .box {
+            background: var(--panel); backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 8px; padding: 12px;
+            position: relative; overflow: hidden;
+        }
+        
+        .box::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg');
+            background-size: cover; background-position: center;
+            opacity: 0.1; z-index: 0;
+        }
+        .box > * { position: relative; z-index: 1; }
+
+        .box-title { font-size: 10px; font-weight: bold; color: var(--text-dim); margin-bottom: 10px; border-bottom: 1px dashed var(--border); padding-bottom: 5px; display: flex; justify-content: space-between; }
+        
+        .bar-bg { background: #000; height: 5px; border-radius: 3px; overflow: hidden; margin-top: 4px; border: 1px solid #222; }
+        .bar-fill { height: 100%; }
+
+        /* === TERMINAL LOG (PAKAI GAMBAR bg-log.jpg) === */
+        .terminal-box {
+            background: var(--panel); backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 8px; padding: 12px; display: flex; flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .terminal-box::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg');
+            background-size: cover; background-position: center;
+            opacity: 0.3; z-index: 0;
+        }
+        
+        .terminal-box::after {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(0, 255, 0, 0.05), rgba(0, 255, 0, 0.1));
+            z-index: 0;
+        }
+
+        .terminal-box > * { position: relative; z-index: 1; }
 
         .terminal {
-            background: #080810; border: 1px solid var(--border); border-radius: 4px;
-            flex-grow: 1; padding: 10px; font-size: 11px; overflow-y: auto; color: #ccc;
+            background: rgba(5, 5, 8, 0.75); 
+            border: 1px solid #1a1a21; border-radius: 4px;
+            padding: 10px; font-size: 10px; height: 150px; overflow-y: auto;
+            color: #00ff00; font-family: 'Courier New', monospace;
+            box-shadow: inset 0 0 15px rgba(0,255,0,0.2);
         }
-        .log-line { margin-bottom: 4px; } .log-cyan { color: var(--neon-cyan); }
-
-        /* EKG Animasi */
-        .ekg-container { width: 100%; height: 30px; overflow: hidden; margin-top: auto; }
-        .ekg-line { stroke: var(--neon-purple); stroke-width: 2; fill: none; stroke-dasharray: 100; stroke-dashoffset: 100; animation: dash 2s linear infinite; }
-        @keyframes dash { to { stroke-dashoffset: 0; } }
-
-        /* LAYOUT GRID */
-        .sys-mon { grid-column: span 4; }
-        .clipcoin-card { grid-column: span 4; }
-        .luckywatch-card { grid-column: span 4; }
-        .network-card { grid-column: span 4; }
-        .health-card { grid-column: span 4; }
-        .api-card { grid-column: span 4; }
-        .faucetpay-card { grid-column: span 4; overflow-y: auto; } /* Kotak FaucetPay */
-        .logs-card { grid-column: span 12; }
-
-        /* SCROLLBAR STYLE */
-        .faucetpay-card::-webkit-scrollbar { width: 6px; }
-        .faucetpay-card::-webkit-scrollbar-track { background: var(--panel); }
-        .faucetpay-card::-webkit-scrollbar-thumb { background: var(--neon-purple); border-radius: 3px; }
-
-        .coin-row { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px dashed #222; }
-        .coin-name { color: var(--neon-cyan); font-weight: bold; }
-        .coin-val { color: var(--neon-green); }
-        
-        @media (max-width: 600px) {
-            .sys-mon, .clipcoin-card, .luckywatch-card, .network-card, .health-card, .api-card, .faucetpay-card { grid-column: span 6; }
-            .logs-card { grid-column: span 12; }
-        }
+        .log-line { margin-bottom: 5px; line-height: 1.4; }
+        .log-time { color: #555; }
+        .log-bot { font-weight: bold; }
     </style>
 </head>
 <body>
 
+<div class="cockpit">
+    <!-- HEADER -->
     <div class="header">
-        <div>
-            <div class="title">NEURAL <span>COMMAND</span> CENTER</div>
-            <div style="font-size:9px; color:#888;">STATUS: <span style="color:var(--neon-green);">ONLINE</span></div>
+        <div class="header-left">
+            <img src="https://raw.githubusercontent.com/cryptoretjeh/termux/main/profile.jpg" alt="Profile" class="profile-pic" onerror="this.src='https://ui-avatars.com/api/?name=C&background=b026ff&color=fff'">
+            <div class="title-area">
+                <h1><span>CryptoRetjeh</span> Terminal</h1>
+                <div class="badge" id="live-badge"><div class="dot" id="live-dot"></div> LIVE SYNC</div>
+            </div>
         </div>
-        <div style="text-align: right;">
-            <div style="font-size:8px; color:#888;">TOTAL ESTIMASI</div>
-            <div class="total-balance" id="total-saldo">$0.00000</div>
+        <div class="header-right">
+            <div class="total-balance" id="total-saldo">$0.00</div>
+            <div class="sync-text" id="last-sync">Sync: -</div>
         </div>
     </div>
 
-    <div class="main-grid">
-        
-        <!-- CLIPCOIN -->
-        <div class="card pink clipcoin-card">
-            <div class="card-title">🎬 CLIPCOIN <span id="cc-status" style="color:var(--neon-yellow);">...</span></div>
-            <div class="data-row"><span class="data-label">Claims</span><span class="data-val" id="cc-claims">0</span></div>
-            <div class="data-row"><span class="data-label">Limit</span><span class="data-val" id="cc-limit">540</span></div>
-            <div style="margin-top:auto;"><div class="big-val val-green" id="cc-saldo">$0.00</div></div>
+    <!-- INFO BAR -->
+    <div class="info-bar">
+        <div class="info-item">
+            <span>Uptime</span> <span class="info-val" id="uptime">00:00:00</span>
         </div>
-
-        <!-- LUCKYWATCH -->
-        <div class="card cyan luckywatch-card">
-            <div class="card-title">🎰 LUCKYWATCH <span id="lw-status" style="color:#888;">...</span></div>
-            <div class="data-row"><span class="data-label">Claims</span><span class="data-val" id="lw-claims">0</span></div>
-            <div class="data-row"><span class="data-label">Limit</span><span class="data-val" id="lw-limit">820</span></div>
-            <div style="margin-top:auto;"><div class="big-val val-cyan" id="lw-saldo">$0.00</div></div>
+        <div class="info-item">
+            <span>Total Claims</span> <span class="info-val green" id="total-claims">0</span>
         </div>
-
-        <!-- FAUCETPAY WALLET (Ganti Bot Lainnya) -->
-        <div class="card purple faucetpay-card">
-            <div class="card-title">💰 FAUCETPAY WALLET</div>
-            <div id="faucet-list" style="flex-grow: 1;">
-                <div style="font-size:10px; color:#888; text-align:center;">Menunggu data...</div>
-            </div>
+        <div class="info-item">
+            <span>Est. Daily</span> <span class="info-val yellow" id="est-daily">$0.00</span>
         </div>
-
-        <!-- SYSTEM HEALTH -->
-        <div class="card cyan health-card">
-            <div class="card-title">💻 SYSTEM HEALTH</div>
-            <div class="data-row"><span class="data-label">CPU</span><span class="data-val" id="cpu-val">0%</span></div>
-            <div class="bar-bg"><div class="bar-fill" id="cpu-bar" style="width:0%;"></div></div>
-            <div class="data-row" style="margin-top:6px;"><span class="data-label">RAM</span><span class="data-val" id="ram-val">0%</span></div>
-            <div class="bar-bg"><div class="bar-fill" id="ram-bar" style="width:0%; background:var(--neon-purple);"></div></div>
-            <div class="ekg-container">
-                <svg viewBox="0 0 100 20" preserveAspectRatio="none" width="100%" height="100%">
-                    <polyline class="ekg-line" points="0,10 10,10 15,5 20,18 25,10 40,10 45,2 50,18 55,10 70,10 75,15 80,5 85,10 100,10"/>
-                </svg>
-            </div>
+        <div class="info-item">
+            <span>Server</span> <span class="info-val green" id="server-status">ONLINE</span>
         </div>
-
-        <!-- NETWORK -->
-        <div class="card purple network-card">
-            <div class="card-title">📡 NETWORK STATUS</div>
-            <div class="data-row"><span class="data-label">Latency</span><span class="data-val val-cyan" id="net-ping">0ms</span></div>
-            <div class="data-row"><span class="data-label">Requests</span><span class="data-val" id="net-req">0</span></div>
-            <div class="data-row"><span class="data-label">Failures</span><span class="data-val" style="color:var(--neon-pink);" id="net-fail">0</span></div>
-        </div>
-
-        <!-- API -->
-        <div class="card yellow api-card">
-            <div class="card-title">🔑 CAPTCHA API</div>
-            <div class="data-row"><span class="data-label">Status</span><span class="data-val" style="color:var(--neon-green);">CONNECTED</span></div>
-            <div class="data-row"><span class="data-label">Tokens</span><span class="data-val" id="cap-token">0</span></div>
-        </div>
-
-        <!-- LIVE TERMINAL -->
-        <div class="card logs-card">
-            <div class="card-title">📟 LIVE TERMINAL</div>
-            <div class="terminal" id="terminal">
-                <div class="log-line"><span class="log-cyan">[System]</span> Menginisialisasi...</div>
-            </div>
-        </div>
-
     </div>
 
-    <script>
-        const JSON_URL = "https://api.npoint.io/c34c77001e31bcce50f0";
-        let lastStatus = "";
-        let startTime = Math.floor(Date.now() / 1000);
+    <!-- BOT BERDAMPINGAN -->
+    <div class="bot-grid">
+        <div class="bot-card clip">
+            <div class="bot-header">
+                <div class="bot-title">🎬 ClipCoin</div>
+                <div class="bot-status idle" id="cc-status">IDLE</div>
+            </div>
+            <div class="stat-row"><span class="stat-label">Claims</span><span class="stat-val" id="cc-claims">0</span></div>
+            <div class="stat-row"><span class="stat-label">Limit</span><span class="stat-val" id="cc-limit">540</span></div>
+            <div class="bot-balance pink" id="cc-saldo">$0.00</div>
+            <button class="btn-pause" id="btn-pause-cc" onclick="togglePause('cc')">PAUSE</button>
+        </div>
 
-        setInterval(() => {
-            let sec = Math.floor(Date.now() / 1000) - startTime;
-            document.getElementById('uptime').innerText = `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
-        }, 1000);
+        <div class="bot-card lucky">
+            <div class="bot-header">
+                <div class="bot-title">🎰 LuckyWatch</div>
+                <div class="bot-status idle" id="lw-status">IDLE</div>
+            </div>
+            <div class="stat-row"><span class="stat-label">Claims</span><span class="stat-val" id="lw-claims">0</span></div>
+            <div class="stat-row"><span class="stat-label">Limit</span><span class="stat-val" id="lw-limit">820</span></div>
+            <div class="bot-balance cyan" id="lw-saldo">$0.00</div>
+            <button class="btn-pause" id="btn-pause-lw" onclick="togglePause('lw')">PAUSE</button>
+        </div>
+    </div>
 
-        function addLog(msg) {
-            const term = document.getElementById('terminal');
-            const time = new Date().toLocaleTimeString('id-ID', {hour12:false});
-            let div = document.createElement('div');
-            div.className = 'log-line';
-            div.innerHTML = `<span style="color:#555;">[${time}]</span> > <span class="log-cyan">${msg}</span>`;
-            term.appendChild(div);
-            term.scrollTop = term.scrollHeight;
-            if(term.children.length > 20) term.removeChild(term.firstChild);
-        }
+    <!-- SYSTEM & NETWORK -->
+    <div class="grid-2">
+        <div class="box">
+            <div class="box-title">💻 SYSTEM HEALTH</div>
+            <div class="stat-row"><span class="stat-label">CPU</span><span class="stat-val" id="cpu-val">0%</span></div>
+            <div class="bar-bg"><div class="bar-fill" id="cpu-bar" style="width:0%; background:var(--cyan);"></div></div>
+            <div class="stat-row" style="margin-top:6px;"><span class="stat-label">RAM</span><span class="stat-val" id="ram-val">0%</span></div>
+            <div class="bar-bg"><div class="bar-fill" id="ram-bar" style="width:0%; background:var(--purple);"></div></div>
+        </div>
+        <div class="box">
+            <div class="box-title">📡 NETWORK & API</div>
+            <div class="stat-row"><span class="stat-label">Ping</span><span class="stat-val" style="color:var(--cyan);" id="net-ping">0ms</span></div>
+            <div class="stat-row"><span class="stat-label">Requests</span><span class="stat-val" id="net-req">0</span></div>
+            <div class="stat-row"><span class="stat-label">API Token</span><span class="stat-val" style="color:var(--yellow);" id="cap-token">0</span></div>
+        </div>
+    </div>
 
-        async function fetchDashboard() {
-            try {
-                const response = await fetch(JSON_URL + "?t=" + new Date().getTime());
-                const data = await response.json();
+    <!-- TERMINAL (LOG) -->
+    <div class="terminal-box">
+        <div class="box-title">📟 LIVE TERMINAL <span style="color:var(--pink);">● REC</span></div>
+        <div class="terminal" id="terminal">
+            <div class="log-line"><span class="log-time">[System]</span> <span style="color:#fff;">Init Neural Network...</span></div>
+        </div>
+    </div>
 
-                // --- UPDATE CLIPCOIN & LUCKYWATCH ---
+</div>
+
+<script>
+    const JSON_URL = "https://api.npoint.io/c34c77001e31bcce50f0";
+    let state = { cc_paused: false, lw_paused: false };
+    let startTime = Math.floor(Date.now() / 1000);
+
+    setInterval(() => {
+        let sec = Math.floor(Date.now() / 1000) - startTime;
+        let h = String(Math.floor(sec/3600)).padStart(2,'0');
+        let m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
+        let s = String(sec%60).padStart(2,'0');
+        document.getElementById('uptime').innerText = `${h}:${m}:${s}`;
+    }, 1000);
+
+    async function togglePause(bot) {
+        if (bot === 'cc') state.cc_paused = !state.cc_paused;
+        if (bot === 'lw') state.lw_paused = !state.lw_paused;
+
+        try {
+            const r = await fetch(JSON_URL);
+            const data = await r.json();
+            data.cc_paused = state.cc_paused;
+            data.lw_paused = state.lw_paused;
+            
+            await fetch(JSON_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            fetchDashboard();
+        } catch (e) { console.error(e); }
+    }
+
+    async function fetchDashboard() {
+        const liveBadge = document.getElementById('live-badge');
+        const liveDot = document.getElementById('live-dot');
+        const serverStatus = document.getElementById('server-status');
+
+        try {
+            const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
+            const data = await res.json();
+            
+            liveBadge.innerText = "LIVE SYNC";
+            liveBadge.className = "badge";
+            liveBadge.prepend(liveDot);
+            liveDot.className = "dot";
+            serverStatus.innerText = "ONLINE";
+            serverStatus.style.color = "var(--green)";
+
+            document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', {hour12:false});
+
+            state.cc_paused = data.cc_paused || false;
+            state.lw_paused = data.lw_paused || false;
+
+            const btnCC = document.getElementById('btn-pause-cc');
+            const btnLW = document.getElementById('btn-pause-lw');
+            const badgeCC = document.getElementById('cc-status');
+            const badgeLW = document.getElementById('lw-status');
+
+            if (state.cc_paused) {
+                btnCC.innerText = "RESUME"; btnCC.classList.add('active');
+                badgeCC.innerText = "PAUSED"; badgeCC.style.color = "var(--red)"; badgeCC.style.borderColor = "var(--red)";
+            } else {
+                btnCC.innerText = "PAUSE"; btnCC.classList.remove('active');
                 if(data.clipcoin) {
-                    document.getElementById('cc-status').innerText = data.clipcoin.status;
+                    badgeCC.innerText = data.clipcoin.status;
+                    badgeCC.className = `bot-status ${data.clipcoin.status === 'WATCHING' ? 'watching' : 'idle'}`;
                     document.getElementById('cc-claims').innerText = data.clipcoin.claims || 0;
                     document.getElementById('cc-limit').innerText = data.clipcoin.limit || 540;
                     document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
                 }
+            }
+
+            if (state.lw_paused) {
+                btnLW.innerText = "RESUME"; btnLW.classList.add('active');
+                badgeLW.innerText = "PAUSED"; badgeLW.style.color = "var(--red)"; badgeLW.style.borderColor = "var(--red)";
+            } else {
+                btnLW.innerText = "PAUSE"; btnLW.classList.remove('active');
                 if(data.luckywatch) {
-                    document.getElementById('lw-status').innerText = data.luckywatch.status;
+                    badgeLW.innerText = data.luckywatch.status;
+                    badgeLW.className = `bot-status ${data.luckywatch.status === 'WATCHING' ? 'watching' : 'idle'}`;
                     document.getElementById('lw-claims').innerText = data.luckywatch.claims || 0;
                     document.getElementById('lw-limit').innerText = data.luckywatch.limit || 820;
                     document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
                 }
-
-                // --- UPDATE TOTAL SALDO ---
-                let total = parseFloat(data.clipcoin?.saldo || 0) + parseFloat(data.luckywatch?.saldo || 0);
-                document.getElementById('total-saldo').innerText = "$" + total.toFixed(5);
-
-                // --- UPDATE SYSTEM ---
-                if(data.system) {
-                    document.getElementById('cpu-val').innerText = data.system.cpu + "%";
-                    document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
-                    document.getElementById('ram-val').innerText = data.system.ram + "%";
-                    document.getElementById('ram-bar').style.width = data.system.ram + "%";
-                    document.getElementById('net-ping').innerText = data.system.ping + "ms";
-                    document.getElementById('net-req').innerText = data.system.total_req;
-                    document.getElementById('net-fail').innerText = data.system.fails;
-                }
-                if(data.captcha) {
-                    document.getElementById('cap-token').innerText = data.captcha.token;
-                }
-
-                // --- UPDATE FAUCETPAY WALLET (BISA SCROLL) ---
-                const faucetList = document.getElementById('faucet-list');
-                if (data.faucetpay && data.faucetpay.length > 0) {
-                    let html = "";
-                    data.faucetpay.forEach(item => {
-                        html += `
-                        <div class="coin-row">
-                            <span class="coin-name">${item.coin}</span>
-                            <span class="coin-val">${item.saldo}</span>
-                        </div>`;
-                    });
-                    faucetList.innerHTML = html;
-                } else {
-                    faucetList.innerHTML = `<div style="font-size:10px; color:#888; text-align:center;">Saldo Kosong / Belum ada koin</div>`;
-                }
-
-            } catch (error) {
-                console.error(error);
             }
-        }
 
-        fetchDashboard();
-        setInterval(fetchDashboard, 3000);
-    </script>
+            let total = parseFloat(data.clipcoin?.saldo || 0) + parseFloat(data.luckywatch?.saldo || 0);
+            let totalClaims = (data.clipcoin?.claims || 0) + (data.luckywatch?.claims || 0);
+            let estDaily = totalClaims * 0.00022; 
+
+            document.getElementById('total-saldo').innerText = "$" + total.toFixed(5);
+            document.getElementById('total-claims').innerText = totalClaims;
+            document.getElementById('est-daily').innerText = "$" + estDaily.toFixed(3);
+
+            if(data.system) {
+                document.getElementById('cpu-val').innerText = data.system.cpu + "%";
+                document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
+                document.getElementById('ram-val').innerText = data.system.ram + "%";
+                document.getElementById('ram-bar').style.width = data.system.ram + "%";
+                document.getElementById('net-ping').innerText = data.system.ping + "ms";
+                document.getElementById('net-req').innerText = data.system.total_req;
+            }
+            if(data.captcha) {
+                document.getElementById('cap-token').innerText = data.captcha.token;
+            }
+
+            if (data.logs && data.logs.length > 0) {
+                const term = document.getElementById('terminal');
+                let newHtml = "";
+                data.logs.forEach(log => {
+                    let parts = log.split('] [');
+                    let time = parts[0].replace('[', '') + ']';
+                    let rest = parts[1] ? parts[1].split('] ') : ["SYS", log];
+                    let bot = rest[0];
+                    let text = rest[1] || "";
+                    
+                    let color = bot.includes("CLIPCOIN") ? "var(--pink)" : "var(--cyan)";
+                    if(text.toLowerCase().includes("error") || text.toLowerCase().includes("limit")) color = "var(--red)";
+
+                    newHtml += `<div class="log-line">
+                        <span class="log-time">${time}</span> 
+                        <span class="log-bot" style="color:${color}">[${bot}]</span> 
+                        <span class="log-text" style="color:#fff;">${text}</span>
+                    </div>`;
+                });
+                
+                if(term.innerHTML !== newHtml) {
+                    term.innerHTML = newHtml;
+                    term.scrollTop = term.scrollHeight;
+                }
+            }
+        } catch (e) {
+            liveBadge.innerText = "OFFLINE";
+            liveBadge.className = "badge offline";
+            liveBadge.prepend(liveDot);
+            liveDot.className = "dot offline";
+            serverStatus.innerText = "OFFLINE";
+            serverStatus.style.color = "var(--red)";
+            console.error(e);
+        }
+    }
+
+    fetchDashboard();
+    setInterval(fetchDashboard, 3000);
+</script>
 </body>
 </html>

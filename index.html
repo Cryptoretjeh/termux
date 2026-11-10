@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Command Center</title>
     <style>
-        body { background: #0a0a14; color: #fff; font-family: monospace; padding: 15px; }
-        .box { background: #11111d; border: 1px solid #232338; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
-        h1 { color: #00e5ff; font-size: 18px; text-align: center; }
+        body { background: #0a0a14; color: #fff; font-family: monospace; padding: 20px; }
+        .box { background: #11111d; padding: 20px; border: 1px solid #232338; border-radius: 8px; margin-bottom: 15px; }
+        h1 { color: #00e5ff; font-size: 22px; text-align: center; margin-bottom: 20px; }
+        h3 { color: #aaa; margin-bottom: 10px; border-bottom: 1px dashed #333; padding-bottom: 5px;}
         .status { color: #ffcc00; font-weight: bold; }
-        .val { color: #00ff88; font-weight: bold; font-size: 20px; }
+        .val { color: #00ff88; font-weight: bold; font-size: 22px; }
     </style>
 </head>
 <body>
@@ -27,36 +28,32 @@
         <p>Saldo: <span id="lw-saldo" class="val">$0.00</span></p>
     </div>
 
-    <!-- Hidden iframe to bypass CORS -->
-    <iframe id="dataFrame" style="display:none;" src="https://cryptoretjeh.github.io/termux/data.html"></iframe>
-
     <script>
-        const frame = document.getElementById('dataFrame');
-        
-        frame.onload = function() {
+        // NPOINT URL LU
+        const JSON_URL = "https://api.npoint.io/c34c77001e31bcce50f0";
+
+        async function getData() {
             try {
-                // Ambil isi teks dari dalam iframe
-                const text = frame.contentDocument.body.innerText;
-                // Ubah teks jadi JSON
-                const data = JSON.parse(text);
+                // Tambah ?t= biar gak kena cache Chrome
+                const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
+                const data = await res.json();
+
+                if(data && data.clipcoin) {
+                    document.getElementById('cc-status').innerText = data.clipcoin.status;
+                    document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
+                }
                 
-                // Update UI ClipCoin
-                document.getElementById('cc-status').innerText = data.clipcoin.status;
-                document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
-                
-                // Update UI LuckyWatch
-                document.getElementById('lw-status').innerText = data.luckywatch.status;
-                document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
-                
-            } catch(e) {
-                console.log("Menunggu data update...", e);
+                if(data && data.luckywatch) {
+                    document.getElementById('lw-status').innerText = data.luckywatch.status;
+                    document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
+                }
+            } catch (e) {
+                console.log("Error:", e);
             }
         }
         
-        // Reload iframe tiap 3 detik biar realtime
-        setInterval(() => {
-            frame.src = "https://cryptoretjeh.github.io/termux/data.html?t=" + new Date().getTime();
-        }, 3000);
+        getData();
+        setInterval(getData, 3000);
     </script>
 </body>
 </html>

@@ -225,8 +225,9 @@
         // KONFIGURASI DATABASE
         // ==========================================
         const JSON_URL = "https://api.jsonbin.io/v3/b/6af27c87ffd5d16053b54d10";
-        // Pakai Access Key (Aman ditaruh di Front-End)
-        const ACCESS_KEY = "$2a$10$fJcDZJ08Ii4okRmC.kwt1uZllnbrRyt0y6o.DcsO1sSoExrqbvkcm"; 
+        
+        // PAKAI X-MASTER-KEY (UDAH SAYA BENERIN)
+        const MASTER_KEY = "$2a$10$8CPn3w2fUfEZppHTjHcO8OlEV6GQYDtZNIyhCBY1.npnFXNBKVIa6"; 
         
         let lastStatus = "";
         let startTime = Math.floor(Date.now() / 1000);
@@ -258,7 +259,7 @@
 
                 const response = await fetch(urlWithCacheBuster, {
                     headers: {
-                        "X-Access-Key": ACCESS_KEY
+                        "X-Master-Key": MASTER_KEY // UDAH DIGANTI JADI MASTER KEY
                     }
                 });
                 

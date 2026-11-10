@@ -19,6 +19,7 @@
             --green: #00ff88;
             --yellow: #ffbb00;
             --red: #ff3333;
+            --neon-matrix: #00ff41; /* Hijau Neon Hacker */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -60,7 +61,6 @@
             overflow: hidden; 
         }
 
-        /* Gambar di Header */
         .header::before {
             content: '';
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -154,6 +154,7 @@
         .bot-status { font-size: 8px; padding: 2px 6px; border-radius: 10px; font-weight: bold; align-self: flex-start; }
         .bot-status.idle { color: var(--green); border: 1px solid var(--green); background: rgba(0,0,0,0.5); }
         .bot-status.watching { color: var(--yellow); border: 1px solid var(--yellow); background: rgba(0,0,0,0.5); }
+        .bot-status.paused { color: var(--red); border: 1px solid var(--red); background: rgba(0,0,0,0.5); }
         
         .stat-row { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 4px; }
         .stat-label { color: #ddd; text-shadow: 1px 1px 1px #000; }
@@ -195,9 +196,9 @@
         .bar-bg { background: rgba(0,0,0,0.8); height: 5px; border-radius: 3px; overflow: hidden; margin-top: 4px; border: 1px solid #222; }
         .bar-fill { height: 100%; }
 
-        /* === TERMINAL LOG (GAMBAR FULL TERANG) === */
+        /* === TERMINAL LOG (HIJAU NEON) === */
         .terminal-box {
-            background: transparent; /* Dibikin transparan total */
+            background: transparent; 
             backdrop-filter: none;
             border: 1px solid var(--border);
             border-radius: 8px; padding: 12px; display: flex; flex-direction: column;
@@ -211,24 +212,52 @@
             background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg');
             background-size: cover; 
             background-position: center;
-            opacity: 1; /* GAMBAR 100% JERNIH */
+            opacity: 1; 
             z-index: 0;
         }
 
         .terminal-box > * { position: relative; z-index: 1; }
 
         .terminal {
-            background: transparent; /* HAPUS KOTAK HITAM DI DALEM */
+            background: transparent; 
             border: none;
             padding: 10px; font-size: 10px; height: 150px; overflow-y: auto;
-            color: #00ff00; font-family: 'Courier New', monospace;
+            color: var(--neon-matrix); 
+            font-family: 'Courier New', monospace;
         }
         
-        /* Teks Log dikasih bayangan tebel biar tetep kebaca di atas gambar */
-        .log-line { margin-bottom: 5px; line-height: 1.4; text-shadow: 1px 1px 3px #000, -1px -1px 3px #000, 0 0 5px #000; }
-        .log-time { color: #ddd; text-shadow: 1px 1px 2px #000; }
-        .log-bot { font-weight: bold; text-shadow: 1px 1px 3px #000, -1px -1px 3px #000; }
-        .log-text { text-shadow: 1px 1px 3px #000, -1px -1px 3px #000; }
+        /* Efek Teks Hijau Neon dengan Bayangan Tebal */
+        .log-line { 
+            margin-bottom: 5px; line-height: 1.4; 
+            text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 0 5px #000; 
+        }
+        .log-time { color: #aaa; text-shadow: 1px 1px 2px #000; }
+        .log-bot { font-weight: bold; text-shadow: 1px 1px 2px #000; }
+        .log-text { color: var(--neon-matrix); text-shadow: 1px 1px 2px #000; }
+
+        /* === FORM COOKIE BARU === */
+        .cookie-box {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .cookie-box label { font-size: 10px; color: var(--text-dim); font-weight: bold; }
+        .cookie-input {
+            background: #000; border: 1px solid var(--border); color: #fff;
+            padding: 10px; border-radius: 4px; font-family: inherit; font-size: 10px;
+            resize: none; height: 60px;
+        }
+        .btn-cookie {
+            background: var(--purple); color: #fff; border: none; padding: 10px;
+            border-radius: 4px; font-weight: bold; cursor: pointer; font-family: inherit;
+            transition: 0.2s;
+        }
+        .btn-cookie:hover { background: #9d00ff; box-shadow: 0 0 10px var(--purple); }
     </style>
 </head>
 <body>
@@ -311,7 +340,17 @@
     <div class="terminal-box">
         <div class="box-title" style="color:var(--green); text-shadow: 0 0 5px var(--green); font-weight: 800; letter-spacing: 1px;">📟 LIVE TERMINAL <span style="color:var(--red); text-shadow: 0 0 8px var(--red); animation: blink 1s infinite alternate;">● REC</span></div>
         <div class="terminal" id="terminal">
-            <div class="log-line"><span class="log-time">[System]</span> <span class="log-text" style="color:#fff;">Init Neural Network...</span></div>
+            <div class="log-line"><span class="log-time">[System]</span> <span class="log-text">Init Neural Network...</span></div>
+        </div>
+    </div>
+
+    <!-- FORM GANTI COOKIE VIA WEB -->
+    <div class="cookie-box">
+        <label>🍪 Update Cookie (Akan dikirim ke Bot Python)</label>
+        <textarea class="cookie-input" id="cookie-input" placeholder="Paste cookie baru di sini..."></textarea>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-cookie" style="flex: 1;" onclick="setCookie('clipcoin')">Update ClipCoin</button>
+            <button class="btn-cookie" style="flex: 1; background: var(--cyan); color: #000;" onclick="setCookie('luckywatch')">Update LuckyWatch</button>
         </div>
     </div>
 
@@ -329,6 +368,28 @@
         let s = String(sec%60).padStart(2,'0');
         document.getElementById('uptime').innerText = `${h}:${m}:${s}`;
     }, 1000);
+
+    async function setCookie(bot) {
+        const cookieVal = document.getElementById('cookie-input').value.trim();
+        if(!cookieVal) return alert("Cookie tidak boleh kosong!");
+
+        try {
+            const r = await fetch(JSON_URL);
+            const data = await r.json();
+            
+            if(bot === 'clipcoin') data.cc_cookie = cookieVal;
+            if(bot === 'luckywatch') data.lw_cookie = cookieVal;
+
+            await fetch(JSON_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            alert(`Cookie ${bot.toUpperCase()} berhasil dikirim ke antrean. Bot akan update dalam 5 detik.`);
+            document.getElementById('cookie-input').value = "";
+        } catch (e) { alert("Gagal update cookie: " + e); }
+    }
 
     async function togglePause(bot) {
         if (bot === 'cc') state.cc_paused = !state.cc_paused;
@@ -423,6 +484,7 @@
                 document.getElementById('cap-token').innerText = data.captcha.token;
             }
 
+            // --- ANIMASI HACKER LOGS (HIJAU NEON) ---
             if (data.logs && data.logs.length > 0) {
                 const term = document.getElementById('terminal');
                 let newHtml = "";
@@ -433,13 +495,17 @@
                     let bot = rest[0];
                     let text = rest[1] || "";
                     
-                    let color = bot.includes("CLIPCOIN") ? "var(--pink)" : "var(--cyan)";
-                    if(text.toLowerCase().includes("error") || text.toLowerCase().includes("limit")) color = "var(--red)";
+                    // Cek apakah ini error/limit (buat warna merah)
+                    let isError = text.toLowerCase().includes("error") || text.toLowerCase().includes("limit") || text.toLowerCase().includes("fail");
 
-                    newHtml += `<div class="log-line">
-                        <span class="log-time">${time}</span> 
-                        <span class="log-bot" style="color:${color}">[${bot}]</span> 
-                        <span class="log-text" style="color:#fff;">${text}</span>
+                    // Warna dasar hijau neon
+                    let textColor = "#00ff41"; 
+                    if(isError) textColor = "#ff3333"; // Merah kalau error
+
+                    newHtml += `<div class="log-line" style="text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 0 0 5px #000;">
+                        <span class="log-time" style="color:#aaa;">${time}</span> 
+                        <span class="log-bot" style="color:${textColor}; font-weight:bold;">[${bot}]</span> 
+                        <span class="log-text" style="color:${textColor};">${text}</span>
                     </div>`;
                 });
                 

@@ -53,13 +53,14 @@
         }
         .title { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: 1px; }
         .title span { color: var(--neon-cyan); }
+        .sys-info { font-size: 9px; color: #888; margin-top: 3px; }
         .total-balance { font-size: 22px; font-weight: 800; color: var(--neon-green); text-shadow: 0 0 10px rgba(0,255,136,0.3); line-height: 1; }
 
         /* GRID */
         .main-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: 1.2fr 1.2fr 1fr; 
+            grid-template-rows: 1fr 1fr 1.2fr; 
             gap: 10px;
             flex-grow: 1;
             min-height: 0;
@@ -70,7 +71,7 @@
             background-color: var(--panel);
             border: 1px solid var(--border);
             border-radius: 6px;
-            padding: 12px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -90,10 +91,10 @@
         .card.yellow::before { background: var(--neon-yellow); box-shadow: 0 0 10px var(--neon-yellow); }
 
         .card-title {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             color: #aaa;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 1px;
             display: flex;
@@ -103,16 +104,16 @@
         }
 
         /* DATA */
-        .data-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
+        .data-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 11px; }
         .data-label { color: #777; }
         .data-val { font-weight: bold; color: #fff; }
         
-        .big-val { font-size: 20px; font-weight: 800; margin-top: 4px; }
+        .big-val { font-size: 18px; font-weight: 800; margin-top: 4px; }
         .val-cyan { color: var(--neon-cyan); text-shadow: 0 0 8px rgba(0,229,255,0.4); }
         .val-green { color: var(--neon-green); text-shadow: 0 0 8px rgba(0,255,136,0.4); }
 
         /* BARS */
-        .bar-bg { background: #1a1a2e; height: 6px; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+        .bar-bg { background: #1a1a2e; height: 5px; border-radius: 3px; margin-top: 4px; overflow: hidden; }
         .bar-fill { height: 100%; background: var(--neon-cyan); box-shadow: 0 0 8px var(--neon-cyan); transition: width 0.5s ease; }
 
         /* TERMINAL */
@@ -121,19 +122,17 @@
             border: 1px solid var(--border);
             border-radius: 4px;
             flex-grow: 1; 
-            padding: 10px;
-            font-size: 11px;
+            padding: 8px;
+            font-size: 10px;
             overflow-y: auto; 
             line-height: 1.5;
             color: #ccc;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
-            font-family: monospace;
         }
-        .log-line { margin-bottom: 4px; }
+        .log-line { margin-bottom: 3px; }
         .log-cyan { color: var(--neon-cyan); }
-        .log-pink { color: var(--neon-pink); }
+        .log-red { color: var(--neon-pink); }
         .log-green { color: var(--neon-green); }
-        .log-red { color: #ff4444; }
 
         .blink { animation: blink 1s infinite alternate; }
         @keyframes blink { from { opacity: 1; } to { opacity: 0.2; } }
@@ -141,55 +140,49 @@
 </head>
 <body>
 
-    <!-- HEADER -->
     <div class="header">
         <div>
             <div class="title">ADMIN <span>COMMAND</span> CENTER</div>
-            <div style="font-size:10px; color:#888;">STATUS: <span style="color:var(--neon-green);">ONLINE</span></div>
+            <div class="sys-info">STATUS: <span style="color:var(--neon-green);">ONLINE</span> | UPTIME: <span id="uptime">00:00:00</span></div>
         </div>
         <div style="text-align: right;">
-            <div style="font-size:10px; color:#888; letter-spacing:1px;">TOTAL ESTIMASI</div>
+            <div style="font-size:8px; color:#888; letter-spacing:1px;">TOTAL ESTIMASI</div>
             <div class="total-balance" id="total-saldo">$0.00000</div>
         </div>
     </div>
 
-    <!-- MAIN GRID -->
     <div class="main-grid">
         
-        <!-- CLIPCOIN -->
         <div class="card pink">
             <div class="card-title">🎬 CLIPCOIN <span id="cc-status" style="color:var(--neon-yellow);">...</span></div>
             <div class="data-row"><span class="data-label">Claims</span><span class="data-val" id="cc-claims">0</span></div>
             <div class="data-row"><span class="data-label">Limit</span><span class="data-val" id="cc-limit">540</span></div>
             <div style="margin-top:auto;">
-                <div style="font-size:10px; color:#777;">BALANCE</div>
+                <div style="font-size:9px; color:#777;">BALANCE</div>
                 <div class="big-val val-green" id="cc-saldo">$0.00</div>
             </div>
         </div>
 
-        <!-- LUCKYWATCH -->
         <div class="card cyan">
             <div class="card-title">🎰 LUCKYWATCH <span id="lw-status" style="color:#888;">...</span></div>
             <div class="data-row"><span class="data-label">Claims</span><span class="data-val" id="lw-claims">0</span></div>
             <div class="data-row"><span class="data-label">Limit</span><span class="data-val" id="lw-limit">820</span></div>
             <div style="margin-top:auto;">
-                <div style="font-size:10px; color:#777;">BALANCE</div>
+                <div style="font-size:9px; color:#777;">BALANCE</div>
                 <div class="big-val val-cyan" id="lw-saldo">$0.00</div>
             </div>
         </div>
 
-        <!-- CAPTCHA API -->
         <div class="card yellow">
             <div class="card-title">🔑 CAPTCHA API</div>
             <div class="data-row"><span class="data-label">Status</span><span class="data-val" style="color:var(--neon-green);">CONNECTED</span></div>
             <div class="data-row"><span class="data-label">Tokens</span><span class="data-val" id="cap-token">0</span></div>
             <div style="margin-top:auto;">
-                <div style="font-size:10px; color:#777;">Sisa Kuota</div>
+                <div style="font-size:9px; color:#777;">Sisa Kuota</div>
                 <div class="bar-bg"><div class="bar-fill" id="cap-bar" style="width:0%; background:var(--neon-yellow);"></div></div>
             </div>
         </div>
 
-        <!-- SYSTEM HEALTH -->
         <div class="card cyan">
             <div class="card-title">💻 SYSTEM HEALTH</div>
             <div class="data-row"><span class="data-label">CPU</span><span class="data-val" id="cpu-val">0%</span></div>
@@ -198,34 +191,30 @@
             <div class="bar-bg"><div class="bar-fill" id="ram-bar" style="width:0%; background:var(--neon-purple);"></div></div>
         </div>
 
-        <!-- NETWORK STATUS -->
         <div class="card purple">
             <div class="card-title">📡 NETWORK STATUS</div>
             <div class="data-row"><span class="data-label">Latency</span><span class="data-val val-cyan" id="net-ping">0ms</span></div>
             <div class="data-row"><span class="data-label">Requests</span><span class="data-val" id="net-req">0</span></div>
             <div class="data-row"><span class="data-label">Failures</span><span class="data-val" style="color:var(--neon-pink);" id="net-fail">0</span></div>
-            <div style="margin-top:auto; font-size:10px; color:#666;">
+            <div style="margin-top:auto; font-size:9px; color:#666;">
                 <div class="blink" style="color:var(--neon-green);">> ENCRYPTION: SECURE</div>
-                <div>> ROTATION: ACTIVE</div>
             </div>
         </div>
 
-        <!-- BOT LAINNYA (Slot Kosong) -->
         <div class="card purple">
             <div class="card-title">🤖 BOT LAINNYA</div>
             <div class="data-row"><span class="data-label">Claims</span><span class="data-val" id="slot-claims">0</span></div>
             <div class="data-row"><span class="data-label">Status</span><span class="data-val" id="slot-status">OFFLINE</span></div>
             <div style="margin-top:auto;">
-                <div style="font-size:10px; color:#777;">BALANCE</div>
+                <div style="font-size:9px; color:#777;">BALANCE</div>
                 <div class="big-val" style="color:#888;" id="slot-saldo">$0.00</div>
             </div>
         </div>
 
-        <!-- TERMINAL LOG -->
         <div class="card" style="grid-column: span 3;">
             <div class="card-title">📟 LIVE TERMINAL <span class="blink" style="color:var(--neon-pink);">● REC</span></div>
             <div class="terminal" id="terminal">
-                <div class="log-line"><span class="log-cyan">[System]</span> Menunggu koneksi ke JSONBin...</div>
+                <div class="log-line"><span class="log-cyan">[System]</span> Menginisialisasi koneksi...</div>
             </div>
         </div>
 
@@ -233,36 +222,53 @@
 
     <script>
         // ==========================================
-        // URL DATABASE KAMU (JANGAN DIUBAH)
+        // KONFIGURASI DATABASE
         // ==========================================
         const JSON_URL = "https://api.jsonbin.io/v3/b/6af27c87ffd5d16053b54d10";
+        // Pakai Access Key (Aman ditaruh di Front-End)
+        const ACCESS_KEY = "$2a$10$fJcDZJ08Ii4okRmC.kwt1uZllnbrRyt0y6o.DcsO1sSoExrqbvkcm"; 
         
         let lastStatus = "";
+        let startTime = Math.floor(Date.now() / 1000);
 
-        function addLog(msg, colorClass = "log-cyan") {
+        // Timer Uptime
+        setInterval(() => {
+            let sec = Math.floor(Date.now() / 1000) - startTime;
+            let h = String(Math.floor(sec/3600)).padStart(2,'0');
+            let m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
+            let s = String(sec%60).padStart(2,'0');
+            document.getElementById('uptime').innerText = `${h}:${m}:${s}`;
+        }, 1000);
+
+        function addLog(msg, isError = false) {
             const term = document.getElementById('terminal');
             const time = new Date().toLocaleTimeString('id-ID', {hour12:false});
             let div = document.createElement('div');
             div.className = 'log-line';
-            div.innerHTML = `<span style="color:#555;">[${time}]</span> > <span class="${colorClass}">${msg}</span>`;
+            div.innerHTML = `<span style="color:#555;">[${time}]</span> > <span class="${isError ? 'log-red' : 'log-cyan'}">${msg}</span>`;
             term.appendChild(div);
             term.scrollTop = term.scrollHeight;
-            // Biar gak numpuk
             if(term.children.length > 30) term.removeChild(term.firstChild);
         }
 
         async function fetchDashboard() {
             try {
-                // Tembak URL JSONBin
-                const response = await fetch(JSON_URL);
+                // ANTI-CACHE: Tambah ?t= waktu saat ini biar Chrome selalu ambil data baru
+                const urlWithCacheBuster = JSON_URL + "?t=" + new Date().getTime();
+
+                const response = await fetch(urlWithCacheBuster, {
+                    headers: {
+                        "X-Access-Key": ACCESS_KEY
+                    }
+                });
                 
                 if (!response.ok) throw new Error("HTTP Error " + response.status);
                 
                 const json = await response.json();
-                const data = json.record; // Ambil bagian record
+                const data = json.record;
 
                 if(!data || !data.clipcoin) {
-                    addLog("Format JSON salah / kosong!", "log-red");
+                    addLog("Format JSON salah / Kosong!", true);
                     return;
                 }
 
@@ -308,22 +314,20 @@
                 // --- LOGIKA LOG TERMINAL ---
                 let currentStatus = `${data.clipcoin.status}-${data.luckywatch.status}`;
                 if(currentStatus !== lastStatus) {
-                    if(data.clipcoin.status === "WATCHING") addLog("ClipCoin: Menonton video...", "log-cyan");
-                    if(data.luckywatch.status === "WATCHING") addLog("LuckyWatch: Menonton video...", "log-cyan");
-                    if(data.clipcoin.status === "IDLE" && data.luckywatch.status === "IDLE") addLog("Semua Bot Idle. Menunggu...", "log-yellow");
+                    if(data.clipcoin.status === "WATCHING") addLog("ClipCoin: Menonton video...");
+                    if(data.luckywatch.status === "WATCHING") addLog("LuckyWatch: Menonton video...");
+                    if(data.clipcoin.status === "IDLE" && data.luckywatch.status === "IDLE") addLog("Bot Idle. Menunggu instruksi...");
                     lastStatus = currentStatus;
                 }
 
             } catch (error) {
                 console.error(error);
-                addLog("Gagal konek ke JSONBin! Cek internet.", "log-red");
+                addLog("Gagal konek ke JSONBin! Cek Internet/API Key.", true);
             }
         }
 
-        // Jalankan pertama kali
+        // Jalankan pertama kali, lalu ulangi tiap 3 detik
         fetchDashboard();
-        
-        // Ulangi tiap 3 detik (Realtime)
         setInterval(fetchDashboard, 3000);
     </script>
 </body>

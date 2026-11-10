@@ -1,7 +1,28 @@
 {
-  "clipcoin": { "status": "WATCHING", "saldo": 0.28413, "claims": 15 },
-  "luckywatch": { "status": "IDLE", "saldo": 0, "claims": 0 },
-  "slot": { "status": "OFFLINE", "saldo": 0, "claims": 0 },
-  "captcha": { "token": 10393 },
-  "system": { "cpu": 12, "ram": 45, "ping": 14, "total_req": 1204, "fails": 2 }
+  "clipcoin": {
+    "status": "IDLE",
+    "saldo": 0.29513,
+    "claims": 0,
+    "limit": 540
+  },
+  "luckywatch": {
+    "status": "IDLE",
+    "saldo": 0,
+    "claims": 0
+  },
+  "slot": {
+    "status": "OFFLINE",
+    "saldo": 0,
+    "claims": 0
+  },
+  "captcha": {
+    "token": 10371
+  },
+  "system": {
+    "cpu": 12,
+    "ram": 45,
+    "ping": 14,
+    "total_req": 1204,
+    "fails": 2
+  }
 }

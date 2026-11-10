@@ -9,7 +9,7 @@
         
         :root {
             --bg: #09090b;
-            --panel: rgba(18, 18, 23, 0.85);
+            --panel: rgba(18, 18, 23, 0.7);
             --border: #272732;
             --text: #e2e8f0;
             --text-dim: #8b8b9a;
@@ -25,7 +25,7 @@
 
         body {
             background-color: var(--bg);
-            background-image: linear-gradient(rgba(9, 9, 11, 0.88), rgba(9, 9, 11, 0.95)), url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-main.jpg');
+            background-image: linear-gradient(rgba(9, 9, 11, 0.6), rgba(9, 9, 11, 0.8)), url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-main.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -43,19 +43,37 @@
             margin: 0 auto;
         }
 
-        /* === HEADER === */
+        /* === HEADER BER GAMBAR === */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--panel);
-            backdrop-filter: blur(10px);
+            background: transparent; /* Dibikin transparan */
+            backdrop-filter: blur(8px); /* Efek kaca */
+            -webkit-backdrop-filter: blur(8px);
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 12px;
             border-left: 3px solid var(--purple);
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden; /* Biar gambar gak keluar kotak */
         }
+
+        /* Gambar di Header */
+        .header::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            /* GANTI URL DI BAWAH INI KALAU MAU GAMBAR LAIN */
+            background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg'); 
+            background-size: cover;
+            background-position: center;
+            opacity: 0.4; /* Transparansi gambar header */
+            z-index: 0;
+        }
+
+        /* Biar konten header di atas gambar */
+        .header > * { position: relative; z-index: 1; }
         
         .header-left { display: flex; align-items: center; gap: 10px; }
         .profile-pic {
@@ -64,24 +82,24 @@
             background: #222;
         }
 
-        .title-area h1 { font-size: 13px; font-weight: 800; color: #fff; }
+        .title-area h1 { font-size: 13px; font-weight: 800; color: #fff; text-shadow: 1px 1px 3px #000; }
         .title-area h1 span { color: var(--purple); }
         
         .badge { 
             font-size: 9px; padding: 3px 8px; border-radius: 4px; 
             border: 1px solid var(--green); color: var(--green); 
-            background: rgba(0,255,136,0.1); font-weight: bold;
+            background: rgba(0,0,0,0.6); font-weight: bold;
             display: inline-flex; align-items: center; gap: 4px;
         }
-        .badge.offline { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.1); }
+        .badge.offline { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.2); }
         
         .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1s infinite alternate; }
         .dot.offline { background: var(--red); }
         @keyframes blink { from { opacity: 1; } to { opacity: 0.2; } }
 
         .header-right { text-align: right; }
-        .total-balance { font-size: 18px; font-weight: 800; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.3); line-height: 1.2; }
-        .sync-text { font-size: 8px; color: var(--text-dim); margin-top: 3px; }
+        .total-balance { font-size: 18px; font-weight: 800; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.5), 1px 1px 2px #000; line-height: 1.2; }
+        .sync-text { font-size: 8px; color: #ccc; margin-top: 3px; text-shadow: 1px 1px 2px #000; }
 
         /* === INFO BAR === */
         .info-bar {
@@ -100,7 +118,7 @@
         .info-val.green { color: var(--green); }
         .info-val.yellow { color: var(--yellow); }
 
-        /* === BOT GRID (PAKAI GAMBAR bg-card.jpg) === */
+        /* === BOT GRID === */
         .bot-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -123,8 +141,10 @@
             content: '';
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg');
-            background-size: cover; background-position: center;
-            opacity: 0.15; z-index: 0;
+            background-size: cover; 
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.4; z-index: 0;
         }
         .bot-card > * { position: relative; z-index: 1; }
 
@@ -132,27 +152,27 @@
         .bot-card.lucky { border-top: 3px solid var(--cyan); }
 
         .bot-header { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
-        .bot-title { font-size: 11px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; }
+        .bot-title { font-size: 11px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; text-shadow: 1px 1px 2px #000; }
         .bot-status { font-size: 8px; padding: 2px 6px; border-radius: 10px; font-weight: bold; align-self: flex-start; }
-        .bot-status.idle { color: var(--green); border: 1px solid var(--green); background: rgba(0,255,136,0.1); }
-        .bot-status.watching { color: var(--yellow); border: 1px solid var(--yellow); background: rgba(255,187,0,0.1); }
+        .bot-status.idle { color: var(--green); border: 1px solid var(--green); background: rgba(0,0,0,0.5); }
+        .bot-status.watching { color: var(--yellow); border: 1px solid var(--yellow); background: rgba(0,0,0,0.5); }
         
         .stat-row { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 4px; }
-        .stat-label { color: var(--text-dim); }
-        .stat-val { font-weight: bold; color: #fff; }
+        .stat-label { color: #ddd; text-shadow: 1px 1px 1px #000; }
+        .stat-val { font-weight: bold; color: #fff; text-shadow: 1px 1px 1px #000; }
         
         .bot-balance { font-size: 16px; font-weight: 800; margin-top: 8px; margin-bottom: 8px; }
-        .bot-balance.pink { color: var(--pink); }
-        .bot-balance.cyan { color: var(--cyan); }
+        .bot-balance.pink { color: var(--pink); text-shadow: 0 0 5px #000; }
+        .bot-balance.cyan { color: var(--cyan); text-shadow: 0 0 5px #000; }
 
         .btn-pause {
             width: 100%; padding: 8px; margin-top: auto;
-            background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: var(--text);
+            background: rgba(0,0,0,0.7); border: 1px solid var(--border); color: var(--text);
             border-radius: 4px; font-family: inherit; font-size: 9px; font-weight: bold; cursor: pointer;
         }
-        .btn-pause.active { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.1); }
+        .btn-pause.active { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.2); }
 
-        /* === SYSTEM & NETWORK (PAKAI GAMBAR bg-card.jpg) === */
+        /* === SYSTEM & NETWORK === */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .box {
             background: var(--panel); backdrop-filter: blur(10px);
@@ -165,19 +185,22 @@
             content: '';
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg');
-            background-size: cover; background-position: center;
-            opacity: 0.1; z-index: 0;
+            background-size: cover; 
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.3; z-index: 0;
         }
         .box > * { position: relative; z-index: 1; }
 
         .box-title { font-size: 10px; font-weight: bold; color: var(--text-dim); margin-bottom: 10px; border-bottom: 1px dashed var(--border); padding-bottom: 5px; display: flex; justify-content: space-between; }
         
-        .bar-bg { background: #000; height: 5px; border-radius: 3px; overflow: hidden; margin-top: 4px; border: 1px solid #222; }
+        .bar-bg { background: rgba(0,0,0,0.8); height: 5px; border-radius: 3px; overflow: hidden; margin-top: 4px; border: 1px solid #222; }
         .bar-fill { height: 100%; }
 
-        /* === TERMINAL LOG (PAKAI GAMBAR bg-log.jpg) === */
+        /* === TERMINAL LOG (GAMBAR FULL) === */
         .terminal-box {
-            background: var(--panel); backdrop-filter: blur(10px);
+            background: transparent; 
+            backdrop-filter: none;
             border: 1px solid var(--border);
             border-radius: 8px; padding: 12px; display: flex; flex-direction: column;
             position: relative;
@@ -188,35 +211,31 @@
             content: '';
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg');
-            background-size: cover; background-position: center;
-            opacity: 0.3; z-index: 0;
-        }
-        
-        .terminal-box::after {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(rgba(0, 255, 0, 0.05), rgba(0, 255, 0, 0.1));
+            background-size: cover; 
+            background-position: center;
+            opacity: 1; 
             z-index: 0;
         }
 
         .terminal-box > * { position: relative; z-index: 1; }
 
         .terminal {
-            background: rgba(5, 5, 8, 0.75); 
-            border: 1px solid #1a1a21; border-radius: 4px;
+            background: transparent; 
+            border: none;
             padding: 10px; font-size: 10px; height: 150px; overflow-y: auto;
             color: #00ff00; font-family: 'Courier New', monospace;
-            box-shadow: inset 0 0 15px rgba(0,255,0,0.2);
         }
-        .log-line { margin-bottom: 5px; line-height: 1.4; }
-        .log-time { color: #555; }
-        .log-bot { font-weight: bold; }
+        
+        .log-line { margin-bottom: 5px; line-height: 1.4; text-shadow: 1px 1px 3px #000, -1px -1px 3px #000, 0 0 5px #000; }
+        .log-time { color: #ccc; text-shadow: 1px 1px 2px #000; }
+        .log-bot { font-weight: bold; text-shadow: 1px 1px 3px #000, -1px -1px 3px #000; }
+        .log-text { text-shadow: 1px 1px 3px #000, -1px -1px 3px #000; }
     </style>
 </head>
 <body>
 
 <div class="cockpit">
-    <!-- HEADER -->
+    <!-- HEADER (SEKARANG PAKE GAMBAR) -->
     <div class="header">
         <div class="header-left">
             <img src="https://raw.githubusercontent.com/cryptoretjeh/termux/main/profile.jpg" alt="Profile" class="profile-pic" onerror="this.src='https://ui-avatars.com/api/?name=C&background=b026ff&color=fff'">
@@ -291,9 +310,9 @@
 
     <!-- TERMINAL (LOG) -->
     <div class="terminal-box">
-        <div class="box-title">📟 LIVE TERMINAL <span style="color:var(--pink);">● REC</span></div>
+        <div class="box-title" style="color:#fff; text-shadow: 1px 1px 2px #000;">📟 LIVE TERMINAL <span style="color:var(--pink);">● REC</span></div>
         <div class="terminal" id="terminal">
-            <div class="log-line"><span class="log-time">[System]</span> <span style="color:#fff;">Init Neural Network...</span></div>
+            <div class="log-line"><span class="log-time">[System]</span> <span class="log-text" style="color:#fff;">Init Neural Network...</span></div>
         </div>
     </div>
 

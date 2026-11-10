@@ -4,22 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CryptoRetjeh Terminal</title>
+    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap');
         
         :root {
-            --bg: #09090b;
-            --panel: rgba(18, 18, 23, 0.7);
-            --border: #272732;
-            --text: #e2e8f0;
-            --text-dim: #8b8b9a;
-            --purple: #b026ff;
-            --pink: #ff007f;
-            --cyan: #00e5ff;
-            --green: #00ff88;
-            --yellow: #ffbb00;
-            --red: #ff3333;
-            --neon-matrix: #00ff41;
+            --bg: #09090b; --panel: rgba(18, 18, 23, 0.7); --border: #272732;
+            --text: #e2e8f0; --text-dim: #8b8b9a; --purple: #b026ff;
+            --pink: #ff007f; --cyan: #00e5ff; --green: #00ff88;
+            --yellow: #ffbb00; --red: #ff3333; --neon-matrix: #00ff41;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,254 +20,139 @@
         body {
             background-color: var(--bg);
             background-image: linear-gradient(rgba(9, 9, 11, 0.6), rgba(9, 9, 11, 0.8)), url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-main.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: var(--text);
-            font-family: 'JetBrains Mono', monospace;
-            min-height: 100vh;
-            padding: 10px;
+            background-size: cover; background-position: center; background-attachment: fixed;
+            color: var(--text); font-family: 'JetBrains Mono', monospace; min-height: 100vh; padding: 8px;
         }
 
-        .cockpit {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
+        .cockpit { display: flex; flex-direction: column; gap: 8px; max-width: 600px; margin: 0 auto; }
 
         /* === HEADER === */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: transparent; 
-            backdrop-filter: blur(8px); 
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 12px;
-            border-left: 3px solid var(--purple);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            position: relative;
-            overflow: hidden; 
-        }
-
-        .header::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg'); 
-            background-size: cover;
-            background-position: center;
-            opacity: 0.4; 
-            z-index: 0;
-        }
-
+        .header { display: flex; justify-content: space-between; align-items: center; background: transparent; backdrop-filter: blur(8px); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; border-left: 3px solid var(--purple); box-shadow: 0 4px 15px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
+        .header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg'); background-size: cover; background-position: center; opacity: 0.4; z-index: 0; }
         .header > * { position: relative; z-index: 1; }
-        
         .header-left { display: flex; align-items: center; gap: 10px; }
-        .profile-pic {
-            width: 40px; height: 40px; border-radius: 8px;
-            object-fit: cover; border: 1px solid var(--purple);
-            background: #222;
-        }
-
-        .title-area h1 { font-size: 13px; font-weight: 800; color: #fff; text-shadow: 1px 1px 3px #000; }
+        .profile-pic { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; border: 1px solid var(--purple); background: #222; }
+        .title-area h1 { font-size: 12px; font-weight: 800; color: #fff; text-shadow: 1px 1px 3px #000; }
         .title-area h1 span { color: var(--purple); }
-        
-        .badge { 
-            font-size: 9px; padding: 3px 8px; border-radius: 4px; 
-            border: 1px solid var(--green); color: var(--green); 
-            background: rgba(0,0,0,0.6); font-weight: bold;
-            display: inline-flex; align-items: center; gap: 4px;
-        }
+        .badge { font-size: 8px; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--green); color: var(--green); background: rgba(0,0,0,0.6); font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
         .badge.offline { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.2); }
-        
         .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1s infinite alternate; }
         .dot.offline { background: var(--red); }
         @keyframes blink { from { opacity: 1; } to { opacity: 0.2; } }
-
         .header-right { text-align: right; }
-        .total-balance { font-size: 18px; font-weight: 800; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.5), 1px 1px 2px #000; line-height: 1.2; }
-        .sync-text { font-size: 8px; color: #ccc; margin-top: 3px; text-shadow: 1px 1px 2px #000; }
+        .total-balance { font-size: 16px; font-weight: 800; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.5), 1px 1px 2px #000; line-height: 1.2; }
+        .sync-text { font-size: 7px; color: #ccc; margin-top: 2px; text-shadow: 1px 1px 2px #000; }
 
-        /* === INFO BAR (Total Claims & Income) === */
-        .info-bar {
-            display: flex;
-            justify-content: space-between;
-            background: var(--panel);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 12px;
-            font-size: 9px;
-            color: var(--text-dim);
-        }
-        .info-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-        .info-val { color: var(--cyan); font-weight: bold; font-size: 12px; }
+        .info-bar { display: flex; justify-content: space-between; background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 8px; color: var(--text-dim); }
+        .info-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .info-val { color: var(--cyan); font-weight: bold; font-size: 11px; }
         .info-val.green { color: var(--green); }
         .info-val.yellow { color: var(--yellow); }
 
-        /* === BOT GRID === */
-        .bot-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .bot-card {
-            background: var(--panel);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .bot-card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg');
-            background-size: cover; 
-            background-repeat: no-repeat;
-            background-position: center;
-            opacity: 0.4; z-index: 0;
-        }
+        /* === BOT === */
+        .bot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .bot-card { background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 8px; padding: 10px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        .bot-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center; opacity: 0.4; z-index: 0; }
         .bot-card > * { position: relative; z-index: 1; }
-
         .bot-card.clip { border-top: 3px solid var(--pink); }
         .bot-card.lucky { border-top: 3px solid var(--cyan); }
-
-        .bot-header { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
-        .bot-title { font-size: 11px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; text-shadow: 1px 1px 2px #000; }
-        .bot-status { font-size: 8px; padding: 2px 6px; border-radius: 10px; font-weight: bold; align-self: flex-start; }
+        .bot-header { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+        .bot-title { font-size: 10px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; text-shadow: 1px 1px 2px #000; }
+        .bot-status { font-size: 7px; padding: 1px 6px; border-radius: 10px; font-weight: bold; align-self: flex-start; }
         .bot-status.idle { color: var(--green); border: 1px solid var(--green); background: rgba(0,0,0,0.5); }
         .bot-status.watching { color: var(--yellow); border: 1px solid var(--yellow); background: rgba(0,0,0,0.5); }
         .bot-status.paused { color: var(--red); border: 1px solid var(--red); background: rgba(0,0,0,0.5); }
-        
-        .stat-row { display: flex; justify-content: space-between; font-size: 9px; margin-bottom: 4px; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 8px; margin-bottom: 2px; }
         .stat-label { color: #ddd; text-shadow: 1px 1px 1px #000; }
         .stat-val { font-weight: bold; color: #fff; text-shadow: 1px 1px 1px #000; }
-        
-        .bot-balance { font-size: 16px; font-weight: 800; margin-top: 8px; margin-bottom: 8px; }
+        .bot-balance { font-size: 14px; font-weight: 800; margin-top: 4px; margin-bottom: 6px; }
         .bot-balance.pink { color: var(--pink); text-shadow: 0 0 5px #000; }
         .bot-balance.cyan { color: var(--cyan); text-shadow: 0 0 5px #000; }
-
-        .btn-pause {
-            width: 100%; padding: 8px; margin-top: auto;
-            background: rgba(0,0,0,0.7); border: 1px solid var(--border); color: var(--text);
-            border-radius: 4px; font-family: inherit; font-size: 9px; font-weight: bold; cursor: pointer;
-        }
+        .btn-pause { width: 100%; padding: 6px; margin-top: auto; background: rgba(0,0,0,0.7); border: 1px solid var(--border); color: var(--text); border-radius: 4px; font-family: inherit; font-size: 8px; font-weight: bold; cursor: pointer; }
         .btn-pause.active { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.2); }
 
-        /* === SYSTEM & NETWORK === */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .box {
-            background: var(--panel); backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-radius: 8px; padding: 12px;
-            position: relative; overflow: hidden;
-        }
-        
-        .box::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg');
-            background-size: cover; 
-            background-repeat: no-repeat;
-            background-position: center;
-            opacity: 0.3; z-index: 0;
-        }
+        /* === SISTEM & NETWORK === */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .box { background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 8px; padding: 10px; position: relative; overflow: hidden; }
+        .box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center; opacity: 0.3; z-index: 0; }
         .box > * { position: relative; z-index: 1; }
-
-        .box-title { font-size: 10px; font-weight: bold; color: var(--text-dim); margin-bottom: 10px; border-bottom: 1px dashed var(--border); padding-bottom: 5px; display: flex; justify-content: space-between; }
-        
-        .bar-bg { background: rgba(0,0,0,0.8); height: 5px; border-radius: 3px; overflow: hidden; margin-top: 4px; border: 1px solid #222; }
+        .box-title { font-size: 9px; font-weight: bold; color: var(--text-dim); margin-bottom: 6px; border-bottom: 1px dashed var(--border); padding-bottom: 4px; display: flex; justify-content: space-between; }
+        .bar-bg { background: rgba(0,0,0,0.8); height: 4px; border-radius: 3px; overflow: hidden; margin-top: 3px; border: 1px solid #222; }
         .bar-fill { height: 100%; }
 
-        /* === STATUS WD === */
-        .wd-box {
-            background: var(--panel);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--yellow);
-            border-radius: 8px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .wd-title { font-size: 10px; font-weight: bold; color: var(--text-dim); }
-        .wd-status { font-size: 11px; font-weight: bold; color: var(--yellow); text-shadow: 0 0 5px var(--yellow); }
-
-        /* === TERMINAL LOG === */
-        .terminal-box {
-            background: transparent; 
-            backdrop-filter: none;
-            border: 1px solid var(--border);
-            border-radius: 8px; padding: 12px; display: flex; flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
+        /* === MT4 KLASIK === */
+        .mt4-window { background: #d4d0c8; border: 2px solid #fff; border-right-color: #404040; border-bottom-color: #404040; font-family: Tahoma, Arial, sans-serif; color: #000; display: flex; flex-direction: column; height: 360px; transition: height 0.3s; }
+        .mt4-window.minimized { height: 26px; overflow: hidden; }
         
-        .terminal-box::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg');
-            background-size: cover; 
-            background-position: center;
-            opacity: 1; 
-            z-index: 0;
-        }
+        .mt4-menubar { background: #d4d0c8; font-size: 9px; padding: 1px 5px; display: flex; gap: 8px; border-bottom: 1px solid #808080; color: #000; }
+        .mt4-menubar span { cursor: pointer; padding: 0 2px; }
+        .mt4-menubar span:hover { background: #0a246a; color: #fff; }
+        .mt4-titlebar { background: linear-gradient(90deg, #0a246a, #a6caf0); color: #fff; font-size: 9px; font-weight: bold; padding: 2px 5px; display: flex; justify-content: space-between; cursor: pointer; }
+        .mt4-titlebar span:last-child { cursor: pointer; padding: 0 4px; }
+        .mt4-titlebar span:last-child:hover { background: #ff3333; }
+        .mt4-toolbar { background: #d4d0c8; border-bottom: 1px solid #808080; padding: 1px 2px; display: flex; gap: 2px; align-items: center; font-size: 8px; }
+        .mt4-btn { background: #d4d0c8; border: 1px solid #fff; border-right-color: #404040; border-bottom-color: #404040; padding: 1px 3px; cursor: pointer; display: flex; align-items: center; gap: 2px; user-select: none; }
+        .mt4-btn:active, .mt4-btn.active { border: 1px solid #404040; border-right-color: #fff; border-bottom-color: #fff; background: #b0b0b0; }
+        .mt4-buy-sell { display: flex; gap: 2px; margin-left: 4px; border-left: 1px solid #808080; padding-left: 4px; }
+        .btn-buy { background: #d4d0c8; border: 1px solid #fff; border-right-color: #404040; border-bottom-color: #404040; padding: 1px 5px; font-weight: bold; color: blue; cursor: pointer; font-size: 8px;}
+        .btn-sell { background: #d4d0c8; border: 1px solid #fff; border-right-color: #404040; border-bottom-color: #404040; padding: 1px 5px; font-weight: bold; color: red; cursor: pointer; font-size: 8px;}
+        
+        .mt4-main { display: flex; flex-grow: 1; overflow: hidden; }
+        .mt4-market-watch { width: 100px; background: #fff; border-right: 1px solid #808080; overflow-y: auto; font-size: 9px; display: flex; flex-direction: column; }
+        .mt4-mw-header { background: #d4d0c8; border-bottom: 1px solid #808080; padding: 1px 2px; font-weight: bold; display: flex; justify-content: space-between; position: sticky; top: 0; }
+        .mt4-mw-list { flex-grow: 1; overflow-y: auto; }
+        .mt4-mw-row { display: flex; justify-content: space-between; padding: 1px 2px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .mt4-mw-row:hover { background: #e0e0ff; }
+        
+        .mt4-chart-area { flex-grow: 1; background: #000; position: relative; display: flex; flex-direction: column; }
+        .mt4-chart-header { color: #fff; font-size: 9px; padding: 1px 4px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; background: #111; flex-wrap: wrap; }
+        .mt4-chart-container { flex-grow: 1; position: relative; overflow: hidden; background: #000; }
+        
+        .mt4-terminal { background: #d4d0c8; height: 100px; border-top: 1px solid #808080; display: flex; flex-direction: column; }
+        .mt4-tabs { display: flex; font-size: 8px; border-bottom: 1px solid #808080; }
+        .mt4-tab { padding: 1px 6px; border: 1px solid #d4d0c8; border-bottom: none; background: #e0e0e0; cursor: pointer; }
+        .mt4-tab.active { background: #d4d0c8; font-weight: bold; border-top: 2px solid #0a246a;}
+        
+        .mt4-tab-content { display: none; background: #fff; flex-grow: 1; overflow-y: auto; font-size: 9px; padding: 1px; }
+        .mt4-tab-content.active { display: block; }
+        
+        .mt4-terminal-header { background: #e0e0e0; border-bottom: 1px solid #808080; display: flex; font-weight: bold; position: sticky; top: 0; }
+        .mt4-terminal-header div, .mt4-trade-row div { padding: 1px 3px; border-right: 1px solid #c0c0c0; }
+        .mt4-col-time { width: 55px; }
+        .mt4-col-type { width: 45px; }
+        .mt4-col-size { width: 28px; }
+        .mt4-col-price { width: 55px; }
+        .mt4-col-profit { flex-grow: 1; text-align: right; }
+        
+        /* Baris Balance MT4 Asli */
+        .mt4-balance-bar { background: #d4d0c8; border-top: 1px solid #fff; padding: 3px 5px; font-size: 9px; display: flex; flex-wrap: wrap; gap: 8px; font-weight: bold; }
+        .mt4-balance-bar span { color: #000; }
+        .mt4-balance-bar span span { color: #000; }
 
+        /* === WD & LOG & COOKIE === */
+        .wd-box { background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
+        .wd-title { font-size: 9px; font-weight: bold; color: var(--text-dim); }
+        .wd-status { font-size: 10px; font-weight: bold; color: var(--yellow); text-shadow: 0 0 5px var(--yellow); }
+
+        .terminal-box { background: transparent; backdrop-filter: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .terminal-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg'); background-size: cover; background-position: center; opacity: 1; z-index: 0; }
         .terminal-box > * { position: relative; z-index: 1; }
-
-        .terminal {
-            background: transparent; 
-            border: none;
-            padding: 10px; font-size: 10px; height: 150px; overflow-y: auto;
-            color: var(--neon-matrix); 
-            font-family: 'Courier New', monospace;
-        }
-        
-        .log-line { margin-bottom: 5px; line-height: 1.4; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 0 5px #000; }
+        .terminal { background: transparent; border: none; padding: 6px; font-size: 9px; height: 90px; overflow-y: auto; color: var(--neon-matrix); font-family: 'Courier New', monospace; }
+        .log-line { margin-bottom: 3px; line-height: 1.3; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 0 5px #000; }
         .log-time { color: #aaa; text-shadow: 1px 1px 2px #000; }
         .log-bot { font-weight: bold; text-shadow: 1px 1px 2px #000; }
         .log-text { color: var(--neon-matrix); text-shadow: 1px 1px 2px #000; }
 
-        /* === FORM COOKIE BARU === */
-        .cookie-box {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        .cookie-box label { font-size: 10px; color: var(--text-dim); font-weight: bold; }
-        .cookie-input {
-            background: #000; border: 1px solid var(--border); color: #fff;
-            padding: 10px; border-radius: 4px; font-family: inherit; font-size: 10px;
-            resize: none; height: 60px;
-        }
-        .btn-cookie {
-            background: var(--purple); color: #fff; border: none; padding: 10px;
-            border-radius: 4px; font-weight: bold; cursor: pointer; font-family: inherit;
-            transition: 0.2s;
-        }
+        .cookie-box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+        .cookie-box label { font-size: 9px; color: var(--text-dim); font-weight: bold; }
+        .cookie-input { background: #000; border: 1px solid var(--border); color: #fff; padding: 6px; border-radius: 4px; font-family: inherit; font-size: 9px; resize: none; height: 40px; }
+        .btn-cookie { background: var(--purple); color: #fff; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: inherit; font-size: 9px; transition: 0.2s; }
         .btn-cookie:hover { background: #9d00ff; box-shadow: 0 0 10px var(--purple); }
     </style>
 </head>
 <body>
 
 <div class="cockpit">
-    <!-- HEADER -->
     <div class="header">
         <div class="header-left">
             <img src="https://raw.githubusercontent.com/cryptoretjeh/termux/main/profile.jpg" alt="Profile" class="profile-pic" onerror="this.src='https://ui-avatars.com/api/?name=C&background=b026ff&color=fff'">
@@ -289,85 +167,127 @@
         </div>
     </div>
 
-    <!-- INFO BAR (Total Claims & Income) -->
     <div class="info-bar">
-        <div class="info-item">
-            <span>Total Claims</span> <span class="info-val green" id="total-claims">0</span>
-        </div>
-        <div class="info-item">
-            <span>Total Income</span> <span class="info-val yellow" id="total-income">$0.00</span>
-        </div>
-        <div class="info-item">
-            <span>Server</span> <span class="info-val green" id="server-status">ONLINE</span>
-        </div>
+        <div class="info-item"><span>Claims</span> <span class="info-val green" id="total-claims">0</span></div>
+        <div class="info-item"><span>Income</span> <span class="info-val yellow" id="total-income">$0.00</span></div>
+        <div class="info-item"><span>Server</span> <span class="info-val green" id="server-status">ONLINE</span></div>
     </div>
 
-    <!-- BOT BERDAMPINGAN -->
     <div class="bot-grid">
         <div class="bot-card clip">
-            <div class="bot-header">
-                <div class="bot-title">🎬 ClipCoin</div>
-                <div class="bot-status idle" id="cc-status">IDLE</div>
-            </div>
+            <div class="bot-header"><div class="bot-title">🎬 ClipCoin</div><div class="bot-status idle" id="cc-status">IDLE</div></div>
             <div class="stat-row"><span class="stat-label">Claims</span><span class="stat-val" id="cc-claims">0</span></div>
             <div class="stat-row"><span class="stat-label">Limit</span><span class="stat-val" id="cc-limit">540</span></div>
             <div class="bot-balance pink" id="cc-saldo">$0.00</div>
             <button class="btn-pause" id="btn-pause-cc" onclick="togglePause('cc')">PAUSE</button>
         </div>
-
         <div class="bot-card lucky">
-            <div class="bot-header">
-                <div class="bot-title">🎰 LuckyWatch</div>
-                <div class="bot-status idle" id="lw-status">IDLE</div>
-            </div>
+            <div class="bot-header"><div class="bot-title">🎰 LuckyWatch</div><div class="bot-status idle" id="lw-status">IDLE</div></div>
             <div class="stat-row"><span class="stat-label">Claims</span><span class="stat-val" id="lw-claims">0</span></div>
-            <div class="stat-row"><span class="stat-label">Limit</span><span class="stat-val" id="lw-limit">820</span></div>
+            <div class="stat-row"><span class="stat-label">Limit</span><span class="stat-val" id="lw-limits">820</span></div>
             <div class="bot-balance cyan" id="lw-saldo">$0.00</div>
             <button class="btn-pause" id="btn-pause-lw" onclick="togglePause('lw')">PAUSE</button>
         </div>
     </div>
 
-    <!-- STATUS WD (Withdraw) -->
-    <div class="wd-box">
-        <div>
-            <div class="wd-title">💸 STATUS WITHDRAW</div>
-            <div class="wd-status" id="wd-status">BELUM ADA ANTREAN</div>
+    <!-- MT4 -->
+    <div class="mt4-window" id="mt4-window">
+        <div class="mt4-titlebar" onclick="toggleMinimize()">
+            <span id="mt4-title-text">1100043274: NealZz [XAUUSDT] - Simulasi</span>
+            <span id="mt4-min-btn">[-]</span>
         </div>
-        <div style="font-size: 20px;">🏦</div>
+        <div class="mt4-menubar">
+            <span>File</span><span>View</span><span>Insert</span><span>Charts</span><span>Tools</span><span>Window</span><span>Help</span>
+        </div>
+        <div class="mt4-toolbar">
+            <div class="mt4-btn">📄 New Order</div>
+            <div class="mt4-btn mt4-btn-active" id="btn-auto" onclick="toggleAutoTrading()">🤖 AutoTrading</div>
+            <div class="mt4-buy-sell">
+                <div class="btn-buy" onclick="manualTrade('buy')">BUY</div>
+                <div class="btn-sell" onclick="manualTrade('sell')">SELL</div>
+            </div>
+            <div style="margin-left: auto; font-weight: bold; color: #0a246a;">P/L: <span id="mt4-profit" style="color: green;">+$0.00</span></div>
+        </div>
+        <div class="mt4-main">
+            <div class="mt4-market-watch">
+                <div class="mt4-mw-header"><span>Symbol</span><span>Bid</span><span>Ask</span></div>
+                <div class="mt4-mw-list" id="mt4-symbols"></div>
+            </div>
+            <div class="mt4-chart-area">
+                <div class="mt4-chart-header">
+                    <span id="mt4-chart-symbol" style="font-weight:bold;">XAUUSDT,H1</span>
+                    <span id="mt4-chart-price" style="color:#00e5ff;">0.00</span>
+                </div>
+                <div class="mt4-chart-container" id="mt4-chart-container"></div>
+            </div>
+        </div>
+        <div class="mt4-terminal">
+            <div class="mt4-tabs">
+                <div class="mt4-tab active" onclick="switchTab('trade')">Trade</div>
+                <div class="mt4-tab" onclick="switchTab('exposure')">Exposure</div>
+                <div class="mt4-tab" onclick="switchTab('history')">Account History</div>
+            </div>
+            <div class="mt4-tab-content active" id="tab-trade">
+                <div class="mt4-terminal-header">
+                    <div class="mt4-col-time" style="width:60px;">Order</div>
+                    <div class="mt4-col-time">Time</div>
+                    <div class="mt4-col-type">Type</div>
+                    <div class="mt4-col-size">Size</div>
+                    <div class="mt4-col-price">Price</div>
+                    <div class="mt4-col-profit">Profit</div>
+                </div>
+                <div id="mt4-open-trades"></div>
+            </div>
+            <div class="mt4-tab-content" id="tab-exposure"></div>
+            <div class="mt4-tab-content" id="tab-history"></div>
+        </div>
+        <!-- BARIS BIRU KLASIK MT4 -->
+        <div class="mt4-balance-bar">
+            <span>Balance: <span id="mt4-balance">4,983.80</span> USD</span>
+            <span>Equity: <span id="mt4-equity">4,979.06</span></span>
+            <span>Margin: <span id="mt4-margin">100.00</span></span>
+            <span>Free margin: <span id="mt4-free">4,879.06</span></span>
+            <span style="margin-left:auto; color:#a00;">Margin level: 4979.06%</span>
+        </div>
     </div>
 
-    <!-- SYSTEM & NETWORK -->
     <div class="grid-2">
         <div class="box">
-            <div class="box-title">💻 SYSTEM HEALTH</div>
+            <div class="box-title">💻 SYSTEM</div>
             <div class="stat-row"><span class="stat-label">CPU</span><span class="stat-val" id="cpu-val">0%</span></div>
             <div class="bar-bg"><div class="bar-fill" id="cpu-bar" style="width:0%; background:var(--cyan);"></div></div>
-            <div class="stat-row" style="margin-top:6px;"><span class="stat-label">RAM</span><span class="stat-val" id="ram-val">0%</span></div>
+            <div class="stat-row" style="margin-top:4px;"><span class="stat-label">RAM</span><span class="stat-val" id="ram-val">0%</span></div>
             <div class="bar-bg"><div class="bar-fill" id="ram-bar" style="width:0%; background:var(--purple);"></div></div>
         </div>
         <div class="box">
-            <div class="box-title">📡 NETWORK & API</div>
+            <div class="box-title">📡 NETWORK</div>
             <div class="stat-row"><span class="stat-label">Ping</span><span class="stat-val" style="color:var(--cyan);" id="net-ping">0ms</span></div>
-            <div class="stat-row"><span class="stat-label">Requests</span><span class="stat-val" id="net-req">0</span></div>
-            <div class="stat-row"><span class="stat-label">API Token</span><span class="stat-val" style="color:var(--yellow);" id="cap-token">0</span></div>
+            <div class="stat-row"><span class="stat-label">Req</span><span class="stat-val" id="net-req">0</span></div>
+            <div class="stat-row"><span class="stat-label">Token</span><span class="stat-val" style="color:var(--yellow);" id="cap-token">0</span></div>
         </div>
     </div>
 
-    <!-- TERMINAL (LOG) -->
     <div class="terminal-box">
-        <div class="box-title" style="color:var(--green); text-shadow: 0 0 5px var(--green); font-weight: 800; letter-spacing: 1px;">📟 LIVE TERMINAL <span style="color:var(--red); text-shadow: 0 0 8px var(--red); animation: blink 1s infinite alternate;">● REC</span></div>
+        <div class="box-title" style="color:var(--green); text-shadow: 0 0 5px var(--green); font-weight: 800; letter-spacing: 1px; margin-bottom:4px;">📟 LIVE TERMINAL <span style="color:var(--red); text-shadow: 0 0 8px var(--red); animation: blink 1s infinite alternate;">● REC</span></div>
         <div class="terminal" id="terminal">
             <div class="log-line"><span class="log-time">[System]</span> <span class="log-text">Init Neural Network...</span></div>
         </div>
     </div>
 
-    <!-- FORM GANTI COOKIE VIA WEB -->
+    <div class="wd-box">
+        <div>
+            <div class="wd-title">💸 WITHDRAW</div>
+            <div class="wd-status" id="wd-status">BELUM ADA ANTREAN</div>
+        </div>
+        <div style="font-size: 16px;">🏦</div>
+    </div>
+
     <div class="cookie-box">
-        <label>🍪 Update Cookie (Akan dikirim ke Bot Python)</label>
-        <textarea class="cookie-input" id="cookie-input" placeholder="Paste cookie baru di sini..."></textarea>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn-cookie" style="flex: 1;" onclick="setCookie('clipcoin')">Update ClipCoin</button>
-            <button class="btn-cookie" style="flex: 1; background: var(--cyan); color: #000;" onclick="setCookie('luckywatch')">Update LuckyWatch</button>
+        <label>🍪 Update Cookie</label>
+        <textarea class="cookie-input" id="cookie-input" placeholder="Paste cookie baru..."></textarea>
+        <div style="display: flex; gap: 6px;">
+            <button class="btn-cookie" style="flex: 1;" onclick="setCookie('clipcoin')">ClipCoin</button>
+            <button class="btn-cookie" style="flex: 1; background: var(--cyan); color: #000;" onclick="setCookie('luckywatch')">LuckyWatch</button>
         </div>
     </div>
 
@@ -376,35 +296,17 @@
 <script>
     const JSON_URL = "https://api.npoint.io/c34c77001e31bcce50f0";
     let state = { cc_paused: false, lw_paused: false };
-    let startTime = Math.floor(Date.now() / 1000);
-
-    // Timer Uptime
-    setInterval(() => {
-        let sec = Math.floor(Date.now() / 1000) - startTime;
-        let h = String(Math.floor(sec/3600)).padStart(2,'0');
-        let m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
-        let s = String(sec%60).padStart(2,'0');
-        document.getElementById('uptime').innerText = `${h}:${m}:${s}`;
-    }, 1000);
 
     async function setCookie(bot) {
         const cookieVal = document.getElementById('cookie-input').value.trim();
         if(!cookieVal) return alert("Cookie tidak boleh kosong!");
-
         try {
             const r = await fetch(JSON_URL);
             const data = await r.json();
-            
             if(bot === 'clipcoin') data.cc_cookie = cookieVal;
             if(bot === 'luckywatch') data.lw_cookie = cookieVal;
-
-            await fetch(JSON_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            
-            alert(`Cookie ${bot.toUpperCase()} berhasil dikirim ke antrean. Bot akan update dalam 5 detik.`);
+            await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            alert(`Cookie ${bot.toUpperCase()} berhasil dikirim ke antrean.`);
             document.getElementById('cookie-input').value = "";
         } catch (e) { alert("Gagal update cookie: " + e); }
     }
@@ -412,18 +314,12 @@
     async function togglePause(bot) {
         if (bot === 'cc') state.cc_paused = !state.cc_paused;
         if (bot === 'lw') state.lw_paused = !state.lw_paused;
-
         try {
             const r = await fetch(JSON_URL);
             const data = await r.json();
             data.cc_paused = state.cc_paused;
             data.lw_paused = state.lw_paused;
-            
-            await fetch(JSON_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             fetchDashboard();
         } catch (e) { console.error(e); }
     }
@@ -432,29 +328,22 @@
         const liveBadge = document.getElementById('live-badge');
         const liveDot = document.getElementById('live-dot');
         const serverStatus = document.getElementById('server-status');
-
         try {
             const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
             const data = await res.json();
-            
             liveBadge.innerText = "LIVE SYNC";
             liveBadge.className = "badge";
             liveBadge.prepend(liveDot);
             liveDot.className = "dot";
             serverStatus.innerText = "ONLINE";
             serverStatus.style.color = "var(--green)";
-
             document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', {hour12:false});
-
             state.cc_paused = data.cc_paused || false;
             state.lw_paused = data.lw_paused || false;
-
             const btnCC = document.getElementById('btn-pause-cc');
             const btnLW = document.getElementById('btn-pause-lw');
             const badgeCC = document.getElementById('cc-status');
             const badgeLW = document.getElementById('lw-status');
-
-            // Status Pause ClipCoin
             if (state.cc_paused) {
                 btnCC.innerText = "RESUME"; btnCC.classList.add('active');
                 badgeCC.innerText = "PAUSED"; badgeCC.style.color = "var(--red)"; badgeCC.style.borderColor = "var(--red)";
@@ -468,8 +357,6 @@
                     document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
                 }
             }
-
-            // Status Pause LuckyWatch
             if (state.lw_paused) {
                 btnLW.innerText = "RESUME"; btnLW.classList.add('active');
                 badgeLW.innerText = "PAUSED"; badgeLW.style.color = "var(--red)"; badgeLW.style.borderColor = "var(--red)";
@@ -479,36 +366,24 @@
                     badgeLW.innerText = data.luckywatch.status;
                     badgeLW.className = `bot-status ${data.luckywatch.status === 'WATCHING' ? 'watching' : 'idle'}`;
                     document.getElementById('lw-claims').innerText = data.luckywatch.claims || 0;
-                    document.getElementById('lw-limit').innerText = data.luckywatch.limit || 820;
+                    document.getElementById('lw-limits').innerText = data.luckywatch.limit || 820;
                     document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
                 }
             }
-
-            // HITUNG TOTAL CLAIMS & INCOME
             let ccSaldo = parseFloat(data.clipcoin?.saldo || 0);
             let lwSaldo = parseFloat(data.luckywatch?.saldo || 0);
             let ccClaims = parseInt(data.clipcoin?.claims || 0);
             let lwClaims = parseInt(data.luckywatch?.claims || 0);
-            
             let totalIncome = ccSaldo + lwSaldo;
             let totalClaims = ccClaims + lwClaims;
-
             document.getElementById('total-saldo').innerText = "$" + totalIncome.toFixed(5);
             document.getElementById('total-income').innerText = "$" + totalIncome.toFixed(5);
             document.getElementById('total-claims').innerText = totalClaims;
-
-            // STATUS WD (Contoh: Bisa diubah manual dari Npoint dengan key "wd_status")
             let wdStatus = data.wd_status || "BELUM ADA ANTREAN";
             document.getElementById('wd-status').innerText = wdStatus;
-            if(wdStatus.toLowerCase().includes("sukses")) {
-                document.getElementById('wd-status').style.color = "var(--green)";
-            } else if(wdStatus.toLowerCase().includes("proses")) {
-                document.getElementById('wd-status').style.color = "var(--yellow)";
-            } else {
-                document.getElementById('wd-status').style.color = "var(--red)";
-            }
-
-            // System & Network
+            if(wdStatus.toLowerCase().includes("sukses")) document.getElementById('wd-status').style.color = "var(--green)";
+            else if(wdStatus.toLowerCase().includes("proses")) document.getElementById('wd-status').style.color = "var(--yellow)";
+            else document.getElementById('wd-status').style.color = "var(--red)";
             if(data.system) {
                 document.getElementById('cpu-val').innerText = data.system.cpu + "%";
                 document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
@@ -517,11 +392,8 @@
                 document.getElementById('net-ping').innerText = data.system.ping + "ms";
                 document.getElementById('net-req').innerText = data.system.total_req;
             }
-            if(data.captcha) {
-                document.getElementById('cap-token').innerText = data.captcha.token;
-            }
+            if(data.captcha) document.getElementById('cap-token').innerText = data.captcha.token;
 
-            // Log Terminal (Hijau Neon)
             if (data.logs && data.logs.length > 0) {
                 const term = document.getElementById('terminal');
                 let newHtml = "";
@@ -531,17 +403,14 @@
                     let rest = parts[1] ? parts[1].split('] ') : ["SYS", log];
                     let bot = rest[0];
                     let text = rest[1] || "";
-                    
                     let isError = text.toLowerCase().includes("error") || text.toLowerCase().includes("limit") || text.toLowerCase().includes("fail");
                     let textColor = isError ? "#ff3333" : "var(--neon-matrix)";
-
                     newHtml += `<div class="log-line" style="text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 0 0 5px #000;">
                         <span class="log-time" style="color:#aaa;">${time}</span> 
                         <span class="log-bot" style="color:${textColor}; font-weight:bold;">[${bot}]</span> 
                         <span class="log-text" style="color:${textColor};">${text}</span>
                     </div>`;
                 });
-                
                 if(term.innerHTML !== newHtml) {
                     term.innerHTML = newHtml;
                     term.scrollTop = term.scrollHeight;
@@ -558,6 +427,343 @@
         }
     }
 
+    // === MT4 LOGIC — CANDLESTICK XAUUSDT ASLI (Binance Futures) ===
+    let chart, candleSeries;
+    let mt4Balance = 4983.80;
+    let mt4Equity = 4983.80;
+    let isInitialized = false;
+    let currentTimeframe = 3600; // H1
+    let isAutoTrading = true;
+    
+    let openPositions = []; 
+    let priceLines = [];
+    let ticketCounter = 8546076;
+
+    // Emas: 1 lot = 100 oz
+    const CONTRACT_SIZE = 100;
+    const LOT_SIZE = 0.10;
+    const SPREAD = 0.05;
+    let marketPrice = 0;
+    let prevTick = 0;
+
+    const SYMBOL = "XAUUSDT";
+    const REST_URL = "https://fapi.binance.com/fapi/v1/klines";
+    const WS_URL = "wss://fstream.binance.com/ws/xauusdt@kline_1h";
+    let ws = null;
+
+    const marketSymbols = [
+        { name: "XAUUSDT", base: 0, vol: 0 },
+        { name: "EURUSD...", base: 1.08355, vol: 0.0003 },
+        { name: "USDJPY...", base: 147.852, vol: 0.05 },
+        { name: "GBPUSD...", base: 1.27084, vol: 0.0004 },
+        { name: "USDCHF...", base: 0.86325, vol: 0.0002 },
+        { name: "AUDUSD...", base: 0.65970, vol: 0.0004 },
+        { name: "NZDUSD...", base: 0.61091, vol: 0.0004 },
+        { name: "USDCAD...", base: 1.34365, vol: 0.0004 },
+        { name: "EURGBP...", base: 0.85281, vol: 0.0003 },
+        { name: "EURJPY...", base: 160.203, vol: 0.05 }
+    ];
+
+    function toggleMinimize() {
+        document.getElementById('mt4-window').classList.toggle('minimized');
+        let btn = document.getElementById('mt4-min-btn');
+        btn.innerText = btn.innerText === '[-]' ? '[+]' : '[-]';
+        if (!document.getElementById('mt4-window').classList.contains('minimized')) {
+            setTimeout(() => { if(chart) chart.applyOptions({ width: document.getElementById('mt4-chart-container').clientWidth, height: document.getElementById('mt4-chart-container').clientHeight }); }, 300);
+        }
+    }
+
+    function toggleAutoTrading() {
+        isAutoTrading = !isAutoTrading;
+        let btn = document.getElementById('btn-auto');
+        btn.style.color = isAutoTrading ? 'green' : 'red';
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.mt4-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.mt4-tab-content').forEach(t => t.classList.remove('active'));
+        if(tabName === 'trade') {
+            document.querySelectorAll('.mt4-tab')[0].classList.add('active');
+            document.getElementById('tab-trade').classList.add('active');
+        } else if(tabName === 'exposure') {
+            document.querySelectorAll('.mt4-tab')[1].classList.add('active');
+            document.getElementById('tab-exposure').classList.add('active');
+        } else {
+            document.querySelectorAll('.mt4-tab')[2].classList.add('active');
+            document.getElementById('tab-history').classList.add('active');
+        }
+    }
+
+    function initMT4Chart() {
+        const container = document.getElementById('mt4-chart-container');
+        
+        chart = LightweightCharts.createChart(container, {
+            width: container.clientWidth,
+            height: container.clientHeight,
+            layout: { backgroundColor: '#000000', textColor: '#d1d4dc' },
+            grid: { 
+                vertLines: { color: '#333', style: 1 }, 
+                horzLines: { color: '#333', style: 1 } 
+            },
+            crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+            timeScale: { 
+                borderColor: '#333', 
+                timeVisible: true, 
+                secondsVisible: false,
+                rightOffset: 5, 
+                barSpacing: 8, 
+            },
+            priceScale: { borderColor: '#333', scaleMargins: { top: 0.1, bottom: 0.1 } },
+        });
+
+        candleSeries = chart.addCandlestickSeries({
+            upColor: '#00ff00',
+            downColor: '#ff0000',
+            borderVisible: false,
+            wickUpColor: '#00ff00',
+            wickDownColor: '#ff0000',
+            priceFormat: { type: 'price', precision: 2, minMove: 0.01 }
+        });
+
+        generateData();
+        updateMarketWatch();
+    }
+
+    function updateMarketWatch() {
+        const container = document.getElementById('mt4-symbols');
+        container.innerHTML = marketSymbols.map(p => {
+            if (p.name === "XAUUSDT") {
+                p.base = marketPrice;
+            } else {
+                p.base += (Math.random() - 0.5) * p.vol;
+            }
+            
+            let bid = p.base;
+            let ask = p.base + (p.name.includes("JPY") ? 0.015 : (p.name === "XAUUSDT" ? SPREAD : 0.00015));
+            let dec = p.name.includes("JPY") ? 3 : (p.name === "XAUUSDT" ? 2 : 5);
+            
+            let isSelected = p.name === "XAUUSDT";
+            let bgStyle = isSelected ? 'background:#0a246a; color:#fff;' : '';
+            let bidColor = isSelected ? '#fff' : 'green';
+            let askColor = isSelected ? '#fff' : 'red';
+
+            return `
+            <div class="mt4-mw-row" style="${bgStyle}">
+                <span style="font-weight:bold;">${p.name}</span>
+                <span style="color:${bidColor};">${bid.toFixed(dec)}</span>
+                <span style="color:${askColor};">${ask.toFixed(dec)}</span>
+            </div>`;
+        }).join('');
+    }
+
+    // Ambil 200 candle H1 asli, lalu sambung live via WebSocket
+    async function generateData() {
+        try {
+            const r = await fetch(`${REST_URL}?symbol=${SYMBOL}&interval=1h&limit=200`);
+            const k = await r.json();
+            if (!Array.isArray(k)) throw new Error("Respons tidak valid");
+            const data = k.map(x => ({
+                time: Math.floor(x[0] / 1000),
+                open: +x[1], high: +x[2], low: +x[3], close: +x[4]
+            }));
+            candleSeries.setData(data);
+            window.lastCandle = data[data.length - 1];
+            marketPrice = window.lastCandle.close;
+            prevTick = marketPrice;
+            isInitialized = true;
+            updateOHLC(marketPrice);
+            updateMarketWatch();
+            connectWS();
+        } catch (e) {
+            console.error(e);
+            document.getElementById('mt4-chart-container').innerHTML =
+                "<div style='color:red;padding:10px'>⚠️ Gagal ambil data XAUUSDT (cek koneksi/wilayah)</div>";
+        }
+    }
+
+    function connectWS() {
+        try { if (ws) ws.close(); } catch (e) {}
+        ws = new WebSocket(WS_URL);
+        ws.onmessage = (e) => {
+            const k = JSON.parse(e.data).k;
+            if (!k) return;
+            const c = { time: Math.floor(k.t / 1000), open: +k.o, high: +k.h, low: +k.l, close: +k.c };
+            window.lastCandle = c;
+            marketPrice = c.close;
+            candleSeries.update(c);
+            updateOHLC(marketPrice);
+        };
+        ws.onclose = () => setTimeout(connectWS, 3000);
+        ws.onerror = () => { try { ws.close(); } catch (e) {} };
+    }
+
+    function updateOHLC(price) {
+        document.getElementById('mt4-chart-price').innerText = price.toFixed(2);
+    }
+
+    function calcFloatingPL(pos, currentPrice) {
+        let diff = pos.type === 'buy' 
+            ? (currentPrice - pos.price) 
+            : (pos.price - currentPrice);
+        return diff * CONTRACT_SIZE * LOT_SIZE;
+    }
+
+    function todayStr() {
+        const d = new Date();
+        return d.getFullYear() + "." + String(d.getMonth()+1).padStart(2,'0') + "." + String(d.getDate()).padStart(2,'0');
+    }
+
+    function manualTrade(type) {
+        if (!isInitialized) return;
+        
+        let execPrice = type === 'buy' ? marketPrice + SPREAD : marketPrice;
+        let time = new Date().toLocaleTimeString('id-ID', {hour12: false}).slice(0,5);
+        
+        ticketCounter++;
+        openPositions.push({ ticket: ticketCounter, type, price: execPrice, time, size: LOT_SIZE });
+        
+        if (priceLines.length >= 5) {
+            const oldLine = priceLines.shift();
+            if (oldLine) candleSeries.removePriceLine(oldLine);
+        }
+        
+        const line = candleSeries.createPriceLine({
+            price: execPrice,
+            color: type === 'buy' ? '#007bff' : '#ff0000',
+            lineWidth: 1,
+            lineStyle: 2, 
+            axisLabelVisible: true,
+            title: `${ticketCounter} ${type} ${LOT_SIZE}`,
+        });
+        priceLines.push(line);
+
+        renderOpenPositions();
+    }
+
+    function renderOpenPositions() {
+        if (!isInitialized) return;
+        const container = document.getElementById('mt4-open-trades');
+        const currentBid = marketPrice;
+        const currentAsk = marketPrice + SPREAD;
+        let totalFloating = 0;
+        
+        container.innerHTML = openPositions.map((pos) => {
+            let color = pos.type === 'buy' ? 'blue' : 'red';
+            let closePrice = pos.type === 'buy' ? currentBid : currentAsk;
+            let floating = calcFloatingPL(pos, closePrice);
+            totalFloating += floating;
+            
+            let fColor = floating >= 0 ? 'blue' : 'red';
+            let sign = floating >= 0 ? '' : '-';
+            
+            return `
+            <div class="mt4-trade-row" style="display:flex; color:#000;">
+                <div class="mt4-col-time" style="width:60px;">${pos.ticket}</div>
+                <div class="mt4-col-time">${todayStr()} ${pos.time}</div>
+                <div class="mt4-col-type" style="color:${color};">${pos.type}</div>
+                <div class="mt4-col-size">${pos.size.toFixed(2)}</div>
+                <div class="mt4-col-price">${pos.price.toFixed(2)}</div>
+                <div class="mt4-col-price">0.00</div>
+                <div class="mt4-col-price">0.00</div>
+                <div class="mt4-col-price">${closePrice.toFixed(2)}</div>
+                <div class="mt4-col-price">-3.00</div>
+                <div class="mt4-col-price">0.00</div>
+                <div class="mt4-col-profit" style="color:${fColor};">${sign}${Math.abs(floating).toFixed(2)}</div>
+            </div>`;
+        }).join('');
+        
+        mt4Equity = mt4Balance + totalFloating;
+        document.getElementById('mt4-equity').innerText = mt4Equity.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+        
+        let usedMargin = openPositions.length * 100; 
+        document.getElementById('mt4-margin').innerText = usedMargin.toFixed(2);
+        
+        let freeMargin = mt4Equity - usedMargin;
+        document.getElementById('mt4-free').innerText = freeMargin.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+        
+        let marginLevel = usedMargin > 0 ? (mt4Equity / usedMargin) * 100 : 0;
+        document.querySelector('.mt4-balance-bar span:last-child').innerText = `Margin level: ${marginLevel.toFixed(2)}%`;
+        
+        let profitEl = document.getElementById('mt4-profit');
+        profitEl.innerText = `${totalFloating >= 0 ? '+' : '-'}$${Math.abs(totalFloating).toFixed(2)}`;
+        profitEl.style.color = totalFloating >= 0 ? 'green' : 'red';
+    }
+
+    function closeRandomPosition() {
+        if(openPositions.length === 0) return;
+        let posIndex = Math.floor(Math.random() * openPositions.length);
+        let pos = openPositions.splice(posIndex, 1)[0];
+        
+        if(priceLines[posIndex]) {
+            candleSeries.removePriceLine(priceLines[posIndex]);
+            priceLines.splice(posIndex, 1);
+        } else {
+            priceLines.splice(posIndex, 1);
+        }
+
+        let currentBid = marketPrice;
+        let currentAsk = marketPrice + SPREAD;
+        let closePrice = pos.type === 'buy' ? currentBid : currentAsk;
+        let profit = calcFloatingPL(pos, closePrice);
+        
+        mt4Balance += profit;
+        document.getElementById('mt4-balance').innerText = mt4Balance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+        
+        renderOpenPositions();
+    }
+
+    // === LOOP UTAMA (harga & candle sekarang dari WebSocket) ===
+    setInterval(() => {
+        if (!isInitialized || !marketPrice) return;
+
+        let change = marketPrice - prevTick;
+        prevTick = marketPrice;
+
+        updateMarketWatch();
+        renderOpenPositions();
+
+        // EA buka posisi jika momentum bagus
+        if (isAutoTrading && Date.now() % 6000 < 1000 && openPositions.length < 3) {
+            if (Math.abs(change) > 0.10) {
+                manualTrade(change > 0 ? 'buy' : 'sell');
+            }
+        }
+
+        // EA tutup posisi jika profit/loss menyentuh target
+        if (isAutoTrading && Date.now() % 4000 < 1000 && openPositions.length > 0) {
+            for (let i = openPositions.length - 1; i >= 0; i--) {
+                let pos = openPositions[i];
+                let closePrice = pos.type === 'buy' ? marketPrice : marketPrice + SPREAD;
+                let pl = calcFloatingPL(pos, closePrice);
+                if (pl > 3.0 || pl < -2.0) {
+                    openPositions.splice(i, 1);
+                    if (priceLines[i]) {
+                        candleSeries.removePriceLine(priceLines[i]);
+                        priceLines.splice(i, 1);
+                    }
+                    mt4Balance += pl;
+                    document.getElementById('mt4-balance').innerText = mt4Balance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+                }
+            }
+            renderOpenPositions();
+        }
+    }, 1000);
+
+    window.addEventListener('resize', () => {
+        if(chart) chart.applyOptions({ width: document.getElementById('mt4-chart-container').clientWidth, height: document.getElementById('mt4-chart-container').clientHeight });
+    });
+
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            if (typeof LightweightCharts !== 'undefined') {
+                initMT4Chart();
+                setTimeout(() => { if(chart) chart.applyOptions({ width: document.getElementById('mt4-chart-container').clientWidth, height: document.getElementById('mt4-chart-container').clientHeight }); }, 200);
+            } else {
+                document.getElementById('mt4-chart-container').innerHTML = "<div style='color:red; padding:10px;'>⚠️ Gagal load Chart.</div>";
+            }
+        }, 500);
+    });
+    
     fetchDashboard();
     setInterval(fetchDashboard, 3000);
 </script>

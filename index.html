@@ -73,7 +73,6 @@
         .bot-card.clip { border-top: 3px solid var(--pink); }
         .bot-card.lucky { border-top: 3px solid var(--cyan); }
         
-        /* Header Flex Layout untuk Bot */
         .bot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 6px; }
         .bot-header-left { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
         .bot-title { font-size: 10px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; text-shadow: 1px 1px 2px #000; white-space: nowrap; }
@@ -82,7 +81,7 @@
         .bot-status.watching { color: var(--yellow); border: 1px solid var(--yellow); background: rgba(0,0,0,0.5); }
         .bot-status.paused { color: var(--red); border: 1px solid var(--red); background: rgba(0,0,0,0.5); }
 
-        /* ========== MINI RING ANIMATION ========== */
+        /* Mini Ring */
         .mini-ring-container {
             position: relative;
             width: 42px;
@@ -92,28 +91,17 @@
             justify-content: center;
             align-items: center;
         }
-
         .mini-ring-track {
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             border-radius: 50%;
             background: rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
         }
-
         .mini-ring-spinner {
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             border-radius: 50%;
-            background: conic-gradient(
-                from 0deg,
-                transparent 0deg,
-                transparent 220deg,
-                currentColor 280deg,
-                #ffffff 320deg,
-                currentColor 360deg
-            );
+            background: conic-gradient(from 0deg, transparent 0deg, transparent 220deg, currentColor 280deg, #ffffff 320deg, currentColor 360deg);
             -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
             mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
             animation: miniSpin 1.6s linear infinite;
@@ -122,11 +110,7 @@
             opacity: 0.2;
             transition: opacity 0.4s ease;
         }
-        .mini-ring-spinner.active {
-            animation-play-state: running;
-            opacity: 1;
-        }
-
+        .mini-ring-spinner.active { animation-play-state: running; opacity: 1; }
         .mini-ring-dot {
             position: absolute;
             top: -1px; left: 50%;
@@ -141,11 +125,7 @@
             opacity: 0;
             transition: opacity 0.4s ease;
         }
-        .mini-ring-dot.active {
-            animation-play-state: running;
-            opacity: 1;
-        }
-
+        .mini-ring-dot.active { animation-play-state: running; opacity: 1; }
         .mini-ring-text {
             position: relative;
             font-size: 8px;
@@ -156,8 +136,6 @@
             text-shadow: 0 0 4px currentColor;
             transition: color 0.3s ease;
         }
-
-        /* Warna tema bot */
         .bot-card.clip .mini-ring-spinner,
         .bot-card.clip .mini-ring-dot,
         .bot-card.clip .mini-ring-text { color: var(--pink); }
@@ -167,15 +145,9 @@
         .faucet-window .mini-ring-spinner,
         .faucet-window .mini-ring-dot,
         .faucet-window .mini-ring-text { color: var(--neon-matrix); }
-
         .mini-ring-text.stop { color: var(--red) !important; text-shadow: 0 0 4px var(--red); }
+        @keyframes miniSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @keyframes miniSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Border pulse saat running */
         @keyframes runningPulsePink {
             0%, 100% { border-color: var(--border); box-shadow: 0 0 0 rgba(255,0,127,0); }
             50% { border-color: var(--pink); box-shadow: 0 0 15px rgba(255,0,127,0.35); }
@@ -192,10 +164,7 @@
         .bot-card.lucky.running { animation: runningPulseCyan 2s infinite; }
         .faucet-window.running { animation: runningPulseGreen 2s infinite; }
 
-        @keyframes textBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
+        @keyframes textBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .text-blink { animation: textBlink 1s infinite; color: var(--neon-matrix); text-shadow: 0 0 5px var(--neon-matrix); }
 
         @keyframes popValue {
@@ -231,7 +200,7 @@
             border-radius: 8px; 
             display: flex; 
             flex-direction: column; 
-            height: 360px; 
+            height: 420px; 
             overflow: hidden; 
             margin-top: 5px; 
             position: relative;
@@ -266,17 +235,42 @@
         .faucet-body { display: flex; flex-grow: 1; overflow: hidden; position: relative; z-index: 2; }
         
         .faucet-sidebar { 
-            width: 110px; 
+            width: 120px; 
             background: rgba(0, 0, 0, 0.75); 
             border-right: 2px solid var(--border);
-            padding: 10px; 
+            padding: 10px 8px; 
             display: flex; 
             flex-direction: column; 
-            gap: 10px; 
+            gap: 8px; 
             z-index: 2;
         }
         .fs-item { font-size: 8px; color: #bbb; }
         .fs-item span { display: block; font-size: 12px; color: var(--cyan); font-weight: bold; margin-top: 2px; text-shadow: 1px 1px 2px #000; }
+
+        .fs-time {
+            border-top: 1px dashed #333;
+            padding-top: 6px;
+            margin-top: 4px;
+        }
+        .fs-time .time-label { font-size: 8px; color: #bbb; }
+        .fs-time .time-value {
+            display: block;
+            font-size: 11px;
+            color: var(--yellow);
+            font-weight: bold;
+            text-shadow: 0 0 6px rgba(255,187,0,0.6), 1px 1px 2px #000;
+            margin-top: 2px;
+            letter-spacing: 0.3px;
+        }
+        .fs-time .time-relative {
+            display: block;
+            font-size: 7px;
+            color: var(--text-dim);
+            margin-top: 1px;
+            font-style: italic;
+        }
+        @keyframes timePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
+        .fs-time .time-value.pulse { animation: timePulse 2.5s ease-in-out infinite; }
         
         .faucet-log-container { flex-grow: 1; display: flex; flex-direction: column; background: rgba(0, 0, 0, 0.55); z-index: 2; }
         .faucet-total-header { 
@@ -294,13 +288,44 @@
         .faucet-log-scroll { flex-grow: 1; overflow-y: auto; padding: 10px; font-family: 'Courier New', monospace; font-size: 10px; line-height: 1.4; }
         .log-section-title { font-size: 9px; color: #fff; margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 3px; display: flex; justify-content: space-between; text-shadow: 1px 1px 2px #000;}
         
-        .log-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 4px; margin-bottom: 4px; border-left: 2px solid var(--cyan); font-size: 10px; }
+        /* === LOG ITEM DENGAN WAKTU === */
+        .log-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(255,255,255,0.05); 
+            padding: 6px 10px; 
+            border-radius: 4px; 
+            margin-bottom: 4px; 
+            border-left: 2px solid var(--cyan); 
+            font-size: 10px; 
+            gap: 8px;
+        }
         .log-item.success { border-left-color: var(--green); }
         .log-item.error { border-left-color: var(--red); }
-        .log-item .coin-info { display: flex; align-items: center; gap: 8px; }
+        .log-item .coin-info { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
         .log-item .coin-emoji { font-size: 14px; }
         .log-item .coin-name { color: var(--cyan); font-weight: bold; }
+        .log-item .coin-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 1px;
+            flex-shrink: 0;
+        }
         .log-item .coin-amount { color: var(--green); font-weight: bold; }
+        .log-item .coin-time {
+            font-size: 8px;
+            color: var(--yellow);
+            font-weight: bold;
+            text-shadow: 0 0 3px rgba(255,187,0,0.5);
+            letter-spacing: 0.2px;
+        }
+        .log-item .coin-time-rel {
+            font-size: 7px;
+            color: #888;
+            font-style: italic;
+        }
 
         /* WD & Cookie */
         .wd-box { background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -347,7 +372,6 @@
                     <div class="bot-title">🎬 ClipCoin</div>
                     <div class="bot-status idle" id="cc-status">IDLE</div>
                 </div>
-                <!-- MINI RING -->
                 <div class="mini-ring-container">
                     <div class="mini-ring-track"></div>
                     <div class="mini-ring-spinner" id="cc-spinner"></div>
@@ -367,7 +391,6 @@
                     <div class="bot-title">🎰 LuckyWatch</div>
                     <div class="bot-status idle" id="lw-status">IDLE</div>
                 </div>
-                <!-- MINI RING -->
                 <div class="mini-ring-container">
                     <div class="mini-ring-track"></div>
                     <div class="mini-ring-spinner" id="lw-spinner"></div>
@@ -390,7 +413,6 @@
                 <span class="faucet-title">⚙️ FAUCET ENGINE</span>
                 <span id="faucet-engine-status" class="faucet-engine-status" style="color:var(--green);">● RUNNING</span>
             </div>
-            <!-- MINI RING -->
             <div class="mini-ring-container">
                 <div class="mini-ring-track"></div>
                 <div class="mini-ring-spinner" id="faucet-spinner"></div>
@@ -405,6 +427,11 @@
                 <div class="fs-item">Claims <span id="faucet-claims-24h">0</span></div>
                 <div class="fs-item" style="border-top: 1px dashed #333; padding-top: 6px; margin-top: 4px;">API Token <span id="faucet-api-token" style="color:#ffbb00;">0</span></div>
                 <div class="fs-item">Web Ping <span id="faucet-web-ping" style="color:var(--cyan);">0ms</span></div>
+                <div class="fs-item fs-time">
+                    <div class="time-label">⏰ Last Claim</div>
+                    <span class="time-value pulse" id="faucet-last-time">--:--:--</span>
+                    <span class="time-relative" id="faucet-last-relative">-</span>
+                </div>
             </div>
             <div class="faucet-log-container">
                 <div class="faucet-total-header">
@@ -412,7 +439,7 @@
                     <span class="total-text" id="faucet-total-val">$0.00000</span>
                 </div>
                 <div class="faucet-log-scroll" id="faucet-scroll-area">
-                    <div class="log-section-title"><span>📦 LOG KLAIM</span></div>
+                    <div class="log-section-title"><span>📦 LOG KLAIM</span><span style="font-size:7px; color:#888;">waktu · jumlah</span></div>
                     <div id="coin-data-list">
                         <div style="color:#aaa; font-size:9px; text-align:center; margin:10px 0; text-shadow: 1px 1px 2px #000;">Menunggu log...</div>
                     </div>
@@ -509,7 +536,6 @@
         el.classList.add('pop');
     }
 
-    // Fungsi kontrol animasi ring
     function setRingState(spinnerId, dotId, textId, isRunning) {
         const spinner = document.getElementById(spinnerId);
         const dot = document.getElementById(dotId);
@@ -527,6 +553,94 @@
             text.innerText = 'STOP';
             text.classList.add('stop');
         }
+    }
+
+    // === HELPER WAKTU ===
+    function formatTimeHMSS(date) {
+        if (!date || isNaN(date.getTime())) return '--:--:--';
+        const hh = String(date.getHours()).padStart(2,'0');
+        const mm = String(date.getMinutes()).padStart(2,'0');
+        const ss = String(date.getSeconds()).padStart(2,'0');
+        return `${hh}:${mm}:${ss}`;
+    }
+
+    function formatTimeAgo(date) {
+        if (!date || isNaN(date.getTime())) return '-';
+        const now = new Date();
+        const diffMs = now - date;
+        if (diffMs < 0) return 'baru saja';
+        const diffMin = Math.floor(diffMs / 60000);
+        if (diffMin < 1) return 'baru saja';
+        if (diffMin < 60) return `${diffMin} mnt lalu`;
+        const diffHour = Math.floor(diffMin / 60);
+        if (diffHour < 24) return `${diffHour} jam lalu`;
+        const diffDay = Math.floor(diffHour / 24);
+        return `${diffDay} hari lalu`;
+    }
+
+    function updateFaucetLastClaim(lastClaimDateStr) {
+        const timeEl = document.getElementById('faucet-last-time');
+        const relEl = document.getElementById('faucet-last-relative');
+        if (!timeEl || !relEl) return;
+
+        if (!lastClaimDateStr) {
+            timeEl.innerText = '--:--:--';
+            relEl.innerText = 'belum ada';
+            return;
+        }
+        try {
+            const d = new Date(lastClaimDateStr);
+            if (isNaN(d.getTime())) {
+                timeEl.innerText = '--:--:--';
+                relEl.innerText = '-';
+                return;
+            }
+            timeEl.innerText = formatTimeHMSS(d);
+            relEl.innerText = formatTimeAgo(d);
+        } catch (e) {
+            timeEl.innerText = '--:--:--';
+            relEl.innerText = '-';
+        }
+    }
+
+    function parseTimestampFromLog(logStr) {
+        if (!logStr) return null;
+        let isoMatch = logStr.match(/(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})/);
+        if (isoMatch) {
+            try {
+                let d = new Date(isoMatch[1].replace(' ', 'T'));
+                if (!isNaN(d.getTime())) return d;
+            } catch(e) {}
+        }
+        let timeMatch = logStr.match(/(\d{2}):(\d{2}):(\d{2})/);
+        if (timeMatch) {
+            let now = new Date();
+            let d = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+                parseInt(timeMatch[1]), parseInt(timeMatch[2]), parseInt(timeMatch[3]));
+            if (d.getTime() > now.getTime() + 60000) d.setDate(d.getDate() - 1);
+            if (!isNaN(d.getTime())) return d;
+        }
+        return null;
+    }
+
+    function computeCoinTimes(limeLogs, lastClaimDate) {
+        if (!limeLogs || limeLogs.length === 0) return [];
+        
+        const baseTime = lastClaimDate ? new Date(lastClaimDate) : new Date();
+        const intervalMs = 2 * 60 * 1000;
+        const total = limeLogs.length;
+        const results = [];
+
+        limeLogs.forEach((log, idx) => {
+            let parsed = parseTimestampFromLog(log);
+            if (!parsed) {
+                // Asumsi index 0 adalah yang PALING BARU
+                // Jadi offset mundur sesuai idx
+                parsed = new Date(baseTime.getTime() - idx * intervalMs);
+            }
+            results.push(parsed);
+        });
+        return results;
     }
 
     async function setCookie(bot) {
@@ -737,12 +851,28 @@
             document.getElementById('total-income').innerText = "$" + grandTotal.toFixed(5);
             document.getElementById('total-claims').innerText = totalClaims;
 
-            // Log Faucet
+            // Last claim faucet
+            let lastClaimStr = data.last_claim_date || data.last_claim || data.lime_last_claim || null;
+            updateFaucetLastClaim(lastClaimStr);
+
+            // Log Faucet dengan waktu per koin
             if (data.lime_logs && data.lime_logs.length > 0) {
+                let lastClaimDateObj = lastClaimStr ? new Date(lastClaimStr) : null;
+                if (lastClaimDateObj && isNaN(lastClaimDateObj.getTime())) lastClaimDateObj = null;
+                
+                let coinTimes = computeCoinTimes(data.lime_logs, lastClaimDateObj);
+                
+                // Render LANGSUNG (index 0 = terbaru, sudah dari JSON)
                 let logHtml = "";
-                data.lime_logs.forEach((log) => {
+                for (let i = 0; i < data.lime_logs.length; i++) {
+                    let log = data.lime_logs[i];
                     let cleanLog = log.replace("✅ ", "").trim();
                     let parts = cleanLog.split(" | ");
+                    let coinTime = coinTimes[i];
+                    
+                    let timeStr = formatTimeHMSS(coinTime);
+                    let timeAgo = formatTimeAgo(coinTime);
+                    
                     if (parts.length === 3) {
                         let coin = parts[1].trim();
                         let amountStr = parts[2].trim().replace("+", "");
@@ -758,12 +888,16 @@
                                 <span class="coin-emoji">${emoji}</span>
                                 <span class="coin-name">${coin}</span>
                             </div>
-                            <span class="coin-amount">+${displayAmount}</span>
+                            <div class="coin-right">
+                                <span class="coin-amount">+${displayAmount}</span>
+                                <span class="coin-time">⏱ ${timeStr}</span>
+                                <span class="coin-time-rel">${timeAgo}</span>
+                            </div>
                         </div>`;
                     } else {
                         logHtml += `<div class="log-item error">${log}</div>`;
                     }
-                });
+                }
                 document.getElementById('coin-data-list').innerHTML = logHtml;
             }
 

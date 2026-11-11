@@ -500,6 +500,13 @@
     let prevLwSaldoUi = 0;
     let prevFaucetTotalUi = 0;
 
+    // === SISTEM LIVE TRACKER WAKTU ===
+    // Menyimpan waktu klaim terakhir yang terdeteksi secara realtime dari HP user
+    let lastKnownClaimTime = null;
+    let lastKnownTopLog = ""; 
+    // Menyimpan histori waktu: Key = string log (Coin|Amount), Value = timestamp Date
+    let logTimeHistory = {};
+
     function getCoinGeckoId(symbol) {
         const map = {
             'BTC': 'bitcoin', 'ETH': 'ethereum', 'BNB': 'binancecoin',
@@ -578,69 +585,38 @@
         return `${diffDay} hari lalu`;
     }
 
-    function updateFaucetLastClaim(lastClaimDateStr) {
-        const timeEl = document.getElementById('faucet-last-time');
-        const relEl = document.getElementById('faucet-last-relative');
-        if (!timeEl || !relEl) return;
-
-        if (!lastClaimDateStr) {
-            timeEl.innerText = '--:--:--';
-            relEl.innerText = 'belum ada';
-            return;
-        }
-        try {
-            const d = new Date(lastClaimDateStr);
-            if (isNaN(d.getTime())) {
-                timeEl.innerText = '--:--:--';
-                relEl.innerText = '-';
-                return;
-            }
-            timeEl.innerText = formatTimeHMSS(d);
-            relEl.innerText = formatTimeAgo(d);
-        } catch (e) {
-            timeEl.innerText = '--:--:--';
-            relEl.innerText = '-';
-        }
-    }
-
-    function parseTimestampFromLog(logStr) {
-        if (!logStr) return null;
-        let isoMatch = logStr.match(/(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})/);
-        if (isoMatch) {
-            try {
-                let d = new Date(isoMatch[1].replace(' ', 'T'));
-                if (!isNaN(d.getTime())) return d;
-            } catch(e) {}
-        }
-        let timeMatch = logStr.match(/(\d{2}):(\d{2}):(\d{2})/);
-        if (timeMatch) {
-            let now = new Date();
-            let d = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
-                parseInt(timeMatch[1]), parseInt(timeMatch[2]), parseInt(timeMatch[3]));
-            if (d.getTime() > now.getTime() + 60000) d.setDate(d.getDate() - 1);
-            if (!isNaN(d.getTime())) return d;
-        }
-        return null;
-    }
-
-    function computeCoinTimes(limeLogs, lastClaimDate) {
-        if (!limeLogs || limeLogs.length === 0) return [];
+    // Fungsi untuk mendeteksi dan mencatat log baru (Real-time Tracking)
+    function trackLiveTimes(limeLogs) {
+        if (!limeLogs || limeLogs.length === 0) return;
         
-        const baseTime = lastClaimDate ? new Date(lastClaimDate) : new Date();
-        const intervalMs = 2 * 60 * 1000;
-        const total = limeLogs.length;
-        const results = [];
+        const topLog = limeLogs[0];
+        const now = new Date();
 
-        limeLogs.forEach((log, idx) => {
-            let parsed = parseTimestampFromLog(log);
-            if (!parsed) {
-                // Asumsi index 0 adalah yang PALING BARU
-                // Jadi offset mundur sesuai idx
-                parsed = new Date(baseTime.getTime() - idx * intervalMs);
+        // Jika ada log paling atas baru yang belum pernah dicatat
+        if (lastKnownTopLog !== topLog) {
+            // Jika sebelumnya belum ada history sama sekali, isi semua yang ada pakai waktu sekarang (fallback)
+            if (!lastKnownClaimTime) {
+                for (let i = limeLogs.length - 1; i >= 0; i--) {
+                    logTimeHistory[limeLogs[i]] = new Date(now.getTime() - (i * 2 * 60000));
+                }
+            } else {
+                // Karena paling atas baru muncul, catat waktu pastinya SEKARANG
+                logTimeHistory[topLog] = now;
+                lastKnownClaimTime = now;
             }
-            results.push(parsed);
-        });
-        return results;
+            lastKnownTopLog = topLog;
+        }
+
+        // Cek apakah ada log baru lain (misal bot termux upload 2 log sekaligus)
+        // Kita asumsikan yang berada di atas lastKnownTopLog (jika ada) adalah log baru
+        let foundLastKnownIndex = limeLogs.indexOf(lastKnownTopLog);
+        if (foundLastKnownIndex > 0) {
+            for (let i = 0; i < foundLastKnownIndex; i++) {
+                if (!logTimeHistory[limeLogs[i]]) {
+                    logTimeHistory[limeLogs[i]] = new Date(now.getTime() - (i * 30000)); // beri selisih 30 detik
+                }
+            }
+        }
     }
 
     async function setCookie(bot) {
@@ -851,24 +827,28 @@
             document.getElementById('total-income').innerText = "$" + grandTotal.toFixed(5);
             document.getElementById('total-claims').innerText = totalClaims;
 
-            // Last claim faucet
-            let lastClaimStr = data.last_claim_date || data.last_claim || data.lime_last_claim || null;
-            updateFaucetLastClaim(lastClaimStr);
-
-            // Log Faucet dengan waktu per koin
+            // === LOG FAUCET & LIVE TIMER ===
             if (data.lime_logs && data.lime_logs.length > 0) {
-                let lastClaimDateObj = lastClaimStr ? new Date(lastClaimStr) : null;
-                if (lastClaimDateObj && isNaN(lastClaimDateObj.getTime())) lastClaimDateObj = null;
+                // 1. Deteksi apakah ada log baru secara realtime
+                trackLiveTimes(data.lime_logs);
                 
-                let coinTimes = computeCoinTimes(data.lime_logs, lastClaimDateObj);
-                
-                // Render LANGSUNG (index 0 = terbaru, sudah dari JSON)
+                // 2. Update Last Claim di Sidebar
+                if (lastKnownClaimTime) {
+                    const timeEl = document.getElementById('faucet-last-time');
+                    const relEl = document.getElementById('faucet-last-relative');
+                    timeEl.innerText = formatTimeHMSS(lastKnownClaimTime);
+                    relEl.innerText = formatTimeAgo(lastKnownClaimTime);
+                }
+
+                // 3. Render Log
                 let logHtml = "";
                 for (let i = 0; i < data.lime_logs.length; i++) {
                     let log = data.lime_logs[i];
                     let cleanLog = log.replace("✅ ", "").trim();
                     let parts = cleanLog.split(" | ");
-                    let coinTime = coinTimes[i];
+                    
+                    // Ambil waktu dari histori, jika tidak ada pakai waktu sekarang
+                    let coinTime = logTimeHistory[log] || new Date();
                     
                     let timeStr = formatTimeHMSS(coinTime);
                     let timeAgo = formatTimeAgo(coinTime);
@@ -878,10 +858,13 @@
                         let amountStr = parts[2].trim().replace("+", "");
                         let amount = parseFloat(amountStr) || 0;
                         let emoji = getCoinEmoji(coin);
+                        
+                        // Handle scientific notation
                         let displayAmount = amountStr;
                         if (displayAmount.includes('e') || displayAmount.includes('E')) {
                             displayAmount = amount.toFixed(10).replace(/0+$/, "").replace(/\.$/, "");
                         }
+
                         logHtml += `
                         <div class="log-item success">
                             <div class="coin-info">
@@ -918,9 +901,10 @@
                 document.getElementById('faucet-current-coin').innerText = data.lime_coin ? data.lime_coin.toUpperCase() : '-';
                 
                 let now = new Date();
-                let lastClaimDate = data.last_claim_date ? new Date(data.last_claim_date) : null;
                 let claims24h = data.lime_claims || 0;
-                if (lastClaimDate) {
+                // Reset 24 jam murni dari data termux (jika bot mengirimkan timestamp valid)
+                if (data.last_claim_date) {
+                    let lastClaimDate = new Date(data.last_claim_date);
                     let hoursDiff = (now - lastClaimDate) / (1000 * 60 * 60);
                     if (hoursDiff > 24) claims24h = 0;
                 }

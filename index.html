@@ -11,8 +11,7 @@
             --bg: #09090b; --panel: rgba(18, 18, 23, 0.7); --border: #272732;
             --text: #e2e8f0; --text-dim: #8b8b9a; --purple: #b026ff;
             --pink: #ff007f; --cyan: #00e5ff; --green: #00ff88;
-            --yellow: #ffbb00; --red: #ff3333; --neon-matrix: #00ff41;
-            --orange: #ff8800;
+            --yellow: #ffbb00; --red: #ff3333; --orange: #ff8800;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,8 +23,7 @@
         }
 
         .cockpit { display: flex; flex-direction: column; gap: 8px; max-width: 600px; margin: 0 auto; }
-        .header, .info-bar, .bot-card, .nocid-miner, .box, .wd-box, .cookie-box { position: relative; transition: 0.3s; }
-        .header:hover, .bot-card:hover, .nocid-miner:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,229,255,0.15); }
+        .header, .info-bar, .bot-card, .nocid-miner, .box, .wd-hub, .cookie-box { position: relative; transition: 0.3s; }
 
         /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; border-left: 3px solid var(--purple); overflow: hidden; }
@@ -43,147 +41,207 @@
         .total-balance { font-size: 16px; font-weight: 600; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.3); line-height: 1.2; }
         .total-balance-label { font-size: 7px; color: #aaa; letter-spacing: 1px; }
 
-        /* INFO BAR */
-        .info-bar { display: flex; justify-content: space-between; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 8px; color: var(--text-dim); }
-        .info-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-        .info-val { color: var(--cyan); font-weight: 600; font-size: 11px; }
 
-        /* BOT CARDS */
+        /* ==== FIX BOT CARDS (BALANCE) ==== */
         .bot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .bot-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
+        .bot-card { 
+            background: var(--panel); border: 1px solid var(--border); border-radius: 8px; 
+            padding: 10px; display: flex; flex-direction: column; overflow: hidden; 
+            /* Hapus height fixed, biarkan auto biar nyesuaiin isi */
+        }
         .bot-card::before { content: ''; position: absolute; inset: 0; background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg'); background-size: cover; opacity: 0.3; z-index: 0; }
         .bot-card > * { position: relative; z-index: 1; }
-        .bot-card.clip { border-top: 3px solid var(--pink); }
-        .bot-card.lucky { border-top: 3px solid var(--cyan); }
-        .bot-header { display: flex; justify-content: space-between; margin-bottom: 6px; gap: 6px; }
-        .bot-title { font-size: 10px; color: #fff; display: flex; align-items: center; gap: 6px; }
-        .bot-status { font-size: 7px; padding: 1px 6px; border-radius: 10px; border: 1px solid var(--green); color: var(--green); }
-        .bot-balance { font-size: 14px; font-weight: 600; margin-top: 4px; margin-bottom: 6px; }
+        .bot-card.clip { border-top: 2px solid var(--pink); }
+        .bot-card.lucky { border-top: 2px solid var(--cyan); }
+        
+        .bot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 6px; }
+        .bot-title { font-size: 10px; color: #fff; display: flex; align-items: center; gap: 4px; }
+        .bot-status { font-size: 7px; padding: 1px 4px; border-radius: 10px; border: 1px solid var(--green); color: var(--green); margin-top: 2px; display: inline-block;}
+        
+        .bot-balance { font-size: 14px; font-weight: 600; margin-top: 4px; margin-bottom: 4px; }
         .bot-balance.pink { color: var(--pink); }
         .bot-balance.cyan { color: var(--cyan); }
+        
         .stat-row { display: flex; justify-content: space-between; font-size: 8px; margin-bottom: 2px; }
-        .bot-log { font-size: 7px; color: #aaa; margin-top: 8px; border-top: 1px dashed #444; padding-top: 4px; height: 40px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
-        .btn-pause { width: 100%; padding: 6px; margin-top: auto; background: rgba(0,0,0,0.7); border: 1px solid var(--border); color: var(--text); border-radius: 4px; font-size: 8px; cursor: pointer; }
+        
+        /* Log Box disesuaikan tingginya */
+        .bot-log { 
+            font-size: 7px; color: #aaa; margin-top: 6px; 
+            border-top: 1px dashed #444; padding-top: 4px; 
+            min-height: 25px; /* Ubah dari height fixed ke min-height */
+            max-height: 40px; overflow: hidden; 
+            display: flex; flex-direction: column; justify-content: flex-end; 
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn-pause { width: 100%; padding: 6px; margin-top: 6px; background: rgba(0,0,0,0.7); border: 1px solid var(--border); color: var(--text); border-radius: 4px; font-size: 8px; cursor: pointer; transition: 0.2s;}
+        .btn-pause:hover { background: rgba(255,255,255,0.1); }
+        .btn-pause.active { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.2); }
 
         /* MINI RING */
-        .mini-ring-container { position: relative; width: 42px; height: 42px; display: flex; justify-content: center; align-items: center; }
+        .mini-ring-container { position: relative; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; flex-shrink: 0;}
         .mini-ring-track { position: absolute; inset: 0; border-radius: 50%; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.08); }
-        .mini-ring-spinner { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg, transparent 220deg, currentColor 280deg, #fff 320deg, currentColor 360deg); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px)); animation: miniSpin 1.6s linear infinite; animation-play-state: paused; opacity: 0.2; }
+        .mini-ring-spinner { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg, transparent 220deg, currentColor 280deg, #fff 320deg, currentColor 360deg); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); animation: miniSpin 1.6s linear infinite; animation-play-state: paused; opacity: 0.2; }
         .mini-ring-spinner.active { animation-play-state: running; opacity: 1; }
-        .mini-ring-text { position: relative; font-size: 8px; z-index: 3; color: #fff; }
+        .mini-ring-text { position: relative; font-size: 7px; z-index: 3; color: #fff; font-weight: 600;}
         .bot-card.clip .mini-ring-spinner, .bot-card.clip .mini-ring-text { color: var(--pink); }
         .bot-card.lucky .mini-ring-spinner, .bot-card.lucky .mini-ring-text { color: var(--cyan); }
         .nocid-miner .mini-ring-spinner, .nocid-miner .mini-ring-text { color: var(--orange); }
         @keyframes miniSpin { 100% { transform: rotate(360deg); } }
 
         /* NOCID MINER */
-        .nocid-miner { background: linear-gradient(180deg, rgba(15,10,5,0.98), rgba(5,2,0,1)); border: 1px solid #332211; border-radius: 10px; overflow: hidden; margin-top: 5px; }
+        .nocid-miner { background: linear-gradient(180deg, rgba(15,10,5,0.98), rgba(5,2,0,1)); border: 1px solid #332211; border-radius: 10px; overflow: hidden; margin-top: 4px; }
         .nocid-miner::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,136,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,136,0,0.02) 1px, transparent 1px); background-size: 15px 15px; }
         .nocid-miner > * { position: relative; z-index: 1; }
-        .nm-header { background: linear-gradient(90deg, rgba(30,15,5,0.9), rgba(15,5,0,0.9)); border-bottom: 1px solid rgba(255,136,0,0.2); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* ANIMASI KIPAS */
-        .rig-fan { width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.8); border: 1px solid #332211; position: relative; display: flex; justify-content: center; align-items: center; }
+        .nm-header { background: linear-gradient(90deg, rgba(30,15,5,0.9), rgba(15,5,0,0.9)); border-bottom: 1px solid rgba(255,136,0,0.2); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
+        .nm-header-left { display: flex; align-items: center; gap: 8px; }
+        
+        .rig-fan { width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,0.8); border: 1px solid #332211; position: relative; display: flex; justify-content: center; align-items: center; }
         .rig-fan::before { content: ''; position: absolute; inset: 1px; border-radius: 50%; border: 1px dashed rgba(255,136,0,0.5); }
-        .rig-fan::after { content: ''; width: 4px; height: 4px; background: var(--orange); border-radius: 50%; box-shadow: 0 0 5px var(--orange); }
+        .rig-fan::after { content: ''; width: 3px; height: 3px; background: var(--orange); border-radius: 50%; box-shadow: 0 0 5px var(--orange); }
         .nocid-miner.running .rig-fan::before, .nocid-miner.running .rig-fan::after { animation: fanSpin 0.8s linear infinite; }
         @keyframes fanSpin { 100% { transform: rotate(360deg); } }
         
-        /* ANIMASI LED */
-        .status-panel { display: flex; align-items: center; gap: 8px; background: #000; padding: 3px 6px; border-radius: 4px; border: 1px solid #222; }
-        .led-group { display: flex; gap: 3px; }
-        .led { width: 4px; height: 4px; border-radius: 50%; background: #111; transition: 0.3s; }
-        .nocid-miner.running .led.l1 { background: var(--green); box-shadow: 0 0 5px var(--green); animation: blink 1s infinite alternate; }
-        .nocid-miner.running .led.l2 { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); animation: blink 1.3s infinite alternate; }
-        .nocid-miner.running .led.l3 { background: var(--cyan); box-shadow: 0 0 5px var(--cyan); animation: blink 0.7s infinite alternate; }
-
-        .nm-title b { font-weight: 600; color: var(--orange); font-size: 11px; }
-        .nm-title span { font-size: 7px; color: var(--text-dim); }
-        .nm-badge { font-size: 7px; padding: 2px 6px; border-radius: 3px; border: 1px solid; text-transform: uppercase; }
+        .nm-title b { font-weight: 600; color: var(--orange); font-size: 11px; display: block;}
+        .nm-title span { font-size: 6px; color: var(--text-dim); letter-spacing: 0.5px; display: block; margin-bottom: 2px;}
+        
+        .nm-badge { font-size: 6px; padding: 1px 5px; border-radius: 3px; border: 1px solid; text-transform: uppercase; transition: 0.3s; display: inline-block;}
         .nm-badge.running { color: var(--green); border-color: rgba(0,255,136,0.5); background: rgba(0,255,136,0.05); }
         .nm-badge.cooldown { color: var(--yellow); border-color: rgba(255,187,0,0.5); }
         .nm-badge.error { color: var(--red); border-color: rgba(255,51,51,0.5); }
         
-        .nm-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
-        .nm-sec-title { font-size: 7px; color: #666; letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+        .nm-header-right { display: flex; align-items: center; gap: 6px; }
+        
+        .sound-toggle { background: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 3px; color: #888; padding: 2px 4px; font-size: 8px; cursor: pointer; margin-right: 4px; }
+        .sound-toggle.on { color: var(--green); border-color: var(--green); }
+        
+        .nm-body { padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+        .nm-sec-title { font-size: 6px; color: #666; letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
         .nm-sec-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, #333, transparent); }
         
         .nm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .nm-stat { background: rgba(0,0,0,0.6); border: 1px solid #222; border-radius: 4px; padding: 6px 8px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .nm-stat { background: rgba(0,0,0,0.6); border: 1px solid #222; border-radius: 4px; padding: 4px 6px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
         .nm-stat::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; }
         .nm-stat.val-hash::after { background: var(--yellow); }
         .nm-stat.val-xmr::after { background: var(--cyan); }
         .nm-stat.val-ncdt::after { background: var(--green); }
         .nm-stat.val-coin::after { background: var(--purple); }
-        .nm-stat-label { font-size: 7px; color: #777; }
-        .nm-stat-val { font-size: 12px; font-weight: 600; }
+        .nm-stat-label { font-size: 6px; color: #777; }
+        .nm-stat-val { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .nm-stat.val-hash .nm-stat-val { color: var(--yellow); }
-        .nm-stat.val-xmr .nm-stat-val { color: var(--cyan); font-size: 11px; }
+        .nm-stat.val-xmr .nm-stat-val { color: var(--cyan); font-size: 10px; }
         .nm-stat.val-ncdt .nm-stat-val { color: var(--green); }
         .nm-stat.val-coin .nm-stat-val { color: var(--purple); }
 
-        /* === GRAFIK BAR (EQUALIZER) KEMBALI === */
-        .hash-graph { position: absolute; bottom: 0; left: 2px; right: 0; height: 18px; display: flex; align-items: flex-end; gap: 1px; opacity: 0.15; z-index: 1; pointer-events: none; padding: 0 4px;}
-        .hash-bar { flex: 1; background: var(--yellow); border-radius: 1px 1px 0 0; transition: height 0.2s; box-shadow: 0 -1px 5px rgba(255,187,0,0.8);}
+        .hash-graph { position: absolute; bottom: 0; left: 2px; right: 0; height: 14px; display: flex; align-items: flex-end; gap: 1px; opacity: 0.15; z-index: 1; pointer-events: none; padding: 0 4px;}
+        .hash-bar { flex: 1; background: var(--yellow); border-radius: 1px 1px 0 0; transition: height 0.2s; box-shadow: 0 -1px 3px rgba(255,187,0,0.8);}
 
-        .nm-session { background: rgba(255,136,0,0.05); border: 1px solid rgba(255,136,0,0.15); border-radius: 4px; padding: 6px 8px; display: flex; justify-content: space-between; font-size: 8px; }
+        .nm-session { background: rgba(255,136,0,0.05); border: 1px solid rgba(255,136,0,0.15); border-radius: 4px; padding: 4px 8px; display: flex; justify-content: space-between; font-size: 7px; }
         .nm-session span:first-child { color: #777; }
         .nm-session span:last-child { color: var(--orange); font-weight: 600; }
 
         .nm-counters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-        .nm-counter { background: rgba(0,0,0,0.5); border: 1px solid #222; border-radius: 4px; padding: 5px 0; text-align: center; border-bottom: 1px solid; }
+        .nm-counter { background: rgba(0,0,0,0.5); border: 1px solid #222; border-radius: 4px; padding: 4px 0; text-align: center; border-bottom: 1px solid; }
         .nm-counter.faucet { border-color: rgba(255,0,127,0.5); }
         .nm-counter.ptc { border-color: rgba(0,229,255,0.5); }
         .nm-counter.bonus { border-color: rgba(0,255,136,0.5); }
-        .nm-counter .num { font-size: 13px; font-weight: 600; }
+        .nm-counter .num { font-size: 12px; font-weight: 600; }
         .nm-counter.faucet .num { color: var(--pink); }
         .nm-counter.ptc .num { color: var(--cyan); }
         .nm-counter.bonus .num { color: var(--green); }
-        .nm-counter .lbl { font-size: 6px; color: #777; margin-top: 1px; }
+        .nm-counter .lbl { font-size: 5px; color: #777; margin-top: 1px; }
 
-        .nm-info { display: flex; justify-content: space-between; background: rgba(0,0,0,0.4); border-radius: 4px; padding: 6px 8px; font-size: 8px; border: 1px solid #222; }
+        .nm-info { display: flex; justify-content: space-between; background: rgba(0,0,0,0.4); border-radius: 4px; padding: 4px 8px; font-size: 7px; border: 1px solid #222; }
         .nm-info-item { color: #777; }
-        .nm-info-item b { color: #fff; font-size: 9px; }
-        .nm-info-item b.timer { color: var(--yellow); background: rgba(255,187,0,0.1); padding: 1px 4px; border-radius: 3px; }
+        .nm-info-item b { color: #fff; font-size: 8px; }
+        .nm-info-item b.timer { color: var(--yellow); background: rgba(255,187,0,0.1); padding: 1px 3px; border-radius: 3px; }
         .nm-info-item b.uptime { color: var(--cyan); }
 
-        .nm-server-ping { display: flex; justify-content: space-between; align-items: center; background: #111; border: 1px solid #222; padding: 6px 8px; border-radius: 4px; font-size: 9px; margin-top: 2px;}
+        .nm-server-ping { display: flex; justify-content: space-between; align-items: center; background: #111; border: 1px solid #222; padding: 4px 8px; border-radius: 4px; font-size: 7px; margin-top: 2px;}
         .nm-server-ping .label { color: #777; }
         .nm-server-ping .val { color: var(--green); font-weight: 600; }
         .nm-server-ping .val.bad { color: var(--red); }
 
-        .nm-estimate { background: rgba(255,136,0,0.1); border: 1px dashed rgba(255,136,0,0.4); border-radius: 4px; padding: 8px; text-align: center; margin-top: 2px; }
-        .nm-estimate .title { font-size: 8px; color: #777; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .nm-estimate .value { font-size: 16px; font-weight: 600; color: var(--orange); text-shadow: 0 0 10px rgba(255,136,0,0.5); }
+        .nm-estimate { background: rgba(255,136,0,0.1); border: 1px dashed rgba(255,136,0,0.4); border-radius: 4px; padding: 6px; text-align: center; margin-top: 2px; }
+        .nm-estimate .title { font-size: 7px; color: #777; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+        .nm-estimate .value { font-size: 14px; font-weight: 600; color: var(--orange); text-shadow: 0 0 8px rgba(255,136,0,0.5); }
 
-        .nm-log-box { background: rgba(0,0,0,0.8); border-top: 1px solid #332211; padding: 8px 12px; max-height: 140px; overflow-y: auto; }
-        .nm-log-header { display: flex; justify-content: space-between; font-size: 7px; color: #666; margin-bottom: 6px; }
-        .nm-log-item { display: grid; grid-template-columns: 40px 60px 1fr; gap: 6px; font-size: 9px; padding: 5px 6px; margin-bottom: 3px; background: rgba(255,255,255,0.02); border-radius: 3px; border-left: 2px solid var(--cyan); }
-        .nm-log-item .ts { color: var(--yellow); font-family: 'Courier New', monospace; font-size: 8px; }
-        .nm-log-item .type { color: var(--cyan); font-weight: 600; font-size: 8px; }
-        .nm-log-item .reward { color: #fff; text-align: right; font-size: 9px; }
+        .nm-terminal {
+            background: #000; border-top: 1px solid #332211; border-bottom: 1px solid #332211;
+            height: 80px; overflow-y: auto; padding: 6px 10px;
+            font-family: 'Courier New', monospace; font-size: 8px; line-height: 1.3;
+            color: var(--green); box-shadow: inset 0 0 10px rgba(0,0,0,1);
+        }
+        .nm-terminal .term-line { margin-bottom: 1px; animation: fadeIn 0.3s ease; }
+        .nm-terminal .term-line.info { color: var(--cyan); }
+        .nm-terminal .term-line.warn { color: var(--yellow); }
+        .nm-terminal .term-line.err { color: var(--red); }
+        .nm-terminal .term-line.share { color: var(--green); font-weight: 600; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+
+        .nm-log-box { background: rgba(0,0,0,0.8); border-top: 1px solid #332211; padding: 6px 10px; max-height: 120px; overflow-y: auto; }
+        .nm-log-header { display: flex; justify-content: space-between; font-size: 6px; color: #666; margin-bottom: 4px; }
+        .nm-log-item { display: grid; grid-template-columns: 35px 50px 1fr; gap: 4px; font-size: 8px; padding: 4px; margin-bottom: 2px; background: rgba(255,255,255,0.02); border-radius: 3px; border-left: 2px solid var(--cyan); }
+        .nm-log-item .ts { color: var(--yellow); font-family: 'Courier New', monospace; font-size: 7px; }
+        .nm-log-item .type { color: var(--cyan); font-weight: 600; font-size: 7px; }
+        .nm-log-item .reward { color: #fff; text-align: right; font-size: 8px; }
         .nm-log-item .reward span { color: var(--green); font-weight: 600; }
-        .nm-log-empty { text-align: center; font-size: 8px; color: #555; padding: 10px; font-style: italic; }
+        .nm-log-empty { text-align: center; font-size: 7px; color: #555; padding: 8px; font-style: italic; }
 
-        .nocid-miner.running { border-color: rgba(255,136,0,0.4); box-shadow: 0 0 20px rgba(255,136,0,0.1); }
+        .nocid-miner.running { border-color: rgba(255,136,0,0.4); box-shadow: 0 0 15px rgba(255,136,0,0.1); }
 
-        /* OTHERS */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
-        .box-title { font-size: 9px; color: var(--text-dim); margin-bottom: 6px; border-bottom: 1px dashed var(--border); padding-bottom: 4px; }
-        .bar-bg { background: rgba(0,0,0,0.8); height: 4px; border-radius: 3px; overflow: hidden; margin-top: 3px; }
+        /* FIX LAYOUT SYSTEM & NETWORK */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;}
+        .box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: flex; flex-direction: column;}
+        .box-title { font-size: 8px; color: var(--text-dim); margin-bottom: 4px; border-bottom: 1px dashed var(--border); padding-bottom: 2px; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 7px; margin-bottom: 2px; }
+        .bar-bg { background: rgba(0,0,0,0.8); height: 3px; border-radius: 3px; overflow: hidden; margin-top: 2px; }
         .bar-fill { height: 100%; transition: width 0.6s; }
-        .wd-box { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; }
-        .wd-status { font-size: 11px; font-weight: 600; color: var(--yellow); }
-        .cookie-box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-        .email-input { background: #000; border: 1px solid var(--border); color: #fff; padding: 8px; border-radius: 4px; font-size: 9px; width: 100%; }
-        .btn-cookie { background: var(--purple); color: #fff; border: none; padding: 8px; border-radius: 4px; font-weight: 400; font-size: 9px; cursor: pointer; }
+        
+        .wd-hub { background: var(--panel); border: 1px solid var(--border); border-left: 2px solid var(--yellow); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; margin-top: 4px;}
+        .wd-hub-header { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; font-weight: bold;}
+        .wd-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+        .wd-item { background: #000; border: 1px solid #222; border-radius: 4px; padding: 6px; text-align: center; display: flex; flex-direction: column; gap: 2px;}
+        .wd-item .name { font-size: 6px; color: #777; text-transform: uppercase; letter-spacing: 0.5px;}
+        .wd-item .status { font-size: 8px; font-weight: 600; letter-spacing: 0.5px;}
+        .wd-item.clip .status { color: var(--pink); }
+        .wd-item.lucky .status { color: var(--cyan); }
+        .wd-item.miner .status { color: var(--green); }
+        .wd-status { font-size: 9px; font-weight: 600; color: var(--yellow); display: block; border-top: 1px dashed #333; padding-top: 6px; margin-top: 2px; text-align: center; letter-spacing: 1px;}
+        
+        .cookie-box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;}
+        .email-input { background: #000; border: 1px solid var(--border); color: #fff; padding: 6px; border-radius: 4px; font-size: 8px; width: 100%; }
+        .btn-cookie { background: var(--purple); color: #fff; border: none; padding: 6px; border-radius: 4px; font-weight: 400; font-size: 8px; cursor: pointer; }
 
         @keyframes popValue { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         .pop { animation: popValue 0.4s ease; display: inline-block; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 9999; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-box { background: #111; border: 1px solid var(--border); border-radius: 8px; padding: 16px; width: 80%; max-width: 280px; text-align: center; transform: scale(0.9); transition: 0.3s; }
+        .modal-overlay.active .modal-box { transform: scale(1); }
+        .modal-title { font-size: 11px; color: #fff; font-weight: 600; margin-bottom: 8px; }
+        .modal-desc { font-size: 9px; color: var(--text-dim); margin-bottom: 16px; }
+        .modal-btns { display: flex; gap: 8px; justify-content: center; }
+        .btn-modal { padding: 6px 12px; border-radius: 4px; font-size: 9px; cursor: pointer; border: none; font-family: inherit; font-weight: 600; }
+        .btn-cancel { background: #333; color: #fff; }
+        .btn-confirm { background: var(--red); color: #fff; }
     </style>
 </head>
 <body>
+
+<!-- Modal Konfirmasi Pause -->
+<div class="modal-overlay" id="pause-modal">
+    <div class="modal-box">
+        <div class="modal-title">Konfirmasi Pause</div>
+        <div class="modal-desc" id="modal-desc">Yakin ingin mem-pause bot ini? Bot akan berhenti bekerja.</div>
+        <div class="modal-btns">
+            <button class="btn-modal btn-cancel" onclick="closeModal()">Batal</button>
+            <button class="btn-modal btn-confirm" id="btn-confirm-pause">Ya, Pause</button>
+        </div>
+    </div>
+</div>
 
 <div class="cockpit">
     <div class="header">
@@ -207,6 +265,7 @@
         <div class="info-item"><span>Server</span> <span class="info-val" style="color:var(--green);" id="server-status">ONLINE</span></div>
     </div>
 
+    <!-- BOT CARDS DIPERKECIL & DISEIMBANGKAN -->
     <div class="bot-grid">
         <div class="bot-card clip" id="card-cc">
             <div class="bot-header">
@@ -254,17 +313,11 @@
                 <div class="nm-title">
                     <b>CryptoRetjeh</b>
                     <span>POOL: NOCID | WORKER: NEALZZ</span>
+                    <span class="nm-badge running" id="nm-status">● RUNNING</span>
                 </div>
             </div>
             <div class="nm-header-right">
-                <div class="status-panel">
-                    <div class="led-group">
-                        <div class="led l1"></div>
-                        <div class="led l2"></div>
-                        <div class="led l3"></div>
-                    </div>
-                </div>
-                <span class="nm-badge running" id="nm-status">● RUNNING</span>
+                <button class="sound-toggle" id="sound-btn" onclick="toggleSound()">🔇 OFF</button>
                 <div class="mini-ring-container">
                     <div class="mini-ring-track"></div>
                     <div class="mini-ring-spinner" id="nm-spinner"></div>
@@ -276,7 +329,6 @@
         <div class="nm-body">
             <div class="nm-sec-title">⚙️ Hardware Performance</div>
             <div class="nm-grid">
-                <!-- Box Hashrate + Grafik -->
                 <div class="nm-stat val-hash">
                     <div class="nm-stat-label">⚡ HASH RATE</div>
                     <div class="nm-stat-val" id="nm-hashrate">0 GH/s</div>
@@ -287,7 +339,7 @@
                     <div class="nm-stat-val" id="nm-current-coin">XMR (RX/0)</div>
                 </div>
                 <div class="nm-stat val-xmr">
-                    <div class="nm-stat-label">💎 XMR BALANCE</div>
+                    <div class="nm-stat-label" id="label-coin-balance">💎 XMR BALANCE</div>
                     <div class="nm-stat-val" id="nm-xmr-balance">0.00000000</div>
                 </div>
                 <div class="nm-stat val-ncdt">
@@ -306,7 +358,7 @@
                 <div class="value" id="nm-est-24h">+0 NCDT</div>
             </div>
 
-            <div class="nm-sec-title" style="margin-top:4px;">⚒️ Rig Statistics</div>
+            <div class="nm-sec-title" style="margin-top:2px;">⚒️ Rig Statistics</div>
             <div class="nm-counters">
                 <div class="nm-counter faucet">
                     <div class="num" id="nm-ct-faucet">0</div>
@@ -333,7 +385,11 @@
             </div>
         </div>
 
-        <!-- LOG MINED COINS REALTIME -->
+        <div class="nm-terminal" id="mini-term">
+            <div class="term-line info">> Initializing CryptoRetjeh Engine...</div>
+            <div class="term-line">> Waiting for worker connection...</div>
+        </div>
+
         <div class="nm-log-box">
             <div class="nm-log-header">
                 <span>💎 MINED COINS LOG</span>
@@ -350,7 +406,7 @@
             <div class="box-title">💻 SYSTEM</div>
             <div class="stat-row"><span class="stat-label">CPU</span><span class="stat-val" id="cpu-val">0%</span></div>
             <div class="bar-bg"><div class="bar-fill" id="cpu-bar" style="width:0%; background:var(--cyan);"></div></div>
-            <div class="stat-row" style="margin-top:4px;"><span class="stat-label">RAM</span><span class="stat-val" id="ram-val">0%</span></div>
+            <div class="stat-row" style="margin-top:2px;"><span class="stat-label">RAM</span><span class="stat-val" id="ram-val">0%</span></div>
             <div class="bar-bg"><div class="bar-fill" id="ram-bar" style="width:0%; background:var(--purple);"></div></div>
         </div>
         <div class="box">
@@ -360,19 +416,33 @@
         </div>
     </div>
 
-    <div class="wd-box">
-        <div>
-            <div style="font-size:9px; color:var(--text-dim);">💸 WITHDRAW STATUS</div>
-            <div class="wd-status" id="wd-status">BELUM ADA ANTREAN</div>
+    <div class="wd-hub">
+        <div class="wd-hub-header">
+            <span>💸 WITHDRAWAL MONITOR</span>
+            <span style="font-size: 7px; color:#555; font-weight:400;">Automated Hub</span>
         </div>
-        <div style="font-size: 16px;">🏦</div>
+        <div class="wd-grid">
+            <div class="wd-item clip">
+                <div class="name">ClipCoin</div>
+                <div class="status" id="wd-cc-status">WAITING</div>
+            </div>
+            <div class="wd-item lucky">
+                <div class="name">LuckyWatch</div>
+                <div class="status" id="wd-lw-status">WAITING</div>
+            </div>
+            <div class="wd-item miner">
+                <div class="name">Nocid Miner</div>
+                <div class="status" id="wd-nm-status">WAITING</div>
+            </div>
+        </div>
+        <div class="wd-status" id="wd-status">BELUM ADA ANTREAN</div>
     </div>
 
     <div class="cookie-box">
-        <label style="font-size:9px; color:var(--text-dim);">🍪 Update Cookie / Email</label>
+        <label style="font-size:8px; color:var(--text-dim);">🍪 Update Cookie / Email</label>
         <input type="text" class="email-input" id="cookie-input" placeholder="Cookie (ClipCoin / LuckyWatch)...">
         <input type="text" class="email-input" id="lime-email" placeholder="Email LimeFaucet...">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
             <button class="btn-cookie" onclick="setCookie('clipcoin')">Set ClipCoin</button>
             <button class="btn-cookie" style="background: var(--cyan); color: #000;" onclick="setCookie('luckywatch')">Set LuckyWatch</button>
             <button class="btn-cookie" style="background: var(--pink); color: #000; grid-column: span 2;" onclick="setEmail('lime')">🌸 Kirim Email Faucet</button>
@@ -383,11 +453,114 @@
 <script>
     const JSON_URL = "https://api.npoint.io/c34c77001e31bcce50f0";
     let state = { cc_paused: false, lw_paused: false };
-    let prevNocidXmr = 0;
     let nocidUptimeStart = null;
     let countdownTimer = null;
     let graphInterval = null;
     let miningHistory = []; 
+    let lastXmrBal = 0;
+    let soundEnabled = false;
+    
+    let audioCtx = null;
+    let fanOsc = null;
+    let fanGain = null;
+
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function playCoinSound() {
+        if (!soundEnabled || !audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1800, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function startFanSound() {
+        if (!soundEnabled || !audioCtx || fanOsc) return;
+        fanOsc = audioCtx.createOscillator();
+        fanGain = audioCtx.createGain();
+        fanOsc.type = 'sawtooth';
+        fanOsc.frequency.setValueAtTime(40, audioCtx.currentTime); 
+        fanGain.gain.setValueAtTime(0.05, audioCtx.currentTime); 
+        fanOsc.connect(fanGain);
+        fanGain.connect(audioCtx.destination);
+        fanOsc.start();
+    }
+
+    function stopFanSound() {
+        if (fanOsc) {
+            fanOsc.stop();
+            fanOsc.disconnect();
+            fanOsc = null;
+        }
+    }
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        const btn = document.getElementById('sound-btn');
+        if (soundEnabled) {
+            initAudio();
+            btn.innerText = "🔊 ON";
+            btn.classList.add('on');
+            const isRunning = document.getElementById('card-nocid').classList.contains('running');
+            if (isRunning) startFanSound();
+        } else {
+            btn.innerText = "🔇 OFF";
+            btn.classList.remove('on');
+            stopFanSound();
+        }
+    }
+
+    function addConsoleLog(text, type="") {
+        const term = document.getElementById('mini-term');
+        if (!term) return;
+        const div = document.createElement('div');
+        div.className = `term-line ${type}`;
+        div.innerText = `> ${text}`;
+        term.appendChild(div);
+        term.scrollTop = term.scrollHeight;
+        if (term.children.length > 25) term.removeChild(term.firstChild);
+    }
+
+    let pendingPauseBot = null;
+    function askPause(bot) {
+        const isPaused = bot === 'cc' ? state.cc_paused : state.lw_paused;
+        if (isPaused) { doTogglePause(bot); return; }
+        pendingPauseBot = bot;
+        const name = bot === 'cc' ? 'ClipCoin' : 'LuckyWatch';
+        document.getElementById('modal-desc').innerText = `Yakin ingin mem-pause bot ${name}? Bot akan berhenti bekerja.`;
+        document.getElementById('pause-modal').classList.add('active');
+    }
+    function closeModal() {
+        document.getElementById('pause-modal').classList.remove('active');
+        pendingPauseBot = null;
+    }
+    document.getElementById('btn-confirm-pause').onclick = () => {
+        if (pendingPauseBot) { doTogglePause(pendingPauseBot); closeModal(); }
+    };
+
+    async function doTogglePause(bot) {
+        if (bot === 'cc') state.cc_paused = !state.cc_paused;
+        if (bot === 'lw') state.lw_paused = !state.lw_paused;
+        try {
+            const r = await fetch(JSON_URL);
+            const data = await r.json();
+            data.cc_paused = state.cc_paused;
+            data.lw_paused = state.lw_paused;
+            await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            fetchDashboard();
+        } catch (e) { console.error(e); }
+    }
 
     function setRingState(sId, tId, isRunning) {
         const s = document.getElementById(sId), t = document.getElementById(tId);
@@ -399,10 +572,7 @@
         sec = Math.max(0, Math.floor(sec));
         return `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
     }
-    
-    function triggerFlash(el) { if(!el) return; el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'), 300); }
 
-    // ==== ANIMASI GRAFIK BAR KEMBALI ====
     function initGraph() {
         const graph = document.getElementById('hash-graph');
         if (graph && graph.children.length === 0) {
@@ -443,19 +613,32 @@
             document.getElementById('net-ping').innerText = (new Date().getTime() - startPing) + "ms";
             document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', { hour12: false });
 
+            state.cc_paused = !!data.cc_paused;
+            state.lw_paused = !!data.lw_paused;
+
             if (data.clipcoin) {
-                setRingState('cc-spinner', 'cc-ring-text', data.clipcoin.status === 'RUNNING' || data.clipcoin.status === 'WATCHING');
+                const isAct = data.clipcoin.status === 'RUNNING' || data.clipcoin.status === 'WATCHING';
+                setRingState('cc-spinner', 'cc-ring-text', isAct);
                 document.getElementById('cc-status').innerText = data.clipcoin.status || 'IDLE';
                 document.getElementById('cc-claims').innerText = data.clipcoin.claims || 0;
                 document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
                 if (data.cc_logs) document.getElementById('cc-log-container').innerHTML = data.cc_logs.slice(-3).join('<br>');
+                
+                const btnCC = document.getElementById('btn-pause-cc');
+                if(state.cc_paused) { btnCC.innerText = "RESUME"; btnCC.classList.add('active'); }
+                else { btnCC.innerText = "PAUSE"; btnCC.classList.remove('active'); }
             }
             if (data.luckywatch) {
-                setRingState('lw-spinner', 'lw-ring-text', data.luckywatch.status === 'RUNNING' || data.luckywatch.status === 'WATCHING');
+                const isAct = data.luckywatch.status === 'RUNNING' || data.luckywatch.status === 'WATCHING';
+                setRingState('lw-spinner', 'lw-ring-text', isAct);
                 document.getElementById('lw-status').innerText = data.luckywatch.status || 'IDLE';
                 document.getElementById('lw-claims').innerText = data.luckywatch.claims || 0;
                 document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
                 if (data.lw_logs) document.getElementById('lw-log-container').innerHTML = data.lw_logs.slice(-3).join('<br>');
+                
+                const btnLW = document.getElementById('btn-pause-lw');
+                if(state.lw_paused) { btnLW.innerText = "RESUME"; btnLW.classList.add('active'); }
+                else { btnLW.innerText = "PAUSE"; btnLW.classList.remove('active'); }
             }
 
             let ccS = parseFloat(data.clipcoin?.saldo || 0), lwS = parseFloat(data.luckywatch?.saldo || 0);
@@ -468,7 +651,19 @@
                 document.getElementById('ram-bar').style.width = data.system.ram + "%";
                 document.getElementById('net-req').innerText = data.system.total_req;
             }
-            if (data.wd_status) document.getElementById('wd-status').innerText = data.wd_status;
+            
+            if (data.wd_status) {
+                document.getElementById('wd-status').innerText = data.wd_status.toUpperCase();
+                const isSukses = data.wd_status.toLowerCase().includes("sukses") || data.wd_status.toLowerCase().includes("success");
+                const isProses = data.wd_status.toLowerCase().includes("proses");
+                let color = isSukses ? 'var(--green)' : (isProses ? 'var(--yellow)' : 'var(--text-dim)');
+                let text = isSukses ? 'SUCCESS' : (isProses ? 'PROCESS' : 'WAITING');
+                
+                ['wd-cc-status', 'wd-lw-status', 'wd-nm-status'].forEach(id => {
+                    let el = document.getElementById(id);
+                    if(el) { el.innerText = text; el.style.color = color; el.style.textShadow = `0 0 5px ${color}`; }
+                });
+            }
 
             renderNocid(data);
 
@@ -488,32 +683,45 @@
             nmStatus.innerText = "🚫 BANNED"; nmStatus.className = "nm-badge error";
             cardNocid.classList.remove('running'); setRingState('nm-spinner', 'nm-ring-text', false);
             stopGraphAnimation();
+            stopFanSound();
+            addConsoleLog("ERROR: BANNED DETECTED! Halting operations.", "err");
         } else if (isCooldown) {
             nmStatus.innerText = "⏳ COOLDOWN"; nmStatus.className = "nm-badge cooldown";
             cardNocid.classList.add('running'); setRingState('nm-spinner', 'nm-ring-text', true);
             startGraphAnimation();
+            stopFanSound();
+            addConsoleLog("INFO: Cooling down. Waiting for next block...", "warn");
         } else {
             nmStatus.innerText = "⚡ RUNNING"; nmStatus.className = "nm-badge running";
             cardNocid.classList.add('running'); setRingState('nm-spinner', 'nm-ring-text', true);
             startGraphAnimation();
+            startFanSound();
+            if(Math.random() > 0.8) addConsoleLog("INFO: Connecting to pool.nocid.fun...", "info");
         }
 
         document.getElementById('nm-hashrate').innerText = data.nocid_hashrate || '0 GH/s';
         const xmrBal = parseFloat(data.nocid_xmr_balance || 0);
         
-        const xmrEl = document.getElementById('nm-xmr-balance');
-        xmrEl.innerText = xmrBal.toFixed(8);
-        
-        // Logika Realtime Mined Log
-        if (Math.abs(xmrBal - prevNocidXmr) > 0.00000001 && prevNocidXmr !== 0) {
-            triggerFlash(xmrEl); 
-            addMiningLog(xmrBal - prevNocidXmr);
+        if (xmrBal > lastXmrBal && lastXmrBal !== 0) {
+            const diff = (xmrBal - lastXmrBal).toFixed(8);
+            playCoinSound();
+            addConsoleLog(`SHARE ACCEPTED! +${diff} ${data.nocid_current_coin}`, "share");
+            addConsoleLog(`INFO: New block found. Updating ledger...`, "info");
         }
-        prevNocidXmr = xmrBal;
+        lastXmrBal = xmrBal;
 
-        document.getElementById('nm-current-coin').innerText = (data.nocid_current_coin || 'XMR').toUpperCase() + " (RX/0)";
+        document.getElementById('nm-xmr-balance').innerText = xmrBal.toFixed(8);
+
+        let currentCoin = (data.nocid_current_coin || 'XMR').toUpperCase();
+        let algo = "RX/0"; 
+        if (currentCoin === "LTC") algo = "Scrypt";
+        else if (currentCoin === "BTC") algo = "SHA-256";
+        
+        document.getElementById('nm-current-coin').innerText = `${currentCoin} (${algo})`;
+        document.getElementById('label-coin-balance').innerText = `💎 ${currentCoin} BALANCE`;
+
         document.getElementById('nm-ncdt-balance').innerText = parseFloat(data.nocid_ncdt_balance || 0).toFixed(2);
-        document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} XMR`;
+        document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} ${currentCoin}`;
         document.getElementById('nm-est-24h').innerText = `+${parseFloat(data.nocid_estimate_24h || 0).toFixed(2)} NCDT`;
         
         const pingEl = document.getElementById('nm-ping-nocid');
@@ -540,27 +748,39 @@
             }, 1000);
         } else { nextEl.innerText = 'READY'; }
 
+        if (data.nocid_logs && data.nocid_logs.length > 0) {
+            miningHistory = data.nocid_logs.map(log => {
+                const parts = log.replace("✅ ", "").split(" | ");
+                return { 
+                    time: parts[0] ? parts[0].trim() : '--:--', 
+                    type: parts[1] ? parts[1].trim() : 'INFO', 
+                    amount: parts[2] ? parts[2].trim() : '' 
+                };
+            }).reverse(); 
+        }
+
         renderMinedLogs();
         document.getElementById('nm-last-update').innerText = new Date().toLocaleTimeString('id-ID');
     }
 
-    function addMiningLog(diffXmr) {
-        if (diffXmr <= 0) return;
-        const now = new Date();
-        const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-        miningHistory.unshift({ time: ts, amount: diffXmr });
-        if (miningHistory.length > 8) miningHistory.pop(); // Batasi 8 log terakhir
-    }
-
     function renderMinedLogs() {
         const logList = document.getElementById('nm-log-list');
-        if (miningHistory.length === 0) {
+        if (!miningHistory || miningHistory.length === 0) {
             logList.innerHTML = `<div class="nm-log-empty">⛏️ Menunggu share koin pertama...</div>`;
             return;
         }
         let html = '';
-        miningHistory.forEach(item => {
-            html += `<div class="nm-log-item"><span class="ts">${item.time}</span><span class="type">💎 XMR</span><span class="reward">+${item.amount.toFixed(8)} <span>XMR</span></span></div>`;
+        miningHistory.slice(0, 10).forEach(item => {
+            let bColor = 'var(--cyan)';
+            if (item.type === 'FAUCET') bColor = 'var(--pink)';
+            if (item.type === 'BONUS') bColor = 'var(--green)';
+
+            html += `
+            <div class="nm-log-item" style="border-left-color: ${bColor}">
+                <span class="ts">${item.time}</span>
+                <span class="type" style="color:${bColor}">${item.type}</span>
+                <span class="reward">${item.amount}</span>
+            </div>`;
         });
         logList.innerHTML = html;
     }

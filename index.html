@@ -365,7 +365,6 @@
             </div>
         </div>
 
-        <!-- MINI CONSOLE -->
         <div class="nm-terminal" id="mini-term">
             <div class="term-line info">> Initializing CryptoRetjeh Engine...</div>
             <div class="term-line">> Waiting for worker connection...</div>
@@ -441,49 +440,68 @@
     let lastXmrBal = 0;
     let soundEnabled = false;
     
-    // ==== AUDIO SYSTEM (GITHUB MP3) ====
-    // GANTI URL DI BAWAH INI DENGAN LINK RAW GITHUB KAMU
-    const URL_COIN_MP3 = "URL_COIN_MP3_DISINI";
-    const URL_FAN_MP3 = "URL_FAN_MP3_DISINI";
+    // AUDIO SYSTEM
+    let audioCtx = null;
+    let fanOsc = null;
+    let fanGain = null;
 
-    const audioCoin = new Audio(URL_COIN_MP3);
-    const audioFan = new Audio(URL_FAN_MP3);
-    audioFan.loop = true;
-    audioFan.volume = 0.3; // Volume suara kipas (30%)
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function playCoinSound() {
+        if (!soundEnabled || !audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1800, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function startFanSound() {
+        if (!soundEnabled || !audioCtx || fanOsc) return;
+        fanOsc = audioCtx.createOscillator();
+        fanGain = audioCtx.createGain();
+        fanOsc.type = 'sawtooth';
+        fanOsc.frequency.setValueAtTime(40, audioCtx.currentTime); 
+        fanGain.gain.setValueAtTime(0.05, audioCtx.currentTime); 
+        fanOsc.connect(fanGain);
+        fanGain.connect(audioCtx.destination);
+        fanOsc.start();
+    }
+
+    function stopFanSound() {
+        if (fanOsc) {
+            fanOsc.stop();
+            fanOsc.disconnect();
+            fanOsc = null;
+        }
+    }
 
     function toggleSound() {
         soundEnabled = !soundEnabled;
         const btn = document.getElementById('sound-btn');
         if (soundEnabled) {
+            initAudio();
             btn.innerText = "🔊 ON";
             btn.classList.add('on');
             const isRunning = document.getElementById('card-nocid').classList.contains('running');
-            if (isRunning) {
-                audioFan.play().catch(e => console.log("Audio play blocked:", e));
-            }
+            if (isRunning) startFanSound();
         } else {
             btn.innerText = "🔇 OFF";
             btn.classList.remove('on');
-            audioFan.pause();
+            stopFanSound();
         }
     }
 
-    function playCoinSound() {
-        if (!soundEnabled) return;
-        audioCoin.currentTime = 0;
-        audioCoin.play().catch(e => console.log("Audio play blocked:", e));
-    }
-
-    function startFanSound() {
-        if (!soundEnabled) return;
-        if (audioFan.paused) audioFan.play().catch(e => console.log("Audio play blocked:", e));
-    }
-
-    function stopFanSound() {
-        audioFan.pause();
-    }
-
-    // ==== MINI CONSOLE ====
     function addConsoleLog(text, type="") {
         const term = document.getElementById('mini-term');
         if (!term) return;
@@ -495,7 +513,6 @@
         if (term.children.length > 25) term.removeChild(term.firstChild);
     }
 
-    // ==== PAUSE LOGIC ====
     let pendingPauseBot = null;
     function askPause(bot) {
         const isPaused = bot === 'cc' ? state.cc_paused : state.lw_paused;
@@ -537,7 +554,6 @@
         return `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
     }
 
-    // ==== GRAPH ANIMATION ====
     function initGraph() {
         const graph = document.getElementById('hash-graph');
         if (graph && graph.children.length === 0) {
@@ -664,23 +680,21 @@
         document.getElementById('nm-hashrate').innerText = data.nocid_hashrate || '0 GH/s';
         const xmrBal = parseFloat(data.nocid_xmr_balance || 0);
         
-        // ==== LOGIKA MENDETEKSI KOIN BARU MASUK ====
+        // ==== LOGIKA XMR MASUK (REAL-TIME) ====
         if (xmrBal > lastXmrBal && lastXmrBal !== 0) {
             const diff = (xmrBal - lastXmrBal).toFixed(8);
             playCoinSound();
             
-            // 1. Log ke Mini Console
             addConsoleLog(`SUCCESS: +${diff} ${data.nocid_current_coin} Masuk.`, "share");
             addConsoleLog(`SALDO: ${xmrBal.toFixed(8)} ${data.nocid_current_coin}`, "info");
             
-            // 2. Log ke Mined Coins Log
             const now = new Date();
             const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
             miningHistory.unshift({ time: ts, amount: diff, type: data.nocid_current_coin });
             if (miningHistory.length > 10) miningHistory.pop();
         }
         lastXmrBal = xmrBal;
-        // ===========================================
+        // =======================================
 
         document.getElementById('nm-xmr-balance').innerText = xmrBal.toFixed(8);
 

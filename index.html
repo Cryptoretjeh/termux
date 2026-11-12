@@ -286,8 +286,7 @@
             border-top: 1px solid rgba(255,136,0,0.3);
             padding: 8px 12px; max-height: 150px; overflow-y: auto;
             scrollbar-width: thin; scrollbar-color: var(--orange) transparent;
-            position: relative;
-            contain: content;
+            position: relative; contain: content;
         }
         .nm-log-section::-webkit-scrollbar { width: 4px; }
         .nm-log-section::-webkit-scrollbar-thumb { background: var(--orange); border-radius: 2px; }
@@ -602,39 +601,34 @@
     const STALE_MS = 15 * 60 * 1000;
 
     let state = { cc_paused: false, lw_paused: false };
-    let lastCcSaldo = 0;
-    let lastLwSaldo = 0;
-
-    let ccResetMarker = null;
-    let lwResetMarker = null;
-    let lastWdStatusKey = "";
-    let prevCcSaldoUi = 0;
-    let prevLwSaldoUi = 0;
-
+    let lastDataTs = 0;
+    let nocidUptimeStart = null;
+    let nocidLastData = null;
     let prevNocidNcdt = 0;
     let prevNocidXmr = 0;
     let prevNocidCounters = { faucet: 0, ptc: 0, bonus: 0 };
-    let nocidUptimeStart = null;
-    let nocidLastData = null;
-    let lastDataTs = 0;
 
     let wdElapsedStart = null;
     let lastWdHistoryHash = "";
     let lastLogsHash = "";
 
-    let activityTracker = {
-        cc: { claims: 0, saldo: 0, lastChange: 0 },
-        lw: { claims: 0, saldo: 0, lastChange: 0 },
-        nm: { ncdt: 0, xmr: 0, lastChange: 0 }
-    };
+    // ============================================================
+    // LOCAL STORAGE: INCOME TRACKER (ANTI RESET KE 0)
+    // ============================================================
+    function getIncomeData() {
+        let d = localStorage.getItem('retjeh_income');
+        if (!d) return { ccTotal: 0, lwTotal: 0, lastWdTs: "" };
+        try { return JSON.parse(d); } catch(e) { return { ccTotal: 0, lwTotal: 0, lastWdTs: "" }; }
+    }
+    function saveIncomeData(d) {
+        localStorage.setItem('retjeh_income', JSON.stringify(d));
+    }
 
-    const ACTIVE_KEYWORDS = [
-        'RUN','WATCH','MINING','CLAIM','PTC','FAUCET','BONUS','CHALLENGE','ACTIVE','ONLINE','PROCESS','WORK','PLAY','STREAM','VIEW','EXECUTE','TASK','SOLVE','SURF','CLICK',
-        'JALAN','AKTIF','MEMPROSES','MENONTON','MENGERJAKAN','KERJA','PROSES','AMBIL','MENUNGGU','SELESAI','MULAI','BERJALAN','MENGAMBIL','MELIHAT','NONTON','MEMBUKA','MENJAWAB'
-    ];
-    const INACTIVE_KEYWORDS = [
-        'PAUSE','PAUSED','STOP','STOPPED','IDLE','OFFLINE','ERROR','EXPIRED','BANNED','COOLDOWN','JEDA','BERHENTI','MATI','TUNGGU','WAIT','DELAY','SLEEP'
-    ];
+    // ============================================================
+    // HELPER
+    // ============================================================
+    const ACTIVE_KEYWORDS = ['RUN','WATCH','MINING','CLAIM','PTC','FAUCET','BONUS','CHALLENGE','ACTIVE','ONLINE','PROCESS','WORK','PLAY','STREAM','VIEW','EXECUTE','TASK','SOLVE','SURF','CLICK','JALAN','AKTIF','MEMPROSES','MENONTON','MENGERJAKAN','KERJA','PROSES','AMBIL','MENUNGGU','SELESAI','MULAI','BERJALAN','MENGAMBIL','MELIHAT','NONTON','MEMBUKA','MENJAWAB'];
+    const INACTIVE_KEYWORDS = ['PAUSE','PAUSED','STOP','STOPPED','IDLE','OFFLINE','ERROR','EXPIRED','BANNED','COOLDOWN','JEDA','BERHENTI','MATI','TUNGGU','WAIT','DELAY','SLEEP'];
 
     function isActiveStatus(status) {
         if (!status) return false;
@@ -645,14 +639,10 @@
         return ACTIVE_KEYWORDS.some(k => s.includes(k));
     }
 
-    function detectActivity(bot, claims, saldo) {
-        const tr = activityTracker[bot];
-        const now = Date.now();
-        let changed = false;
-        if (claims > tr.claims) { changed = true; tr.claims = claims; }
-        if (Math.abs(saldo - tr.saldo) > 0.0000001) { changed = true; tr.saldo = saldo; }
-        if (changed) tr.lastChange = now;
-        return (now - tr.lastChange) < 60000;
+    function isWdSuccess(status) {
+        if (!status) return false;
+        const s = status.toLowerCase();
+        return s.includes("sukses") || s.includes("berhasil") || s.includes("completed") || s.includes("success") || s.includes("done") || s.includes("selesai");
     }
 
     function triggerPop(el) {
@@ -668,15 +658,11 @@
         const text = document.getElementById(textId);
         if (!spinner || !dot || !text) return;
         if (isRunning) {
-            spinner.classList.add('active');
-            dot.classList.add('active');
-            text.innerText = 'RUN';
-            text.classList.remove('stop');
+            spinner.classList.add('active'); dot.classList.add('active');
+            text.innerText = 'RUN'; text.classList.remove('stop');
         } else {
-            spinner.classList.remove('active');
-            dot.classList.remove('active');
-            text.innerText = 'STOP';
-            text.classList.add('stop');
+            spinner.classList.remove('active'); dot.classList.remove('active');
+            text.innerText = 'STOP'; text.classList.add('stop');
         }
     }
 
@@ -694,26 +680,18 @@
     }
 
     function fmtHM(t) {
-        const h = String(t.getHours()).padStart(2, '0');
-        const m = String(t.getMinutes()).padStart(2, '0');
-        const s = String(t.getSeconds()).padStart(2, '0');
-        return `${h}:${m}:${s}`;
+        return `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}:${String(t.getSeconds()).padStart(2,'0')}`;
     }
 
     function fmtDuration(sec) {
         sec = Math.max(0, Math.floor(sec));
-        const h = Math.floor(sec / 3600);
-        const m = Math.floor((sec % 3600) / 60);
-        const s = sec % 60;
+        const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
         return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
 
-    function isWdSuccess(status) {
-        if (!status) return false;
-        const s = status.toLowerCase();
-        return s.includes("sukses") || s.includes("berhasil") || s.includes("completed") || s.includes("success") || s.includes("done") || s.includes("selesai");
-    }
-
+    // ============================================================
+    // COOKIE & PAUSE
+    // ============================================================
     async function setCookie(bot) {
         const cookieVal = document.getElementById('cookie-input')?.value.trim();
         if (!cookieVal) return alert("Cookie tidak boleh kosong!");
@@ -723,7 +701,7 @@
             if (bot === 'clipcoin') data.cc_cookie = cookieVal;
             if (bot === 'luckywatch') data.lw_cookie = cookieVal;
             await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            alert(`Cookie ${bot.toUpperCase()} berhasil dikirim ke antrean.`);
+            alert(`Cookie ${bot.toUpperCase()} berhasil dikirim.`);
         } catch (e) { alert("Gagal update cookie: " + e); }
     }
 
@@ -735,7 +713,7 @@
             const data = await r.json();
             if (bot === 'lime') data.lime_email = emailVal;
             await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            alert(`Email Faucet berhasil dikirim ke antrean.`);
+            alert(`Email Faucet berhasil dikirim.`);
             document.getElementById('lime-email').value = "";
         } catch (e) { alert("Gagal update email: " + e); }
     }
@@ -761,6 +739,7 @@
         const liveDot = document.getElementById('live-dot');
         const serverStatus = document.getElementById('server-status');
         const startPing = new Date().getTime();
+        
         try {
             const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
             const data = await res.json();
@@ -784,117 +763,94 @@
             const btnLW = document.getElementById('btn-pause-lw');
             const badgeCC = document.getElementById('cc-status');
             const badgeLW = document.getElementById('lw-status');
-            const cardCC = document.getElementById('card-cc');
-            const cardLW = document.getElementById('card-lw');
 
-            // ClipCoin
+            // ---------- ClipCoin ----------
             if (state.cc_paused) {
                 btnCC.innerText = "RESUME"; btnCC.classList.add('active');
-                badgeCC.innerText = "PAUSED"; badgeCC.style.color = "var(--red)"; badgeCC.style.borderColor = "var(--red)";
-                cardCC.classList.remove('running');
+                badgeCC.innerText = "PAUSED"; badgeCC.className = "bot-status paused";
+                document.getElementById('card-cc').classList.remove('running');
                 setRingState('cc-spinner', 'cc-dot', 'cc-ring-text', false);
             } else {
                 btnCC.innerText = "PAUSE"; btnCC.classList.remove('active');
-                badgeCC.style.color = ""; badgeCC.style.borderColor = "";
                 if (data.clipcoin) {
-                    const rawStatus = data.clipcoin.status || 'IDLE';
-                    const claims = parseInt(data.clipcoin.claims || 0);
-                    const rawSaldo = parseFloat(data.clipcoin.saldo || 0);
-                    const statusActive = isActiveStatus(rawStatus);
-                    const activityActive = detectActivity('cc', claims, rawSaldo);
-                    const active = statusActive || activityActive;
+                    const active = isActiveStatus(data.clipcoin.status);
                     if (active) {
-                        badgeCC.innerHTML = `<span class="text-blink">▶ ${rawStatus}</span>`;
-                        cardCC.classList.add('running');
+                        badgeCC.innerHTML = `<span class="text-blink">▶ ${data.clipcoin.status}</span>`;
+                        document.getElementById('card-cc').classList.add('running');
                         setRingState('cc-spinner', 'cc-dot', 'cc-ring-text', true);
                     } else {
-                        badgeCC.innerText = rawStatus;
-                        cardCC.classList.remove('running');
+                        badgeCC.innerText = data.clipcoin.status || 'IDLE';
+                        document.getElementById('card-cc').classList.remove('running');
                         setRingState('cc-spinner', 'cc-dot', 'cc-ring-text', false);
                     }
                     badgeCC.className = `bot-status ${active ? 'watching' : 'idle'}`;
-                    document.getElementById('cc-claims').innerText = claims;
+                    document.getElementById('cc-claims').innerText = data.clipcoin.claims || 0;
                     document.getElementById('cc-limit').innerText = data.clipcoin.limit || 540;
-                    lastCcSaldo = rawSaldo;
-                    let ccDisplay = (ccResetMarker !== null && rawSaldo >= ccResetMarker) ? Math.max(0, rawSaldo - ccResetMarker) : rawSaldo;
+                    
+                    // --- LOGIKA PENYIMPANAN SALDO CLIPCOIN ---
+                    const incomeData = getIncomeData();
+                    let rawSaldo = parseFloat(data.clipcoin.saldo || 0);
+                    
+                    if (rawSaldo > incomeData.ccTotal) {
+                        incomeData.ccTotal = rawSaldo; 
+                        saveIncomeData(incomeData);
+                    } else if (rawSaldo < incomeData.ccTotal && rawSaldo === 0) {
+                        incomeData.ccTotal = 0;
+                        saveIncomeData(incomeData);
+                    }
+
                     let ccSaldoEl = document.getElementById('cc-saldo');
-                    ccSaldoEl.innerText = "$" + ccDisplay.toFixed(5);
-                    if (Math.abs(ccDisplay - prevCcSaldoUi) > 0.000001 && ccDisplay > 0) triggerPop(ccSaldoEl);
-                    prevCcSaldoUi = ccDisplay;
+                    ccSaldoEl.innerText = "$" + incomeData.ccTotal.toFixed(5);
                 }
             }
 
-            // LuckyWatch
+            // ---------- LuckyWatch ----------
             if (state.lw_paused) {
                 btnLW.innerText = "RESUME"; btnLW.classList.add('active');
-                badgeLW.innerText = "PAUSED"; badgeLW.style.color = "var(--red)"; badgeLW.style.borderColor = "var(--red)";
-                cardLW.classList.remove('running');
+                badgeLW.innerText = "PAUSED"; badgeLW.className = "bot-status paused";
+                document.getElementById('card-lw').classList.remove('running');
                 setRingState('lw-spinner', 'lw-dot', 'lw-ring-text', false);
             } else {
                 btnLW.innerText = "PAUSE"; btnLW.classList.remove('active');
-                badgeLW.style.color = ""; badgeLW.style.borderColor = "";
                 if (data.luckywatch) {
-                    const rawStatus = data.luckywatch.status || 'IDLE';
-                    const claims = parseInt(data.luckywatch.claims || 0);
-                    const rawSaldo = parseFloat(data.luckywatch.saldo || 0);
-                    const statusActive = isActiveStatus(rawStatus);
-                    const activityActive = detectActivity('lw', claims, rawSaldo);
-                    const active = statusActive || activityActive;
+                    const active = isActiveStatus(data.luckywatch.status);
                     if (active) {
-                        badgeLW.innerHTML = `<span class="text-blink">▶ ${rawStatus}</span>`;
-                        cardLW.classList.add('running');
+                        badgeLW.innerHTML = `<span class="text-blink">▶ ${data.luckywatch.status}</span>`;
+                        document.getElementById('card-lw').classList.add('running');
                         setRingState('lw-spinner', 'lw-dot', 'lw-ring-text', true);
                     } else {
-                        badgeLW.innerText = rawStatus;
-                        cardLW.classList.remove('running');
+                        badgeLW.innerText = data.luckywatch.status || 'IDLE';
+                        document.getElementById('card-lw').classList.remove('running');
                         setRingState('lw-spinner', 'lw-dot', 'lw-ring-text', false);
                     }
                     badgeLW.className = `bot-status ${active ? 'watching' : 'idle'}`;
-                    document.getElementById('lw-claims').innerText = claims;
+                    document.getElementById('lw-claims').innerText = data.luckywatch.claims || 0;
                     document.getElementById('lw-limits').innerText = data.luckywatch.limit || 820;
-                    lastLwSaldo = rawSaldo;
-                    let lwDisplay = (lwResetMarker !== null && rawSaldo >= lwResetMarker) ? Math.max(0, rawSaldo - lwResetMarker) : rawSaldo;
+                    
+                    // --- LOGIKA PENYIMPANAN SALDO LUCKYWATCH ---
+                    const incomeData = getIncomeData();
+                    let rawSaldo = parseFloat(data.luckywatch.saldo || 0);
+                    
+                    if (rawSaldo > incomeData.lwTotal) {
+                        incomeData.lwTotal = rawSaldo; 
+                        saveIncomeData(incomeData);
+                    } else if (rawSaldo < incomeData.lwTotal && rawSaldo === 0) {
+                        incomeData.lwTotal = 0;
+                        saveIncomeData(incomeData);
+                    }
+
                     let lwSaldoEl = document.getElementById('lw-saldo');
-                    lwSaldoEl.innerText = "$" + lwDisplay.toFixed(5);
-                    if (Math.abs(lwDisplay - prevLwSaldoUi) > 0.000001 && lwDisplay > 0) triggerPop(lwSaldoEl);
-                    prevLwSaldoUi = lwDisplay;
+                    lwSaldoEl.innerText = "$" + incomeData.lwTotal.toFixed(5);
                 }
             }
 
-            // Totals + WD marker reset
-            let ccRaw = state.cc_paused ? lastCcSaldo : parseFloat(data.clipcoin?.saldo || 0);
-            let lwRaw = state.lw_paused ? lastLwSaldo : parseFloat(data.luckywatch?.saldo || 0);
-            if (!state.cc_paused) lastCcSaldo = ccRaw;
-            if (!state.lw_paused) lastLwSaldo = lwRaw;
-
-            let ccClaims = parseInt(data.clipcoin?.claims || 0);
-            let lwClaims = parseInt(data.luckywatch?.claims || 0);
-
-            let wdStatusRaw = data.wd_status || "BELUM ADA ANTREAN";
-            let wdTimestamp = data.wd_timestamp || data.wd_updated_at || "";
-            const wdSuccess = isWdSuccess(wdStatusRaw);
-            const isNewWd = wdSuccess && wdTimestamp && wdTimestamp !== lastWdStatusKey.split("|")[1];
-
-            if (isNewWd) {
-                ccResetMarker = parseFloat(data.clipcoin?.saldo || 0);
-                lwResetMarker = parseFloat(data.luckywatch?.saldo || 0);
-                lastWdStatusKey = wdStatusRaw + "|" + wdTimestamp;
-                ['cc-saldo', 'lw-saldo', 'total-saldo'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
-                });
-                console.log("[WD] Marker reset. cc:", ccResetMarker, "lw:", lwResetMarker);
-            } else if (!wdSuccess) {
-                lastWdStatusKey = wdStatusRaw + "|" + wdTimestamp;
-            }
-
-            let ccDisplay = (ccResetMarker !== null && ccRaw >= ccResetMarker) ? Math.max(0, ccRaw - ccResetMarker) : ccRaw;
-            let lwDisplay = (lwResetMarker !== null && lwRaw >= lwResetMarker) ? Math.max(0, lwRaw - lwResetMarker) : lwRaw;
-            let grandTotal = ccDisplay + lwDisplay;
-
+            // ---------- Total Income (Gabungan) ----------
+            const finalIncome = getIncomeData();
+            let grandTotal = finalIncome.ccTotal + finalIncome.lwTotal;
+            
             document.getElementById('total-saldo').innerText = "$" + grandTotal.toFixed(5);
             document.getElementById('total-income').innerText = "$" + grandTotal.toFixed(5);
-            document.getElementById('total-claims').innerText = ccClaims + lwClaims;
+            document.getElementById('total-claims').innerText = parseInt(data.clipcoin?.claims||0) + parseInt(data.luckywatch?.claims||0);
 
             if (data.system) {
                 document.getElementById('cpu-val').innerText = data.system.cpu + "%";
@@ -904,17 +860,6 @@
                 document.getElementById('net-req').innerText = data.system.total_req;
             }
             if (data.captcha) document.getElementById('cap-token').innerText = data.captcha.token;
-
-            if (data.cc_logs && data.cc_logs.length > 0) {
-                let logHtml = "";
-                data.cc_logs.slice(-3).forEach(log => { logHtml += `<div style="margin-bottom:2px;">${log}</div>`; });
-                document.getElementById('cc-log-container').innerHTML = logHtml;
-            }
-            if (data.lw_logs && data.lw_logs.length > 0) {
-                let logHtml = "";
-                data.lw_logs.slice(-3).forEach(log => { logHtml += `<div style="margin-bottom:2px;">${log}</div>`; });
-                document.getElementById('lw-log-container').innerHTML = logHtml;
-            }
 
             renderNocid(data);
             updateWdCard(data);
@@ -937,79 +882,41 @@
         if (!nmStatus || !cardNocid) return;
 
         if (data.nocid_banned) {
-            nmStatus.innerText = "🚫 BANNED";
-            nmStatus.className = "nm-badge error";
-            cardNocid.classList.remove('running');
-            setRingState('nm-spinner', 'nm-dot', 'nm-ring-text', false);
+            nmStatus.innerText = "🚫 BANNED"; nmStatus.className = "nm-badge error";
+            cardNocid.classList.remove('running'); setRingState('nm-spinner', 'nm-dot', 'nm-ring-text', false);
         } else {
             const rawStatus = (data.nocid_status || "IDLE").toString().toUpperCase();
-            let statusClass = 'idle';
-            let statusIcon = '●';
-            let statusActive = isActiveStatus(rawStatus);
+            let statusClass = 'idle', statusIcon = '●', isRunning = isActiveStatus(rawStatus);
 
-            const ncdtNow = parseFloat(data.nocid_ncdt_balance || 0);
-            const xmrNow = parseFloat(data.nocid_xmr_balance || 0);
-            const tr = activityTracker.nm;
-            if (Math.abs(ncdtNow - tr.ncdt) > 0.0001 || Math.abs(xmrNow - tr.xmr) > 0.00000001) {
-                tr.lastChange = Date.now();
-                tr.ncdt = ncdtNow;
-                tr.xmr = xmrNow;
-            }
-            const activityActive = (Date.now() - tr.lastChange) < 90000;
-            const isRunning = statusActive || activityActive;
+            if (rawStatus.includes('MINING') || rawStatus.includes('CLAIM')) { statusClass = 'mining'; statusIcon = '⛏'; isRunning = true; }
+            else if (rawStatus.includes('PTC') || rawStatus.includes('FAUCET') || rawStatus.includes('BONUS') || rawStatus.includes('CHALLENGE')) { statusClass = 'claim'; statusIcon = '⚡'; isRunning = true; }
+            else if (rawStatus.includes('WAIT') || rawStatus.includes('COOLDOWN') || rawStatus.includes('JEDA')) { statusClass = 'wait'; statusIcon = '⏳'; }
+            else if (rawStatus.includes('ERROR') || rawStatus.includes('EXPIRED')) { statusClass = 'error'; statusIcon = '✖'; }
 
-            if (rawStatus.includes('MINING') || rawStatus.includes('CLAIM')) {
-                statusClass = 'mining'; statusIcon = '⛏';
-            } else if (rawStatus.includes('PTC') || rawStatus.includes('FAUCET') || rawStatus.includes('BONUS') || rawStatus.includes('CHALLENGE')) {
-                statusClass = 'claim'; statusIcon = '⚡';
-            } else if (rawStatus.includes('WAIT') || rawStatus.includes('COOLDOWN') || rawStatus.includes('JEDA')) {
-                statusClass = 'wait'; statusIcon = '⏳';
-            } else if (rawStatus.includes('ERROR') || rawStatus.includes('EXPIRED')) {
-                statusClass = 'error'; statusIcon = '✖';
-            } else if (isRunning) {
-                statusClass = 'mining'; statusIcon = '⛏';
-            }
-
-            if (isRunning && rawStatus.includes('MINING')) {
-                nmStatus.innerText = `⛏ MINING`;
-            } else if (isRunning && activityActive && !statusActive) {
-                nmStatus.innerText = `⚡ ACTIVE`;
-            } else {
-                nmStatus.innerText = `${statusIcon} ${rawStatus}`;
-            }
+            nmStatus.innerText = `${statusIcon} ${rawStatus}`;
             nmStatus.className = `nm-badge ${statusClass}`;
 
-            if (isRunning) cardNocid.classList.add('running');
-            else cardNocid.classList.remove('running');
+            if (isRunning) cardNocid.classList.add('running'); else cardNocid.classList.remove('running');
             setRingState('nm-spinner', 'nm-dot', 'nm-ring-text', isRunning);
         }
 
-        const hashrateEl = document.getElementById('nm-hashrate');
-        if (hashrateEl) hashrateEl.innerText = data.nocid_hashrate || '0 GH/s';
-        const coinEl = document.getElementById('nm-current-coin');
-        if (coinEl) coinEl.innerText = (data.nocid_current_coin || 'XMR').toUpperCase();
+        document.getElementById('nm-hashrate').innerText = data.nocid_hashrate || '0 GH/s';
+        document.getElementById('nm-current-coin').innerText = (data.nocid_current_coin || 'XMR').toUpperCase();
 
         const xmrBal = parseFloat(data.nocid_xmr_balance || 0);
         const ncdtBal = parseFloat(data.nocid_ncdt_balance || 0);
 
         const xmrEl = document.getElementById('nm-xmr-balance');
-        if (xmrEl) {
-            xmrEl.innerText = xmrBal.toFixed(8);
-            if (Math.abs(xmrBal - prevNocidXmr) > 0.00000001) triggerPop(xmrEl);
-        }
+        if (xmrEl) { xmrEl.innerText = xmrBal.toFixed(8); if (Math.abs(xmrBal - prevNocidXmr) > 0.00000001) triggerPop(xmrEl); }
         prevNocidXmr = xmrBal;
 
         const ncdtEl = document.getElementById('nm-ncdt-balance');
-        if (ncdtEl) {
-            ncdtEl.innerText = ncdtBal.toFixed(2);
-            if (Math.abs(ncdtBal - prevNocidNcdt) > 0.0001) triggerPop(ncdtEl);
-        }
+        if (ncdtEl) { ncdtEl.innerText = ncdtBal.toFixed(2); if (Math.abs(ncdtBal - prevNocidNcdt) > 0.0001) triggerPop(ncdtEl); }
         prevNocidNcdt = ncdtBal;
 
         const sessionNcdt = parseFloat(data.nocid_session_ncdt || 0);
         const sessionXmr = parseFloat(data.nocid_session_xmr || 0);
-        const sessEl = document.getElementById('nm-session');
-        if (sessEl) sessEl.innerText = `+${sessionNcdt.toFixed(2)} NCDT · +${sessionXmr.toFixed(8)} XMR`;
+        document.getElementById('nm-session').innerText = `+${sessionNcdt.toFixed(2)} NCDT · +${sessionXmr.toFixed(8)} XMR`;
 
         const cFaucet = parseInt(data.nocid_total_faucet || 0);
         const cPtc    = parseInt(data.nocid_total_ptc || 0);
@@ -1019,39 +926,29 @@
         const ctP = document.getElementById('nm-ct-ptc');
         const ctB = document.getElementById('nm-ct-bonus');
         if (ctF) { ctF.innerText = cFaucet; if (cFaucet !== prevNocidCounters.faucet) triggerPop(ctF); }
-        if (ctP) { ctP.innerText = cPtc;    if (cPtc !== prevNocidCounters.ptc)       triggerPop(ctP); }
-        if (ctB) { ctB.innerText = cBonus;  if (cBonus !== prevNocidCounters.bonus)   triggerPop(ctB); }
+        if (ctP) { ctP.innerText = cPtc; if (cPtc !== prevNocidCounters.ptc) triggerPop(ctP); }
+        if (ctB) { ctB.innerText = cBonus; if (cBonus !== prevNocidCounters.bonus) triggerPop(ctB); }
         prevNocidCounters = { faucet: cFaucet, ptc: cPtc, bonus: cBonus };
 
         const nextIn = parseInt(data.nocid_next_claim_in || 0);
         const nextEl = document.getElementById('nm-next-claim');
         if (nextEl) {
-            if (nextIn > 0) {
-                nextEl.innerText = fmtDuration(nextIn);
-                nextEl.classList.remove('ready');
-            } else {
-                nextEl.innerText = 'READY';
-                nextEl.classList.add('ready');
-            }
+            if (nextIn > 0) { nextEl.innerText = fmtDuration(nextIn); nextEl.classList.remove('ready'); }
+            else { nextEl.innerText = 'READY'; nextEl.classList.add('ready'); }
         }
 
         if (data.nocid_uptime_start) {
             const upStart = new Date(data.nocid_uptime_start).getTime();
             if (!isNaN(upStart)) nocidUptimeStart = upStart;
         }
-        const uptimeEl = document.getElementById('nm-uptime');
-        if (uptimeEl && nocidUptimeStart) {
-            uptimeEl.innerText = fmtDuration((Date.now() - nocidUptimeStart) / 1000);
+        if (document.getElementById('nm-uptime') && nocidUptimeStart) {
+            document.getElementById('nm-uptime').innerText = fmtDuration((Date.now() - nocidUptimeStart) / 1000);
         }
 
-        const solverEl = document.getElementById('nm-solver');
-        if (solverEl) solverEl.innerText = data.nocid_solver_balance || 0;
+        document.getElementById('nm-solver').innerText = data.nocid_solver_balance || 0;
+        document.getElementById('nm-last-update').innerText = data.nocid_updated_at ? fmtHM(new Date(data.nocid_updated_at)) : fmtHM(new Date());
 
-        const upd = data.nocid_updated_at ? new Date(data.nocid_updated_at) : new Date();
-        const updEl = document.getElementById('nm-last-update');
-        if (updEl) updEl.innerText = fmtHM(upd);
-
-        // LOG anti-flicker
+        // LOG ANTI-KEDIP
         const logs = data.nocid_logs || [];
         const logList = document.getElementById('nm-log-list');
         if (!logList) return;
@@ -1065,20 +962,10 @@
                 let html = '';
                 logs.slice().reverse().forEach((item, idx) => {
                     let tsStr = '--:--';
-                    try {
-                        if (item.ts) {
-                            const d = new Date(item.ts);
-                            tsStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-                        }
-                    } catch (e) {}
+                    try { if (item.ts) { const d = new Date(item.ts); tsStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; } } catch (e) {}
                     const t = (item.type || 'INFO').toUpperCase();
                     const newCls = idx === 0 ? 'new-entry' : '';
-                    html += `
-                        <div class="nm-log-item ${newCls}">
-                            <span class="ts">${tsStr}</span>
-                            <span class="type ${t}">${t}</span>
-                            <span class="reward">${item.reward || ''}</span>
-                        </div>`;
+                    html += `<div class="nm-log-item ${newCls}"><span class="ts">${tsStr}</span><span class="type ${t}">${t}</span><span class="reward">${item.reward || ''}</span></div>`;
                 });
                 logList.innerHTML = html;
             }
@@ -1107,31 +994,23 @@
         const history = data.wd_history || [];
 
         card.className = "wd-card";
-        let stateType = "idle";
-        let badgeText = "● IDLE";
-        let badgeClass = "idle";
+        let stateType = "idle", badgeText = "● IDLE", badgeClass = "idle";
 
         if (isWdSuccess(status)) { stateType = "success"; badgeText = "✓ SUCCESS"; badgeClass = "success"; }
         else if (statusLow.includes("proses") || statusLow.includes("process") || statusLow.includes("pending")) { stateType = "processing"; badgeText = "⏳ PROCESSING"; badgeClass = "processing"; }
         else if (statusLow.includes("antre") || statusLow.includes("queue") || statusLow.includes("menunggu")) { stateType = "pending"; badgeText = "⏸ QUEUED"; badgeClass = "pending"; }
         else if (statusLow.includes("gagal") || statusLow.includes("fail") || statusLow.includes("error")) { stateType = "failed"; badgeText = "✖ FAILED"; badgeClass = "failed"; }
-        else if (statusLow.includes("belum") || statusLow.includes("idle") || statusLow === "") { stateType = "idle"; badgeText = "● IDLE"; badgeClass = "idle"; }
 
         card.classList.add(stateType);
         badge.className = `wd-state-badge ${badgeClass}`;
         badge.innerText = badgeText;
 
         amountEl.innerText = amount > 0 ? `$${amount.toFixed(5)}` : "-";
-
         if (wdTime) {
-            try {
-                const d = new Date(wdTime);
-                timeEl.innerText = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
-            } catch (e) { timeEl.innerText = wdTime.slice(0, 19); }
-        } else {
-            timeEl.innerText = "-";
-        }
-
+            try { const d = new Date(wdTime); timeEl.innerText = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`; } 
+            catch (e) { timeEl.innerText = wdTime.slice(0, 19); }
+        } else { timeEl.innerText = "-"; }
+        
         statusEl.innerText = status || "BELUM ADA ANTREAN";
 
         if (stateType === "processing" || stateType === "pending") {
@@ -1144,8 +1023,7 @@
             if (!wdElapsedStart) wdElapsedStart = Date.now();
             const elapsedSec = Math.max(0, (Date.now() - wdElapsedStart) / 1000);
             elapsedEl.innerText = fmtDuration(elapsedSec);
-            const pct = Math.min(100, (elapsedSec / 300) * 100);
-            progressFill.style.width = pct + "%";
+            progressFill.style.width = Math.min(100, (elapsedSec / 300) * 100) + "%";
         } else {
             progressRow.style.display = "none";
             progressBar.style.display = "none";
@@ -1163,12 +1041,7 @@
                     let html = '';
                     history.slice(0, 5).forEach(h => {
                         let tStr = '--:--';
-                        try {
-                            if (h.ts) {
-                                const d = new Date(h.ts);
-                                tStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-                            }
-                        } catch (e) {}
+                        try { if (h.ts) { const d = new Date(h.ts); tStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; } } catch (e) {}
                         const s = (h.status || 'pending').toLowerCase();
                         let cls = 'pending';
                         if (s.includes('sukses') || s.includes('success') || s.includes('berhasil')) cls = 'success';
@@ -1186,6 +1059,9 @@
         }
     }
 
+    // ============================================================
+    // FETCH NOCID ONLY (PENCEGAH DELAY)
+    // ============================================================
     async function fetchNocidOnly() {
         try {
             const res = await fetch(JSON_URL + "?t=" + Date.now() + "_n");
@@ -1196,6 +1072,9 @@
         } catch (e) {}
     }
 
+    // ============================================================
+    // LIVE TICKER & WATCHDOG & BOOT
+    // ============================================================
     setInterval(() => {
         if (!nocidLastData) return;
         if (nocidUptimeStart) {
@@ -1212,7 +1091,6 @@
                 else { nextEl.innerText = 'READY'; nextEl.classList.add('ready'); }
             }
         }
-        // WD elapsed ticker
         if (wdElapsedStart) {
             const elapsedEl = document.getElementById('wd-elapsed');
             const progressFill = document.getElementById('wd-progress-fill');
@@ -1239,14 +1117,12 @@
         console.table({
             'cc_paused': d.cc_paused,
             'cc.status': d.clipcoin?.status,
-            'cc → isActive': isActiveStatus(d.clipcoin?.status),
+            'cc.saldo': d.clipcoin?.saldo,
             'lw_paused': d.lw_paused,
             'lw.status': d.luckywatch?.status,
-            'lw → isActive': isActiveStatus(d.luckywatch?.status),
+            'lw.saldo': d.luckywatch?.saldo,
             'nm_status': d.nocid_status,
-            'nm → isActive': isActiveStatus(d.nocid_status),
             'wd_status': d.wd_status,
-            'wd_amount': d.wd_amount,
         });
         return d;
     };

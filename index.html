@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NealZz CryptoRetjeh</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&display=swap');
 
         :root {
             --bg: #09090b; --panel: rgba(18, 18, 23, 0.7); --border: #272732;
@@ -16,231 +16,195 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
             background-color: var(--bg);
             background-image: linear-gradient(rgba(9, 9, 11, 0.6), rgba(9, 9, 11, 0.8)), url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-main.jpg');
             background-size: cover; background-position: center; background-attachment: fixed;
-            color: var(--text); font-family: 'JetBrains Mono', monospace; min-height: 100vh; padding: 8px;
+            color: var(--text); font-family: 'JetBrains Mono', monospace; min-height: 100vh; padding: 8px; font-weight: 300;
         }
 
         .cockpit { display: flex; flex-direction: column; gap: 8px; max-width: 600px; margin: 0 auto; }
+        .header, .info-bar, .bot-card, .nocid-miner, .box, .wd-box, .cookie-box { position: relative; transition: 0.3s; }
+        .header:hover, .bot-card:hover, .nocid-miner:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,229,255,0.15); }
 
-        .info-bar, .bot-card, .nocid-miner, .box, .wd-box, .cookie-box {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-        }
-        .info-bar:hover, .bot-card:hover, .nocid-miner:hover, .box:hover, .wd-box:hover, .cookie-box:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0, 229, 255, 0.2);
-        }
-
-        /* Header & Info Bar */
+        /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; border-left: 3px solid var(--purple); overflow: hidden; }
-        .header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg'); background-size: cover; background-position: center; opacity: 0.15; z-index: 0; }
+        .header::before { content: ''; position: absolute; inset: 0; background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg'); background-size: cover; opacity: 0.15; z-index: 0; }
         .header > * { position: relative; z-index: 1; }
         .header-left { display: flex; align-items: center; gap: 10px; }
-        .profile-pic { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; border: 1px solid var(--purple); background: #222; }
-        .title-area h1 { font-size: 12px; font-weight: 800; color: #fff; text-shadow: 1px 1px 3px #000; }
-        .title-area h1 span.text-cyan { color: var(--cyan); }
-        .title-area h1 span.text-purple { color: var(--purple); }
-        .badge { font-size: 8px; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--green); color: var(--green); background: rgba(0,0,0,0.6); font-weight: bold; display: inline-flex; align-items: center; gap: 4px; }
-        .badge.offline { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.2); }
+        .profile-pic { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--purple); }
+        .title-area h1 { font-size: 12px; color: #fff; font-weight: 400; }
+        .title-area h1 span.text-cyan { color: var(--cyan); font-weight: 600; }
+        .title-area h1 span.text-purple { color: var(--purple); font-weight: 600; }
+        .badge { font-size: 8px; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--green); color: var(--green); background: rgba(0,0,0,0.6); display: inline-flex; gap: 4px; }
         .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1s infinite alternate; }
-        .dot.offline { background: var(--red); }
         @keyframes blink { from { opacity: 1; } to { opacity: 0.2; } }
-        
         .header-right { text-align: right; }
-        .total-balance { font-size: 16px; font-weight: 800; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.5), 1px 1px 2px #000; line-height: 1.2; }
-        .total-balance-label { font-size: 7px; color: #aaa; margin-top: 1px; letter-spacing: 1px; }
-        .sync-text { font-size: 7px; color: #ccc; margin-top: 2px; text-shadow: 1px 1px 2px #000; }
+        .total-balance { font-size: 16px; font-weight: 600; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.3); line-height: 1.2; }
+        .total-balance-label { font-size: 7px; color: #aaa; letter-spacing: 1px; }
 
-        .info-bar { display: flex; justify-content: space-between; background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 8px; color: var(--text-dim); }
+        /* INFO BAR */
+        .info-bar { display: flex; justify-content: space-between; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 8px; color: var(--text-dim); }
         .info-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-        .info-val { color: var(--cyan); font-weight: bold; font-size: 11px; }
+        .info-val { color: var(--cyan); font-weight: 600; font-size: 11px; }
 
-        /* Bot Cards */
+        /* BOT CARDS */
         .bot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .bot-card { background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
+        .bot-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
         .bot-card::before { content: ''; position: absolute; inset: 0; background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg'); background-size: cover; opacity: 0.3; z-index: 0; }
         .bot-card > * { position: relative; z-index: 1; }
         .bot-card.clip { border-top: 3px solid var(--pink); }
         .bot-card.lucky { border-top: 3px solid var(--cyan); }
-        .bot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 6px; }
-        .bot-title { font-size: 10px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; }
-        .bot-status { font-size: 7px; padding: 1px 6px; border-radius: 10px; font-weight: bold; }
-        .bot-status.idle { color: var(--green); border: 1px solid var(--green); }
-        .bot-status.watching { color: var(--yellow); border: 1px solid var(--yellow); }
-        .bot-balance { font-size: 14px; font-weight: 800; margin-top: 4px; margin-bottom: 6px; }
+        .bot-header { display: flex; justify-content: space-between; margin-bottom: 6px; gap: 6px; }
+        .bot-title { font-size: 10px; color: #fff; display: flex; align-items: center; gap: 6px; }
+        .bot-status { font-size: 7px; padding: 1px 6px; border-radius: 10px; border: 1px solid var(--green); color: var(--green); }
+        .bot-balance { font-size: 14px; font-weight: 600; margin-top: 4px; margin-bottom: 6px; }
         .bot-balance.pink { color: var(--pink); }
         .bot-balance.cyan { color: var(--cyan); }
         .stat-row { display: flex; justify-content: space-between; font-size: 8px; margin-bottom: 2px; }
-        .btn-pause { width: 100%; padding: 6px; margin-top: auto; background: rgba(0,0,0,0.7); border: 1px solid var(--border); color: var(--text); border-radius: 4px; font-size: 8px; font-weight: bold; cursor: pointer; }
-        .bot-log { font-size: 7px; color: #aaa; margin-top: 8px; border-top: 1px dashed #444; padding-top: 4px; height: 35px; overflow: hidden; font-family: 'Courier New', monospace; }
+        .bot-log { font-size: 7px; color: #aaa; margin-top: 8px; border-top: 1px dashed #444; padding-top: 4px; height: 40px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+        .btn-pause { width: 100%; padding: 6px; margin-top: auto; background: rgba(0,0,0,0.7); border: 1px solid var(--border); color: var(--text); border-radius: 4px; font-size: 8px; cursor: pointer; }
 
-        /* Mini Ring */
+        /* MINI RING */
         .mini-ring-container { position: relative; width: 42px; height: 42px; display: flex; justify-content: center; align-items: center; }
         .mini-ring-track { position: absolute; inset: 0; border-radius: 50%; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.08); }
-        .mini-ring-spinner { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg, transparent 220deg, currentColor 280deg, #fff 320deg, currentColor 360deg); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px)); animation: miniSpin 1.6s linear infinite; animation-play-state: paused; opacity: 0.2; transition: opacity 0.4s; }
+        .mini-ring-spinner { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg, transparent 220deg, currentColor 280deg, #fff 320deg, currentColor 360deg); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px)); animation: miniSpin 1.6s linear infinite; animation-play-state: paused; opacity: 0.2; }
         .mini-ring-spinner.active { animation-play-state: running; opacity: 1; }
-        .mini-ring-text { position: relative; font-size: 8px; font-weight: 800; z-index: 3; color: #fff; }
+        .mini-ring-text { position: relative; font-size: 8px; z-index: 3; color: #fff; }
         .bot-card.clip .mini-ring-spinner, .bot-card.clip .mini-ring-text { color: var(--pink); }
         .bot-card.lucky .mini-ring-spinner, .bot-card.lucky .mini-ring-text { color: var(--cyan); }
         .nocid-miner .mini-ring-spinner, .nocid-miner .mini-ring-text { color: var(--orange); }
-        .mini-ring-text.stop { color: var(--red) !important; }
         @keyframes miniSpin { 100% { transform: rotate(360deg); } }
 
-        @keyframes runningPulsePink { 0%, 100% { border-color: var(--border); } 50% { border-color: var(--pink); box-shadow: 0 0 15px rgba(255,0,127,0.35); } }
-        @keyframes runningPulseCyan { 0%, 100% { border-color: var(--border); } 50% { border-color: var(--cyan); box-shadow: 0 0 15px rgba(0,229,255,0.35); } }
-        .bot-card.clip.running { animation: runningPulsePink 2s infinite; }
-        .bot-card.lucky.running { animation: runningPulseCyan 2s infinite; }
-
-        /* ==== NOCID MINER UI (PRO MAX) ==== */
-        .nocid-miner {
-            background: linear-gradient(135deg, rgba(15,5,0,0.95) 0%, rgba(5,0,0,0.98) 100%);
-            border: 1px solid var(--border); border-radius: 12px; display: flex; flex-direction: column;
-            overflow: hidden; margin-top: 5px; position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-        .nocid-miner::before {
-            content: ''; position: absolute; inset: 0;
-            background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg');
-            background-size: cover; background-position: center; opacity: 0.1; z-index: 0;
-        }
+        /* NOCID MINER */
+        .nocid-miner { background: linear-gradient(180deg, rgba(15,10,5,0.98), rgba(5,2,0,1)); border: 1px solid #332211; border-radius: 10px; overflow: hidden; margin-top: 5px; }
+        .nocid-miner::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,136,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,136,0,0.02) 1px, transparent 1px); background-size: 15px 15px; }
         .nocid-miner > * { position: relative; z-index: 1; }
-
-        .nm-header {
-            background: linear-gradient(90deg, rgba(255,136,0,0.15) 0%, rgba(255,0,127,0.1) 50%, rgba(176,38,255,0.15) 100%);
-            border-bottom: 2px solid rgba(255,136,0,0.3);
-            padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .nm-title { font-weight: 800; font-size: 14px; letter-spacing: 1.5px; color: #fff; text-shadow: 0 0 10px rgba(255,136,0,0.5); display: flex; align-items: center; gap: 6px; }
+        .nm-header { background: linear-gradient(90deg, rgba(30,15,5,0.9), rgba(15,5,0,0.9)); border-bottom: 1px solid rgba(255,136,0,0.2); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
         
-        .nm-badge { font-size: 9px; padding: 3px 10px; border-radius: 12px; font-weight: bold; letter-spacing: 0.5px; border: 1px solid; display: inline-flex; align-items: center; gap: 4px; }
-        .nm-badge.running { color: var(--green); border-color: var(--green); background: rgba(0,255,136,0.1); box-shadow: 0 0 10px rgba(0,255,136,0.2); animation: nmBadgePulse 1.5s infinite; }
-        .nm-badge.cooldown { color: var(--yellow); border-color: var(--yellow); background: rgba(255,187,0,0.1); }
-        .nm-badge.error { color: var(--red); border-color: var(--red); background: rgba(255,51,51,0.15); }
-        @keyframes nmBadgePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
-
-        .nm-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
-
-        /* Section Title */
-        .nm-sec-title { font-size: 8px; color: var(--text-dim); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: -6px; font-weight: bold; }
-
-        /* Stats Grid */
-        .nm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .nm-stat {
-            background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); position: relative; overflow: hidden;
-        }
-        .nm-stat::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
-        .nm-stat.val-hash::after { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
-        .nm-stat.val-xmr::after { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
-        .nm-stat.val-ncdt::after { background: var(--green); box-shadow: 0 0 8px var(--green); }
-        .nm-stat.val-coin::after { background: var(--purple); box-shadow: 0 0 8px var(--purple); }
-
-        .nm-stat-label { font-size: 8px; color: var(--text-dim); letter-spacing: 0.5px; display: flex; justify-content: space-between; }
-        .nm-stat-val { font-size: 15px; font-weight: 800; color: #fff; text-shadow: 1px 1px 2px #000; }
+        /* ANIMASI KIPAS */
+        .rig-fan { width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,0.8); border: 1px solid #332211; position: relative; display: flex; justify-content: center; align-items: center; }
+        .rig-fan::before { content: ''; position: absolute; inset: 1px; border-radius: 50%; border: 1px dashed rgba(255,136,0,0.5); }
+        .rig-fan::after { content: ''; width: 4px; height: 4px; background: var(--orange); border-radius: 50%; box-shadow: 0 0 5px var(--orange); }
+        .nocid-miner.running .rig-fan::before, .nocid-miner.running .rig-fan::after { animation: fanSpin 0.8s linear infinite; }
+        @keyframes fanSpin { 100% { transform: rotate(360deg); } }
         
-        .nm-stat.val-hash .nm-stat-val { color: var(--yellow); text-shadow: 0 0 10px rgba(255,187,0,0.4); }
-        .nm-stat.val-xmr .nm-stat-val { color: var(--cyan); text-shadow: 0 0 10px rgba(0,229,255,0.4); font-size: 14px;}
-        .nm-stat.val-ncdt .nm-stat-val { color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.4); }
-        .nm-stat.val-coin .nm-stat-val { color: var(--purple); text-shadow: 0 0 10px rgba(176,38,255,0.4); }
+        /* ANIMASI LED */
+        .status-panel { display: flex; align-items: center; gap: 8px; background: #000; padding: 3px 6px; border-radius: 4px; border: 1px solid #222; }
+        .led-group { display: flex; gap: 3px; }
+        .led { width: 4px; height: 4px; border-radius: 50%; background: #111; transition: 0.3s; }
+        .nocid-miner.running .led.l1 { background: var(--green); box-shadow: 0 0 5px var(--green); animation: blink 1s infinite alternate; }
+        .nocid-miner.running .led.l2 { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); animation: blink 1.3s infinite alternate; }
+        .nocid-miner.running .led.l3 { background: var(--cyan); box-shadow: 0 0 5px var(--cyan); animation: blink 0.7s infinite alternate; }
 
-        /* Session Box */
-        .nm-session {
-            background: linear-gradient(90deg, rgba(255,136,0,0.1), transparent);
-            border: 1px solid rgba(255,136,0,0.2); border-radius: 6px;
-            padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 10px;
-        }
-        .nm-session span:first-child { color: var(--text-dim); font-weight: bold; }
-        .nm-session span:last-child { color: var(--orange); font-weight: 800; text-shadow: 0 0 8px rgba(255,136,0,0.5); }
+        .nm-title b { font-weight: 600; color: var(--orange); font-size: 11px; }
+        .nm-title span { font-size: 7px; color: var(--text-dim); }
+        .nm-badge { font-size: 7px; padding: 2px 6px; border-radius: 3px; border: 1px solid; text-transform: uppercase; }
+        .nm-badge.running { color: var(--green); border-color: rgba(0,255,136,0.5); background: rgba(0,255,136,0.05); }
+        .nm-badge.cooldown { color: var(--yellow); border-color: rgba(255,187,0,0.5); }
+        .nm-badge.error { color: var(--red); border-color: rgba(255,51,51,0.5); }
+        
+        .nm-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+        .nm-sec-title { font-size: 7px; color: #666; letter-spacing: 1px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+        .nm-sec-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, #333, transparent); }
+        
+        .nm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .nm-stat { background: rgba(0,0,0,0.6); border: 1px solid #222; border-radius: 4px; padding: 6px 8px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .nm-stat::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; }
+        .nm-stat.val-hash::after { background: var(--yellow); }
+        .nm-stat.val-xmr::after { background: var(--cyan); }
+        .nm-stat.val-ncdt::after { background: var(--green); }
+        .nm-stat.val-coin::after { background: var(--purple); }
+        .nm-stat-label { font-size: 7px; color: #777; }
+        .nm-stat-val { font-size: 12px; font-weight: 600; }
+        .nm-stat.val-hash .nm-stat-val { color: var(--yellow); }
+        .nm-stat.val-xmr .nm-stat-val { color: var(--cyan); font-size: 11px; }
+        .nm-stat.val-ncdt .nm-stat-val { color: var(--green); }
+        .nm-stat.val-coin .nm-stat-val { color: var(--purple); }
 
-        /* Counters */
-        .nm-counters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        .nm-counter {
-            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.03);
-            border-radius: 6px; padding: 8px 0; text-align: center;
-            border-bottom: 2px solid;
-        }
-        .nm-counter.faucet { border-color: var(--pink); }
-        .nm-counter.ptc { border-color: var(--cyan); }
-        .nm-counter.bonus { border-color: var(--green); }
-        .nm-counter .num { font-size: 18px; font-weight: 800; color: #fff; text-shadow: 1px 1px 3px #000; }
+        /* === GRAFIK BAR (EQUALIZER) KEMBALI === */
+        .hash-graph { position: absolute; bottom: 0; left: 2px; right: 0; height: 18px; display: flex; align-items: flex-end; gap: 1px; opacity: 0.15; z-index: 1; pointer-events: none; padding: 0 4px;}
+        .hash-bar { flex: 1; background: var(--yellow); border-radius: 1px 1px 0 0; transition: height 0.2s; box-shadow: 0 -1px 5px rgba(255,187,0,0.8);}
+
+        .nm-session { background: rgba(255,136,0,0.05); border: 1px solid rgba(255,136,0,0.15); border-radius: 4px; padding: 6px 8px; display: flex; justify-content: space-between; font-size: 8px; }
+        .nm-session span:first-child { color: #777; }
+        .nm-session span:last-child { color: var(--orange); font-weight: 600; }
+
+        .nm-counters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+        .nm-counter { background: rgba(0,0,0,0.5); border: 1px solid #222; border-radius: 4px; padding: 5px 0; text-align: center; border-bottom: 1px solid; }
+        .nm-counter.faucet { border-color: rgba(255,0,127,0.5); }
+        .nm-counter.ptc { border-color: rgba(0,229,255,0.5); }
+        .nm-counter.bonus { border-color: rgba(0,255,136,0.5); }
+        .nm-counter .num { font-size: 13px; font-weight: 600; }
         .nm-counter.faucet .num { color: var(--pink); }
         .nm-counter.ptc .num { color: var(--cyan); }
         .nm-counter.bonus .num { color: var(--green); }
-        .nm-counter .lbl { font-size: 7px; color: var(--text-dim); letter-spacing: 1px; margin-top: 2px; }
+        .nm-counter .lbl { font-size: 6px; color: #777; margin-top: 1px; }
 
-        /* Info Row */
-        .nm-info {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.02); border-radius: 6px; padding: 8px 12px;
-            font-size: 9px; border: 1px solid rgba(255,255,255,0.05);
-        }
-        .nm-info-item { display: flex; align-items: center; gap: 6px; color: var(--text-dim); }
-        .nm-info-item b { color: #fff; font-size: 10px; }
-        .nm-info-item b.timer { color: var(--yellow); background: rgba(255,187,0,0.1); padding: 2px 6px; border-radius: 4px; }
+        .nm-info { display: flex; justify-content: space-between; background: rgba(0,0,0,0.4); border-radius: 4px; padding: 6px 8px; font-size: 8px; border: 1px solid #222; }
+        .nm-info-item { color: #777; }
+        .nm-info-item b { color: #fff; font-size: 9px; }
+        .nm-info-item b.timer { color: var(--yellow); background: rgba(255,187,0,0.1); padding: 1px 4px; border-radius: 3px; }
         .nm-info-item b.uptime { color: var(--cyan); }
 
-        /* Logs */
-        .nm-log-box { background: rgba(0,0,0,0.7); border-top: 1px solid rgba(255,136,0,0.2); padding: 10px 16px; max-height: 160px; overflow-y: auto; }
-        .nm-log-header { display: flex; justify-content: space-between; font-size: 8px; color: var(--text-dim); margin-bottom: 8px; font-weight: bold; letter-spacing: 1px; }
-        .nm-log-item {
-            display: grid; grid-template-columns: 45px 60px 1fr; gap: 8px; font-size: 10px;
-            padding: 6px; margin-bottom: 4px; background: rgba(255,255,255,0.03); border-radius: 4px;
-            border-left: 3px solid transparent;
-        }
-        .nm-log-item.FAUCET { border-left-color: var(--pink); background: linear-gradient(90deg, rgba(255,0,127,0.08), transparent); }
-        .nm-log-item.PTC { border-left-color: var(--cyan); background: linear-gradient(90deg, rgba(0,229,255,0.08), transparent); }
-        .nm-log-item.BONUS { border-left-color: var(--green); background: linear-gradient(90deg, rgba(0,255,136,0.08), transparent); }
-        .nm-log-item .ts { color: var(--yellow); font-weight: bold; }
-        .nm-log-item .type { color: #fff; font-weight: bold; }
-        .nm-log-item .reward { color: var(--green); text-align: right; font-weight: 800; }
-        .nm-log-empty { text-align: center; font-size: 9px; color: var(--text-dim); padding: 10px; font-style: italic; }
+        .nm-server-ping { display: flex; justify-content: space-between; align-items: center; background: #111; border: 1px solid #222; padding: 6px 8px; border-radius: 4px; font-size: 9px; margin-top: 2px;}
+        .nm-server-ping .label { color: #777; }
+        .nm-server-ping .val { color: var(--green); font-weight: 600; }
+        .nm-server-ping .val.bad { color: var(--red); }
 
-        /* Efek Menyala saat Running */
-        .nocid-miner.running { border-color: rgba(255,136,0,0.5); box-shadow: 0 0 25px rgba(255,136,0,0.15), inset 0 0 20px rgba(255,136,0,0.05); }
-        .nocid-miner.running .nm-header { border-bottom-color: var(--orange); }
-        .nocid-miner.running .nm-header::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--orange), transparent); animation: slide 2s infinite linear; }
-        @keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        
-        /* WD & Cookie */
+        .nm-estimate { background: rgba(255,136,0,0.1); border: 1px dashed rgba(255,136,0,0.4); border-radius: 4px; padding: 8px; text-align: center; margin-top: 2px; }
+        .nm-estimate .title { font-size: 8px; color: #777; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .nm-estimate .value { font-size: 16px; font-weight: 600; color: var(--orange); text-shadow: 0 0 10px rgba(255,136,0,0.5); }
+
+        .nm-log-box { background: rgba(0,0,0,0.8); border-top: 1px solid #332211; padding: 8px 12px; max-height: 140px; overflow-y: auto; }
+        .nm-log-header { display: flex; justify-content: space-between; font-size: 7px; color: #666; margin-bottom: 6px; }
+        .nm-log-item { display: grid; grid-template-columns: 40px 60px 1fr; gap: 6px; font-size: 9px; padding: 5px 6px; margin-bottom: 3px; background: rgba(255,255,255,0.02); border-radius: 3px; border-left: 2px solid var(--cyan); }
+        .nm-log-item .ts { color: var(--yellow); font-family: 'Courier New', monospace; font-size: 8px; }
+        .nm-log-item .type { color: var(--cyan); font-weight: 600; font-size: 8px; }
+        .nm-log-item .reward { color: #fff; text-align: right; font-size: 9px; }
+        .nm-log-item .reward span { color: var(--green); font-weight: 600; }
+        .nm-log-empty { text-align: center; font-size: 8px; color: #555; padding: 10px; font-style: italic; }
+
+        .nocid-miner.running { border-color: rgba(255,136,0,0.4); box-shadow: 0 0 20px rgba(255,136,0,0.1); }
+
+        /* OTHERS */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
-        .box-title { font-size: 9px; font-weight: bold; color: var(--text-dim); margin-bottom: 6px; border-bottom: 1px dashed var(--border); padding-bottom: 4px; }
+        .box-title { font-size: 9px; color: var(--text-dim); margin-bottom: 6px; border-bottom: 1px dashed var(--border); padding-bottom: 4px; }
         .bar-bg { background: rgba(0,0,0,0.8); height: 4px; border-radius: 3px; overflow: hidden; margin-top: 3px; }
-        .bar-fill { height: 100%; transition: width 0.6s ease; }
-        .wd-box { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
+        .bar-fill { height: 100%; transition: width 0.6s; }
+        .wd-box { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; }
+        .wd-status { font-size: 11px; font-weight: 600; color: var(--yellow); }
         .cookie-box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-        .email-input { background: #000; border: 1px solid var(--border); color: #fff; padding: 8px; border-radius: 4px; font-family: inherit; font-size: 10px; width: 100%; }
-        .btn-cookie { background: var(--purple); color: #fff; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: inherit; font-size: 9px; }
+        .email-input { background: #000; border: 1px solid var(--border); color: #fff; padding: 8px; border-radius: 4px; font-size: 9px; width: 100%; }
+        .btn-cookie { background: var(--purple); color: #fff; border: none; padding: 8px; border-radius: 4px; font-weight: 400; font-size: 9px; cursor: pointer; }
+
+        @keyframes popValue { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .pop { animation: popValue 0.4s ease; display: inline-block; }
     </style>
 </head>
 <body>
 
 <div class="cockpit">
-
     <div class="header">
         <div class="header-left">
-            <img src="https://raw.githubusercontent.com/cryptoretjeh/termux/main/profile.jpg" alt="Profile" class="profile-pic" onerror="this.src='https://ui-avatars.com/api/?name=C&background=b026ff&color=fff'">
+            <img src="https://raw.githubusercontent.com/cryptoretjeh/termux/main/profile.jpg" class="profile-pic" onerror="this.src='https://ui-avatars.com/api/?name=C&background=b026ff&color=fff'">
             <div class="title-area">
-                <h1><span class="text-cyan">NealZz</span> <span class="text-purple">CryptoRetjeh</span> <span class="admin-shield">🛡️</span></h1>
+                <h1><span class="text-cyan">NealZz</span> <span class="text-purple">CryptoRetjeh</span></h1>
                 <div class="badge" id="live-badge"><div class="dot" id="live-dot"></div> LIVE SYNC</div>
             </div>
         </div>
         <div class="header-right">
             <div class="total-balance" id="total-saldo">$0.00</div>
             <div class="total-balance-label">CLIPCOIN + LUCKYWATCH</div>
-            <div class="sync-text" id="last-sync">Sync: -</div>
+            <div class="sync-text" id="last-sync" style="font-size:7px; color:#ccc;">Sync: -</div>
         </div>
     </div>
 
     <div class="info-bar">
-        <div class="info-item"><span>Claims</span> <span class="info-val green" id="total-claims">0</span></div>
-        <div class="info-item"><span>Income</span> <span class="info-val yellow" id="total-income">$0.00</span></div>
-        <div class="info-item"><span>Server</span> <span class="info-val green" id="server-status">ONLINE</span></div>
+        <div class="info-item"><span>Claims</span> <span class="info-val" id="total-claims">0</span></div>
+        <div class="info-item"><span>Income</span> <span class="info-val" id="total-income">$0.00</span></div>
+        <div class="info-item"><span>Server</span> <span class="info-val" style="color:var(--green);" id="server-status">ONLINE</span></div>
     </div>
 
     <div class="bot-grid">
@@ -260,7 +224,7 @@
             <div class="stat-row"><span class="stat-label">Limit</span><span class="stat-val" id="cc-limit">540</span></div>
             <div class="bot-balance pink" id="cc-saldo">$0.00</div>
             <div class="bot-log" id="cc-log-container"><div>Menunggu aktivitas...</div></div>
-            <button class="btn-pause" id="btn-pause-cc" onclick="togglePause('cc')">PAUSE</button>
+            <button class="btn-pause" id="btn-pause-cc" onclick="askPause('cc')">PAUSE</button>
         </div>
         <div class="bot-card lucky" id="card-lw">
             <div class="bot-header">
@@ -278,17 +242,28 @@
             <div class="stat-row"><span class="stat-label">Limit</span><span class="stat-val" id="lw-limits">820</span></div>
             <div class="bot-balance cyan" id="lw-saldo">$0.00</div>
             <div class="bot-log" id="lw-log-container"><div>Menunggu aktivitas...</div></div>
-            <button class="btn-pause" id="btn-pause-lw" onclick="togglePause('lw')">PAUSE</button>
+            <button class="btn-pause" id="btn-pause-lw" onclick="askPause('lw')">PAUSE</button>
         </div>
     </div>
 
-    <!-- ================= NOCID MINER (PRO UI) ================= -->
+    <!-- NOCID MINER -->
     <div class="nocid-miner" id="card-nocid">
         <div class="nm-header">
-            <div class="nm-title">
-                <span>⛏️ CryptoRetjeh V1.3.8</span>
+            <div class="nm-header-left">
+                <div class="rig-fan"></div>
+                <div class="nm-title">
+                    <b>CryptoRetjeh</b>
+                    <span>POOL: NOCID | WORKER: NEALZZ</span>
+                </div>
             </div>
-            <div style="display:flex; align-items:center; gap:10px;">
+            <div class="nm-header-right">
+                <div class="status-panel">
+                    <div class="led-group">
+                        <div class="led l1"></div>
+                        <div class="led l2"></div>
+                        <div class="led l3"></div>
+                    </div>
+                </div>
                 <span class="nm-badge running" id="nm-status">● RUNNING</span>
                 <div class="mini-ring-container">
                     <div class="mini-ring-track"></div>
@@ -299,15 +274,17 @@
         </div>
 
         <div class="nm-body">
-            <div class="nm-sec-title">📊 REALTIME MINING STATS</div>
+            <div class="nm-sec-title">⚙️ Hardware Performance</div>
             <div class="nm-grid">
+                <!-- Box Hashrate + Grafik -->
                 <div class="nm-stat val-hash">
                     <div class="nm-stat-label">⚡ HASH RATE</div>
                     <div class="nm-stat-val" id="nm-hashrate">0 GH/s</div>
+                    <div class="hash-graph" id="hash-graph"></div>
                 </div>
                 <div class="nm-stat val-coin">
-                    <div class="nm-stat-label">🪙 MINING COIN</div>
-                    <div class="nm-stat-val" id="nm-current-coin">XMR</div>
+                    <div class="nm-stat-label">🪙 ALGO</div>
+                    <div class="nm-stat-val" id="nm-current-coin">XMR (RX/0)</div>
                 </div>
                 <div class="nm-stat val-xmr">
                     <div class="nm-stat-label">💎 XMR BALANCE</div>
@@ -320,11 +297,16 @@
             </div>
 
             <div class="nm-session">
-                <span>📈 SESSION INCOME</span>
+                <span>📈 SESSION EARNINGS</span>
                 <span id="nm-session">+0 NCDT · +0.00000000 XMR</span>
             </div>
 
-            <div class="nm-sec-title" style="margin-top:4px;">🎯 TOTAL TASK COMPLETED</div>
+            <div class="nm-estimate">
+                <div class="title">📊 Estimasi Pendapatan 24 Jam</div>
+                <div class="value" id="nm-est-24h">+0 NCDT</div>
+            </div>
+
+            <div class="nm-sec-title" style="margin-top:4px;">⚒️ Rig Statistics</div>
             <div class="nm-counters">
                 <div class="nm-counter faucet">
                     <div class="num" id="nm-ct-faucet">0</div>
@@ -344,15 +326,21 @@
                 <div class="nm-info-item">⏳ Next Claim: <b class="timer" id="nm-next-claim">READY</b></div>
                 <div class="nm-info-item">⚡ Uptime: <b class="uptime" id="nm-uptime">00:00:00</b></div>
             </div>
+            
+            <div class="nm-server-ping">
+                <span class="label">📡 Ping Server Nocid</span>
+                <span class="val" id="nm-ping-nocid">0 ms</span>
+            </div>
         </div>
 
+        <!-- LOG MINED COINS REALTIME -->
         <div class="nm-log-box">
             <div class="nm-log-header">
-                <span>📜 LIVE ACTIVITY LOG</span>
+                <span>💎 MINED COINS LOG</span>
                 <span id="nm-last-update">--:--:--</span>
             </div>
             <div id="nm-log-list">
-                <div class="nm-log-empty">Menunggu aktivitas miner...</div>
+                <div class="nm-log-empty">Menunggu koin pertama ditambang...</div>
             </div>
         </div>
     </div>
@@ -367,21 +355,21 @@
         </div>
         <div class="box">
             <div class="box-title">📡 NETWORK</div>
-            <div class="stat-row"><span class="stat-label">Ping</span><span class="stat-val" style="color:var(--cyan);" id="net-ping">0ms</span></div>
+            <div class="stat-row"><span class="stat-label">Ping (Web)</span><span class="stat-val" style="color:var(--cyan);" id="net-ping">0ms</span></div>
             <div class="stat-row"><span class="stat-label">Req</span><span class="stat-val" id="net-req">0</span></div>
-            <div class="stat-row"><span class="stat-label">Token</span><span class="stat-val" style="color:var(--yellow);" id="cap-token">0</span></div>
         </div>
     </div>
 
     <div class="wd-box">
         <div>
-            <div class="box-title" style="border:none; margin:0;">💸 WITHDRAW</div>
+            <div style="font-size:9px; color:var(--text-dim);">💸 WITHDRAW STATUS</div>
             <div class="wd-status" id="wd-status">BELUM ADA ANTREAN</div>
         </div>
+        <div style="font-size: 16px;">🏦</div>
     </div>
 
     <div class="cookie-box">
-        <label style="font-size:9px; font-weight:bold; color:var(--text-dim);">🍪 Update Cookie / Email</label>
+        <label style="font-size:9px; color:var(--text-dim);">🍪 Update Cookie / Email</label>
         <input type="text" class="email-input" id="cookie-input" placeholder="Cookie (ClipCoin / LuckyWatch)...">
         <input type="text" class="email-input" id="lime-email" placeholder="Email LimeFaucet...">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
@@ -394,99 +382,56 @@
 
 <script>
     const JSON_URL = "https://api.npoint.io/c34c77001e31bcce50f0";
-    const STALE_MS = 10 * 60 * 1000; // 10 menit
-
     let state = { cc_paused: false, lw_paused: false };
-    let ccResetMarker = null;
-    let lwResetMarker = null;
-    let lastWdStatusKey = "";
-
-    // Tracker Miner
-    let prevNocidNcdt = 0;
     let prevNocidXmr = 0;
-    let prevNocidCounters = { faucet: 0, ptc: 0, bonus: 0 };
     let nocidUptimeStart = null;
-    let nocidLastData = null;
-    let lastDataTs = 0;
     let countdownTimer = null;
+    let graphInterval = null;
+    let miningHistory = []; 
 
-    function triggerPop(el) {
-        if (!el) return;
-        el.classList.remove('pop');
-        void el.offsetWidth;
-        el.classList.add('pop');
+    function setRingState(sId, tId, isRunning) {
+        const s = document.getElementById(sId), t = document.getElementById(tId);
+        if(!s || !t) return;
+        if(isRunning) { s.classList.add('active'); t.innerText='RUN'; }
+        else { s.classList.remove('active'); t.innerText='STOP'; }
     }
+    function fmtDuration(sec) {
+        sec = Math.max(0, Math.floor(sec));
+        return `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+    }
+    
+    function triggerFlash(el) { if(!el) return; el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'), 300); }
 
-    function setRingState(spinnerId, textId, isRunning) {
-        const spinner = document.getElementById(spinnerId);
-        const text = document.getElementById(textId);
-        if (!spinner || !text) return;
-        if (isRunning) {
-            spinner.classList.add('active');
-            text.innerText = 'RUN';
-            text.classList.remove('stop');
-        } else {
-            spinner.classList.remove('active');
-            text.innerText = 'STOP';
-            text.classList.add('stop');
+    // ==== ANIMASI GRAFIK BAR KEMBALI ====
+    function initGraph() {
+        const graph = document.getElementById('hash-graph');
+        if (graph && graph.children.length === 0) {
+            for (let i = 0; i < 15; i++) {
+                let bar = document.createElement('div');
+                bar.className = 'hash-bar';
+                bar.style.height = (Math.random() * 40 + 10) + '%';
+                graph.appendChild(bar);
+            }
         }
     }
 
-    function fmtDuration(sec) {
-        sec = Math.max(0, Math.floor(sec));
-        const h = Math.floor(sec / 3600);
-        const m = Math.floor((sec % 3600) / 60);
-        const s = sec % 60;
-        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    function startGraphAnimation() {
+        initGraph();
+        if (graphInterval) clearInterval(graphInterval);
+        graphInterval = setInterval(() => {
+            const graph = document.getElementById('hash-graph');
+            if (!graph) return;
+            const bars = graph.children;
+            for (let i = 0; i < bars.length - 1; i++) {
+                bars[i].style.height = bars[i+1].style.height;
+            }
+            const newHeight = Math.max(10, Math.random() * 90);
+            bars[bars.length - 1].style.height = newHeight + '%';
+        }, 250);
     }
 
-    function forceAllStop(reason) {
-        setRingState('cc-spinner', 'cc-ring-text', false);
-        setRingState('lw-spinner', 'lw-ring-text', false);
-        setRingState('nm-spinner', 'nm-ring-text', false);
-        document.getElementById('card-nocid')?.classList.remove('running');
-        document.getElementById('live-badge').innerText = reason || 'STALE';
-        document.getElementById('live-badge').className = 'badge offline';
-    }
-
-    async function setCookie(bot) {
-        const cookieVal = document.getElementById('cookie-input')?.value.trim();
-        if (!cookieVal) return alert("Cookie tidak boleh kosong!");
-        try {
-            const r = await fetch(JSON_URL);
-            const data = await r.json();
-            if (bot === 'clipcoin') data.cc_cookie = cookieVal;
-            if (bot === 'luckywatch') data.lw_cookie = cookieVal;
-            await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            alert(`Cookie ${bot.toUpperCase()} berhasil dikirim.`);
-            document.getElementById('cookie-input').value = '';
-        } catch (e) { alert("Gagal update cookie: " + e); }
-    }
-
-    async function setEmail(bot) {
-        const emailVal = document.getElementById('lime-email')?.value.trim();
-        if (!emailVal) return alert("Email tidak boleh kosong!");
-        try {
-            const r = await fetch(JSON_URL);
-            const data = await r.json();
-            if (bot === 'lime') data.lime_email = emailVal;
-            await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            alert(`Email Faucet berhasil dikirim.`);
-            document.getElementById('lime-email').value = "";
-        } catch (e) { alert("Gagal update email: " + e); }
-    }
-
-    async function togglePause(bot) {
-        if (bot === 'cc') state.cc_paused = !state.cc_paused;
-        if (bot === 'lw') state.lw_paused = !state.lw_paused;
-        try {
-            const r = await fetch(JSON_URL);
-            const data = await r.json();
-            data.cc_paused = state.cc_paused;
-            data.lw_paused = state.lw_paused;
-            await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            fetchDashboard();
-        } catch (e) { console.error(e); }
+    function stopGraphAnimation() {
+        if (graphInterval) { clearInterval(graphInterval); graphInterval = null; }
     }
 
     async function fetchDashboard() {
@@ -494,41 +439,30 @@
         try {
             const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
             const data = await res.json();
-            lastDataTs = Date.now();
-
-            // --- HEADER STATUS ---
+            
             document.getElementById('net-ping').innerText = (new Date().getTime() - startPing) + "ms";
-            document.getElementById('live-badge').innerText = "LIVE SYNC";
-            document.getElementById('live-badge').className = 'badge';
             document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', { hour12: false });
 
-            // --- CLIPCOIN ---
             if (data.clipcoin) {
-                const isAct = data.clipcoin.status === 'RUNNING' || data.clipcoin.status === 'WATCHING';
-                setRingState('cc-spinner', 'cc-ring-text', isAct);
+                setRingState('cc-spinner', 'cc-ring-text', data.clipcoin.status === 'RUNNING' || data.clipcoin.status === 'WATCHING');
                 document.getElementById('cc-status').innerText = data.clipcoin.status || 'IDLE';
                 document.getElementById('cc-claims').innerText = data.clipcoin.claims || 0;
                 document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
+                if (data.cc_logs) document.getElementById('cc-log-container').innerHTML = data.cc_logs.slice(-3).join('<br>');
             }
-
-            // --- LUCKYWATCH ---
             if (data.luckywatch) {
-                const isAct = data.luckywatch.status === 'RUNNING' || data.luckywatch.status === 'WATCHING';
-                setRingState('lw-spinner', 'lw-ring-text', isAct);
+                setRingState('lw-spinner', 'lw-ring-text', data.luckywatch.status === 'RUNNING' || data.luckywatch.status === 'WATCHING');
                 document.getElementById('lw-status').innerText = data.luckywatch.status || 'IDLE';
                 document.getElementById('lw-claims').innerText = data.luckywatch.claims || 0;
                 document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
+                if (data.lw_logs) document.getElementById('lw-log-container').innerHTML = data.lw_logs.slice(-3).join('<br>');
             }
 
-            // TOTAL USD
-            let ccS = parseFloat(data.clipcoin?.saldo || 0);
-            let lwS = parseFloat(data.luckywatch?.saldo || 0);
-            let totalUsd = ccS + lwS;
-            document.getElementById('total-saldo').innerText = "$" + totalUsd.toFixed(5);
-            document.getElementById('total-income').innerText = "$" + totalUsd.toFixed(5);
+            let ccS = parseFloat(data.clipcoin?.saldo || 0), lwS = parseFloat(data.luckywatch?.saldo || 0);
+            document.getElementById('total-saldo').innerText = "$" + (ccS + lwS).toFixed(5);
+            document.getElementById('total-income').innerText = "$" + (ccS + lwS).toFixed(5);
             document.getElementById('total-claims').innerText = parseInt(data.clipcoin?.claims || 0) + parseInt(data.luckywatch?.claims || 0);
 
-            // SYSTEM & WD
             if (data.system) {
                 document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
                 document.getElementById('ram-bar').style.width = data.system.ram + "%";
@@ -536,154 +470,103 @@
             }
             if (data.wd_status) document.getElementById('wd-status').innerText = data.wd_status;
 
-            // RENDER MINER
             renderNocid(data);
 
-        } catch (e) {
-            if (Date.now() - lastDataTs > 30000) forceAllStop('OFFLINE');
-        }
+        } catch (e) { console.error(e); }
     }
 
-    // ============================================================
-    // RENDER MINER (SINKRONISASI 100%)
-    // ============================================================
     function renderNocid(data) {
         if (!data) return;
-        nocidLastData = data;
-
         const cardNocid = document.getElementById('card-nocid');
         const nmStatus = document.getElementById('nm-status');
         
-        // --- LOGIKA STATUS (Selama tidak BANNED, Animasi Jalan Terus) ---
         const isBanned = data.nocid_banned === true;
         const rawStatus = (data.nocid_status || "RUNNING").toUpperCase();
         const isCooldown = rawStatus.includes("COOLDOWN") || rawStatus.includes("WAIT");
 
         if (isBanned) {
-            nmStatus.innerText = "🚫 BANNED";
-            nmStatus.className = "nm-badge error";
-            cardNocid.classList.remove('running');
-            setRingState('nm-spinner', 'nm-ring-text', false);
+            nmStatus.innerText = "🚫 BANNED"; nmStatus.className = "nm-badge error";
+            cardNocid.classList.remove('running'); setRingState('nm-spinner', 'nm-ring-text', false);
+            stopGraphAnimation();
         } else if (isCooldown) {
-            nmStatus.innerText = "⏳ COOLDOWN";
-            nmStatus.className = "nm-badge cooldown";
-            cardNocid.classList.add('running'); // Tetap nyala walau cooldown
-            setRingState('nm-spinner', 'nm-ring-text', true); 
+            nmStatus.innerText = "⏳ COOLDOWN"; nmStatus.className = "nm-badge cooldown";
+            cardNocid.classList.add('running'); setRingState('nm-spinner', 'nm-ring-text', true);
+            startGraphAnimation();
         } else {
-            nmStatus.innerText = "⚡ RUNNING";
-            nmStatus.className = "nm-badge running";
-            cardNocid.classList.add('running');
-            setRingState('nm-spinner', 'nm-ring-text', true);
+            nmStatus.innerText = "⚡ RUNNING"; nmStatus.className = "nm-badge running";
+            cardNocid.classList.add('running'); setRingState('nm-spinner', 'nm-ring-text', true);
+            startGraphAnimation();
         }
 
-        // --- DATA STATISTIK (Gunakan variabel nocid_* dari python) ---
-        const hashrate = data.nocid_hashrate || '0 GH/s';
+        document.getElementById('nm-hashrate').innerText = data.nocid_hashrate || '0 GH/s';
         const xmrBal = parseFloat(data.nocid_xmr_balance || 0);
-        const ncdtBal = parseFloat(data.nocid_ncdt_balance || 0);
-
-        document.getElementById('nm-hashrate').innerText = hashrate;
-        document.getElementById('nm-current-coin').innerText = (data.nocid_current_coin || 'XMR').toUpperCase();
         
         const xmrEl = document.getElementById('nm-xmr-balance');
         xmrEl.innerText = xmrBal.toFixed(8);
-        if (Math.abs(xmrBal - prevNocidXmr) > 0.00000001) triggerPop(xmrEl);
+        
+        // Logika Realtime Mined Log
+        if (Math.abs(xmrBal - prevNocidXmr) > 0.00000001 && prevNocidXmr !== 0) {
+            triggerFlash(xmrEl); 
+            addMiningLog(xmrBal - prevNocidXmr);
+        }
         prevNocidXmr = xmrBal;
 
-        const ncdtEl = document.getElementById('nm-ncdt-balance');
-        ncdtEl.innerText = ncdtBal.toFixed(2);
-        if (Math.abs(ncdtBal - prevNocidNcdt) > 0.0001) triggerPop(ncdtEl);
-        prevNocidNcdt = ncdtBal;
+        document.getElementById('nm-current-coin').innerText = (data.nocid_current_coin || 'XMR').toUpperCase() + " (RX/0)";
+        document.getElementById('nm-ncdt-balance').innerText = parseFloat(data.nocid_ncdt_balance || 0).toFixed(2);
+        document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} XMR`;
+        document.getElementById('nm-est-24h').innerText = `+${parseFloat(data.nocid_estimate_24h || 0).toFixed(2)} NCDT`;
+        
+        const pingEl = document.getElementById('nm-ping-nocid');
+        pingEl.innerText = `${data.nocid_server_ping || 0} ms`;
+        pingEl.className = (data.nocid_server_ping > 500) ? 'val bad' : 'val';
 
-        // SESSION
-        const sessNcdt = parseFloat(data.nocid_session_ncdt || 0);
-        const sessXmr = parseFloat(data.nocid_session_xmr || 0);
-        document.getElementById('nm-session').innerText = `+${sessNcdt.toFixed(2)} NCDT · +${sessXmr.toFixed(8)} XMR`;
+        document.getElementById('nm-ct-faucet').innerText = parseInt(data.nocid_total_faucet || 0);
+        document.getElementById('nm-ct-ptc').innerText = parseInt(data.nocid_total_ptc || 0);
+        document.getElementById('nm-ct-bonus').innerText = parseInt(data.nocid_total_challenges || 0);
 
-        // COUNTERS (SINKRON)
-        const cFaucet = parseInt(data.nocid_total_faucet || 0);
-        const cPtc    = parseInt(data.nocid_total_ptc || 0);
-        const cBonus  = parseInt(data.nocid_total_challenges || 0);
-
-        const elFaucet = document.getElementById('nm-ct-faucet');
-        const elPtc = document.getElementById('nm-ct-ptc');
-        const elBonus = document.getElementById('nm-ct-bonus');
-
-        elFaucet.innerText = cFaucet;
-        elPtc.innerText = cPtc;
-        elBonus.innerText = cBonus;
-
-        if (cFaucet !== prevNocidCounters.faucet) triggerPop(elFaucet);
-        if (cPtc !== prevNocidCounters.ptc) triggerPop(elPtc);
-        if (cBonus !== prevNocidCounters.bonus) triggerPop(elBonus);
-        prevNocidCounters = { faucet: cFaucet, ptc: cPtc, bonus: cBonus };
-
-        // --- TIMER & UPTIME ---
-        if (data.nocid_uptime_start) {
-            nocidUptimeStart = new Date(data.nocid_uptime_start).getTime();
-        }
-        if (nocidUptimeStart) {
-            document.getElementById('nm-uptime').innerText = fmtDuration((Date.now() - nocidUptimeStart) / 1000);
-        }
+        if (data.nocid_uptime_start) nocidUptimeStart = new Date(data.nocid_uptime_start).getTime();
+        if (nocidUptimeStart) document.getElementById('nm-uptime').innerText = fmtDuration((Date.now() - nocidUptimeStart) / 1000);
 
         const nextIn = parseInt(data.nocid_next_claim_in || 0);
         const nextEl = document.getElementById('nm-next-claim');
-        
-        // Update timer countdown secara lokal biar gak beku
         if (countdownTimer) clearInterval(countdownTimer);
         if (nextIn > 0) {
             let currentSec = nextIn;
             nextEl.innerText = fmtDuration(currentSec);
             countdownTimer = setInterval(() => {
                 currentSec--;
-                if (currentSec <= 0) {
-                    clearInterval(countdownTimer);
-                    nextEl.innerText = 'READY';
-                } else {
-                    nextEl.innerText = fmtDuration(currentSec);
-                }
+                if (currentSec <= 0) { clearInterval(countdownTimer); nextEl.innerText = 'READY'; }
+                else nextEl.innerText = fmtDuration(currentSec);
             }, 1000);
-        } else {
-            nextEl.innerText = 'READY';
-        }
+        } else { nextEl.innerText = 'READY'; }
 
-        // --- LOGS ---
-        const logs = data.nocid_logs || [];
-        const logList = document.getElementById('nm-log-list');
-        if (!logs.length) {
-            logList.innerHTML = `<div class="nm-log-empty">Menunggu aktivitas miner...</div>`;
-        } else {
-            let html = '';
-            logs.slice().reverse().forEach(item => {
-                let tsStr = '--:--';
-                try {
-                    if (item.ts) {
-                        const d = new Date(item.ts);
-                        tsStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-                    }
-                } catch (e) {}
-                const t = (item.type || 'INFO').toUpperCase();
-                html += `
-                    <div class="nm-log-item ${t}">
-                        <span class="ts">${tsStr}</span>
-                        <span class="type">${t}</span>
-                        <span class="reward">${item.reward || ''}</span>
-                    </div>`;
-            });
-            logList.innerHTML = html;
-        }
-        
+        renderMinedLogs();
         document.getElementById('nm-last-update').innerText = new Date().toLocaleTimeString('id-ID');
     }
 
-    // Loop Utama
+    function addMiningLog(diffXmr) {
+        if (diffXmr <= 0) return;
+        const now = new Date();
+        const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        miningHistory.unshift({ time: ts, amount: diffXmr });
+        if (miningHistory.length > 8) miningHistory.pop(); // Batasi 8 log terakhir
+    }
+
+    function renderMinedLogs() {
+        const logList = document.getElementById('nm-log-list');
+        if (miningHistory.length === 0) {
+            logList.innerHTML = `<div class="nm-log-empty">⛏️ Menunggu share koin pertama...</div>`;
+            return;
+        }
+        let html = '';
+        miningHistory.forEach(item => {
+            html += `<div class="nm-log-item"><span class="ts">${item.time}</span><span class="type">💎 XMR</span><span class="reward">+${item.amount.toFixed(8)} <span>XMR</span></span></div>`;
+        });
+        logList.innerHTML = html;
+    }
+
     fetchDashboard();
     setInterval(fetchDashboard, 2000);
-    
-    // Watchdog 10 Menit
-    setInterval(() => {
-        if (lastDataTs === 0) return;
-        if ((Date.now() - lastDataTs) > STALE_MS) forceAllStop('STALE');
-    }, 5000);
 </script>
 </body>
 </html>

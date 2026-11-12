@@ -6,12 +6,13 @@
     <title>NealZz CryptoRetjeh</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap');
-        
+
         :root {
             --bg: #09090b; --panel: rgba(18, 18, 23, 0.7); --border: #272732;
             --text: #e2e8f0; --text-dim: #8b8b9a; --purple: #b026ff;
             --pink: #ff007f; --cyan: #00e5ff; --green: #00ff88;
             --yellow: #ffbb00; --red: #ff3333; --neon-matrix: #00ff41;
+            --orange: #ff8800;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,20 +26,20 @@
 
         .cockpit { display: flex; flex-direction: column; gap: 8px; max-width: 600px; margin: 0 auto; }
 
-        .info-bar, .bot-card, .faucet-window, .box, .wd-box, .cookie-box {
+        .info-bar, .bot-card, .nocid-miner, .box, .wd-box, .cookie-box {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
         }
-        .info-bar:hover, .bot-card:hover, .faucet-window:hover, .box:hover, .wd-box:hover, .cookie-box:hover {
+        .info-bar:hover, .bot-card:hover, .nocid-miner:hover, .box:hover, .wd-box:hover, .cookie-box:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 25px rgba(0, 229, 255, 0.2);
         }
         @keyframes borderGlow {
             0% { border-color: var(--border); }
-            50% { border-color: rgba(0, 229, 255, 0.5); }
+            50% { border-color: rgba(255,136,0,0.5); }
             100% { border-color: var(--border); }
         }
-        .bot-card, .faucet-window, .box { animation: borderGlow 3s infinite; }
+        .bot-card, .nocid-miner, .box { animation: borderGlow 3s infinite; }
 
         /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; border-left: 3px solid var(--purple); overflow: hidden; }
@@ -57,6 +58,7 @@
         @keyframes blink { from { opacity: 1; } to { opacity: 0.2; } }
         .header-right { text-align: right; }
         .total-balance { font-size: 16px; font-weight: 800; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.5), 1px 1px 2px #000; line-height: 1.2; }
+        .total-balance-label { font-size: 7px; color: #aaa; margin-top: 1px; letter-spacing: 1px; }
         .sync-text { font-size: 7px; color: #ccc; margin-top: 2px; text-shadow: 1px 1px 2px #000; }
 
         .info-bar { display: flex; justify-content: space-between; background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 8px; color: var(--text-dim); }
@@ -72,7 +74,7 @@
         .bot-card > * { position: relative; z-index: 1; }
         .bot-card.clip { border-top: 3px solid var(--pink); }
         .bot-card.lucky { border-top: 3px solid var(--cyan); }
-        
+
         .bot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 6px; }
         .bot-header-left { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
         .bot-title { font-size: 10px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; text-shadow: 1px 1px 2px #000; white-space: nowrap; }
@@ -81,59 +83,38 @@
         .bot-status.watching { color: var(--yellow); border: 1px solid var(--yellow); background: rgba(0,0,0,0.5); }
         .bot-status.paused { color: var(--red); border: 1px solid var(--red); background: rgba(0,0,0,0.5); }
 
-        /* Mini Ring */
         .mini-ring-container {
-            position: relative;
-            width: 42px;
-            height: 42px;
-            flex-shrink: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: relative; width: 42px; height: 42px; flex-shrink: 0;
+            display: flex; justify-content: center; align-items: center;
         }
         .mini-ring-track {
-            position: absolute; inset: 0;
-            border-radius: 50%;
+            position: absolute; inset: 0; border-radius: 50%;
             background: rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
         }
         .mini-ring-spinner {
-            position: absolute; inset: 0;
-            border-radius: 50%;
+            position: absolute; inset: 0; border-radius: 50%;
             background: conic-gradient(from 0deg, transparent 0deg, transparent 220deg, currentColor 280deg, #ffffff 320deg, currentColor 360deg);
             -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
             mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
-            animation: miniSpin 1.6s linear infinite;
-            animation-play-state: paused;
+            animation: miniSpin 1.6s linear infinite; animation-play-state: paused;
             filter: drop-shadow(0 0 4px currentColor);
-            opacity: 0.2;
-            transition: opacity 0.4s ease;
+            opacity: 0.2; transition: opacity 0.4s ease;
         }
         .mini-ring-spinner.active { animation-play-state: running; opacity: 1; }
         .mini-ring-dot {
-            position: absolute;
-            top: -1px; left: 50%;
-            width: 4px; height: 4px;
-            margin-left: -2px;
-            border-radius: 50%;
-            background: #fff;
-            box-shadow: 0 0 6px #fff, 0 0 10px currentColor;
+            position: absolute; top: -1px; left: 50%;
+            width: 4px; height: 4px; margin-left: -2px; border-radius: 50%;
+            background: #fff; box-shadow: 0 0 6px #fff, 0 0 10px currentColor;
             transform-origin: 2px 22px;
-            animation: miniSpin 1.6s linear infinite;
-            animation-play-state: paused;
-            opacity: 0;
-            transition: opacity 0.4s ease;
+            animation: miniSpin 1.6s linear infinite; animation-play-state: paused;
+            opacity: 0; transition: opacity 0.4s ease;
         }
         .mini-ring-dot.active { animation-play-state: running; opacity: 1; }
         .mini-ring-text {
-            position: relative;
-            font-size: 8px;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            z-index: 3;
-            color: #fff;
-            text-shadow: 0 0 4px currentColor;
+            position: relative; font-size: 8px; font-weight: 800; letter-spacing: 0.5px;
+            z-index: 3; color: #fff; text-shadow: 0 0 4px currentColor;
             transition: color 0.3s ease;
         }
         .bot-card.clip .mini-ring-spinner,
@@ -142,9 +123,9 @@
         .bot-card.lucky .mini-ring-spinner,
         .bot-card.lucky .mini-ring-dot,
         .bot-card.lucky .mini-ring-text { color: var(--cyan); }
-        .faucet-window .mini-ring-spinner,
-        .faucet-window .mini-ring-dot,
-        .faucet-window .mini-ring-text { color: var(--neon-matrix); }
+        .nocid-miner .mini-ring-spinner,
+        .nocid-miner .mini-ring-dot,
+        .nocid-miner .mini-ring-text { color: var(--orange); }
         .mini-ring-text.stop { color: var(--red) !important; text-shadow: 0 0 4px var(--red); }
         @keyframes miniSpin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -156,16 +137,16 @@
             0%, 100% { border-color: var(--border); box-shadow: 0 0 0 rgba(0,229,255,0); }
             50% { border-color: var(--cyan); box-shadow: 0 0 15px rgba(0,229,255,0.35); }
         }
-        @keyframes runningPulseGreen {
-            0%, 100% { border-color: var(--border); box-shadow: 0 0 0 rgba(0,255,65,0); }
-            50% { border-color: var(--neon-matrix); box-shadow: 0 0 15px rgba(0,255,65,0.35); }
+        @keyframes runningPulseOrange {
+            0%, 100% { border-color: var(--border); box-shadow: 0 0 0 rgba(255,136,0,0); }
+            50% { border-color: var(--orange); box-shadow: 0 0 15px rgba(255,136,0,0.4); }
         }
         .bot-card.clip.running { animation: runningPulsePink 2s infinite; }
         .bot-card.lucky.running { animation: runningPulseCyan 2s infinite; }
-        .faucet-window.running { animation: runningPulseGreen 2s infinite; }
+        .nocid-miner.running { animation: runningPulseOrange 2s infinite; }
 
         @keyframes textBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .text-blink { animation: textBlink 1s infinite; color: var(--neon-matrix); text-shadow: 0 0 5px var(--neon-matrix); }
+        .text-blink { animation: textBlink 1s infinite; }
 
         @keyframes popValue {
             0% { transform: scale(1); }
@@ -193,151 +174,128 @@
         .bar-bg { background: rgba(0,0,0,0.8); height: 4px; border-radius: 3px; overflow: hidden; margin-top: 3px; border: 1px solid #222; }
         .bar-fill { height: 100%; }
 
-        /* Faucet Engine */
-        .faucet-window { 
-            background: #0a0a0a;
-            border: 1px solid var(--border); 
-            border-radius: 8px; 
-            display: flex; 
-            flex-direction: column; 
-            height: 420px; 
-            overflow: hidden; 
-            margin-top: 5px; 
-            position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-        }
-        .faucet-window::before { 
-            content: ''; 
-            position: absolute; 
-            top: 0; left: 0; right: 0; bottom: 0; 
-            background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg'); 
-            background-size: cover; 
-            background-position: center; 
-            opacity: 0.6; 
-            z-index: 0; 
-        }
-        .faucet-header { 
-            background: rgba(17, 17, 17, 0.85); 
-            border-bottom: 2px solid var(--border); 
-            padding: 8px 12px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            font-size: 10px; 
-            color: #aaa; 
-            position: relative; 
-            z-index: 2; 
-            gap: 8px;
-        }
-        .faucet-header-left { display: flex; align-items: center; gap: 10px; }
-        .faucet-title { font-weight: bold; color: var(--neon-matrix); text-shadow: 1px 1px 2px #000, 0 0 5px #000; }
-        .faucet-engine-status { font-weight: bold; }
-        .faucet-body { display: flex; flex-grow: 1; overflow: hidden; position: relative; z-index: 2; }
-        
-        .faucet-sidebar { 
-            width: 120px; 
-            background: rgba(0, 0, 0, 0.75); 
-            border-right: 2px solid var(--border);
-            padding: 10px 8px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 8px; 
-            z-index: 2;
-        }
-        .fs-item { font-size: 8px; color: #bbb; }
-        .fs-item span { display: block; font-size: 12px; color: var(--cyan); font-weight: bold; margin-top: 2px; text-shadow: 1px 1px 2px #000; }
-
-        .fs-time {
-            border-top: 1px dashed #333;
-            padding-top: 6px;
-            margin-top: 4px;
-        }
-        .fs-time .time-label { font-size: 8px; color: #bbb; }
-        .fs-time .time-value {
-            display: block;
-            font-size: 11px;
-            color: var(--yellow);
-            font-weight: bold;
-            text-shadow: 0 0 6px rgba(255,187,0,0.6), 1px 1px 2px #000;
-            margin-top: 2px;
-            letter-spacing: 0.3px;
-        }
-        .fs-time .time-relative {
-            display: block;
-            font-size: 7px;
-            color: var(--text-dim);
-            margin-top: 1px;
-            font-style: italic;
-        }
-        @keyframes timePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.75; } }
-        .fs-time .time-value.pulse { animation: timePulse 2.5s ease-in-out infinite; }
-        
-        .faucet-log-container { flex-grow: 1; display: flex; flex-direction: column; background: rgba(0, 0, 0, 0.55); z-index: 2; }
-        .faucet-total-header { 
-            background: linear-gradient(90deg, rgba(255,187,0,0.3), rgba(255,187,0,0.1)); 
-            border-bottom: 1px solid var(--border); 
-            padding: 8px 10px; 
-            font-size: 11px; 
-            font-weight: bold; 
-            display: flex; 
-            justify-content: space-between;
-            text-shadow: 1px 1px 2px #000;
-        }
-        .total-text { color: #ffbb00; text-shadow: 0 0 8px #ffbb00, 1px 1px 2px #000; animation: neonPulse 1.5s infinite alternate; }
-        @keyframes neonPulse { from { opacity: 1; text-shadow: 0 0 12px #ffbb00; } to { opacity: 0.7; text-shadow: 0 0 4px #ffbb00; } }
-        .faucet-log-scroll { flex-grow: 1; overflow-y: auto; padding: 10px; font-family: 'Courier New', monospace; font-size: 10px; line-height: 1.4; }
-        .log-section-title { font-size: 9px; color: #fff; margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 3px; display: flex; justify-content: space-between; text-shadow: 1px 1px 2px #000;}
-        
-        /* === LOG ITEM DENGAN WAKTU === */
-        .log-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: rgba(255,255,255,0.05); 
-            padding: 6px 10px; 
-            border-radius: 4px; 
-            margin-bottom: 4px; 
-            border-left: 2px solid var(--cyan); 
-            font-size: 10px; 
-            gap: 8px;
-        }
-        .log-item.success { border-left-color: var(--green); }
-        .log-item.error { border-left-color: var(--red); }
-        .log-item .coin-info { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
-        .log-item .coin-emoji { font-size: 14px; }
-        .log-item .coin-name { color: var(--cyan); font-weight: bold; }
-        .log-item .coin-right {
+        /* ======================================================
+           NOCID_MINER PANEL
+           ====================================================== */
+        .nocid-miner {
+            background: linear-gradient(180deg, rgba(20,10,0,0.9) 0%, rgba(10,5,0,0.95) 100%);
+            border: 1px solid var(--border);
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
-            gap: 1px;
-            flex-shrink: 0;
+            overflow: hidden;
+            margin-top: 5px;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(255,136,0,0.15);
         }
-        .log-item .coin-amount { color: var(--green); font-weight: bold; }
-        .log-item .coin-time {
-            font-size: 8px;
-            color: var(--yellow);
-            font-weight: bold;
-            text-shadow: 0 0 3px rgba(255,187,0,0.5);
-            letter-spacing: 0.2px;
+        .nocid-miner::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg');
+            background-size: cover; background-position: center;
+            opacity: 0.15; z-index: 0;
         }
-        .log-item .coin-time-rel {
-            font-size: 7px;
-            color: #888;
-            font-style: italic;
+        .nocid-miner > * { position: relative; z-index: 1; }
+
+        .nm-header {
+            background: linear-gradient(90deg, rgba(255,136,0,0.25) 0%, rgba(255,0,127,0.15) 50%, rgba(176,38,255,0.2) 100%);
+            border-bottom: 2px solid var(--orange);
+            padding: 10px 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 8px;
         }
+        .nm-header-left { display: flex; align-items: center; gap: 8px; }
+        .nm-title {
+            font-weight: 800; font-size: 12px; letter-spacing: 1px;
+            background: linear-gradient(90deg, #ffbb00, #ff8800, #ff007f);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 6px rgba(255,136,0,0.5));
+        }
+        .nm-badge {
+            font-size: 8px; padding: 2px 8px; border-radius: 10px; font-weight: bold;
+            display: inline-flex; align-items: center; gap: 4px;
+            border: 1px solid var(--orange); color: var(--orange);
+            background: rgba(0,0,0,0.5);
+        }
+        .nm-badge.mining { color: var(--green); border-color: var(--green); background: rgba(0,255,136,0.1); }
+        .nm-badge.wait { color: var(--yellow); border-color: var(--yellow); background: rgba(255,187,0,0.1); }
+        .nm-badge.idle { color: var(--text-dim); border-color: var(--text-dim); }
+        .nm-badge.claim { color: var(--pink); border-color: var(--pink); background: rgba(255,0,127,0.1); }
+        .nm-badge.error { color: var(--red); border-color: var(--red); background: rgba(255,51,51,0.15); }
+
+        .nm-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+        .nm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .nm-stat {
+            background: rgba(0,0,0,0.45);
+            border: 1px solid rgba(255,136,0,0.15);
+            border-radius: 6px;
+            padding: 6px 8px;
+            display: flex; flex-direction: column; gap: 2px;
+        }
+        .nm-stat-label { font-size: 7px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; }
+        .nm-stat-value {
+            font-size: 12px; font-weight: 800; color: #fff;
+            text-shadow: 0 0 6px currentColor;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .nm-stat-value.hash { color: #ffbb00; text-shadow: 0 0 8px rgba(255,187,0,0.6); }
+        .nm-stat-value.ncdt { color: var(--green); text-shadow: 0 0 8px rgba(0,255,136,0.5); }
+        .nm-stat-value.xmr  { color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.5); }
+        .nm-stat-value.coin { color: var(--purple); text-shadow: 0 0 8px rgba(176,38,255,0.5); }
+
+        .nm-session {
+            background: rgba(255,136,0,0.06);
+            border: 1px dashed rgba(255,136,0,0.3);
+            border-radius: 6px;
+            padding: 6px 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 9px;
+        }
+        .nm-session-label { color: var(--text-dim); letter-spacing: 0.5px; }
+        .nm-session-val { color: var(--orange); font-weight: bold; text-shadow: 0 0 6px rgba(255,136,0,0.6); }
+
+        .nm-counter-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 8px; text-align: center; }
+        .nm-counter {
+            background: rgba(0,0,0,0.4);
+            border-radius: 4px;
+            padding: 4px 2px;
+            border-bottom: 2px solid;
+        }
+        .nm-counter.faucet { border-color: var(--pink); }
+        .nm-counter.ptc { border-color: var(--cyan); }
+        .nm-counter.bonus { border-color: var(--green); }
+        .nm-counter .num { display: block; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 0 6px currentColor; }
+        .nm-counter.faucet .num { color: var(--pink); }
+        .nm-counter.ptc .num { color: var(--cyan); }
+        .nm-counter.bonus .num { color: var(--green); }
+        .nm-counter .lbl { color: var(--text-dim); font-size: 7px; letter-spacing: 0.5px; }
+
+        .nm-info-row { display: flex; justify-content: space-between; gap: 6px; font-size: 8px; color: var(--text-dim); padding: 4px 0; border-top: 1px dashed rgba(255,136,0,0.2); }
+        .nm-info-row span b { color: #fff; }
+        .nm-info-row .next-claim { color: var(--yellow); font-weight: bold; }
+        .nm-info-row .uptime { color: var(--cyan); font-weight: bold; }
+
+        .nm-log-section { background: rgba(0,0,0,0.55); border-top: 1px solid rgba(255,136,0,0.3); padding: 8px 12px; max-height: 140px; overflow-y: auto; }
+        .nm-log-title { font-size: 8px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 6px; display: flex; justify-content: space-between; }
+        .nm-log-item { display: grid; grid-template-columns: 50px 60px 1fr; gap: 8px; font-size: 9px; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.03); align-items: center; }
+        .nm-log-item .ts { color: var(--yellow); font-weight: bold; }
+        .nm-log-item .type { color: var(--cyan); font-weight: bold; text-transform: uppercase; }
+        .nm-log-item .type.FAUCET { color: var(--pink); }
+        .nm-log-item .type.PTC { color: var(--cyan); }
+        .nm-log-item .type.BONUS { color: var(--green); }
+        .nm-log-item .reward { color: var(--green); text-align: right; }
+        .nm-log-empty { text-align: center; color: var(--text-dim); font-size: 9px; padding: 10px; }
 
         /* WD & Cookie */
         .wd-box { background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
         .wd-title { font-size: 9px; font-weight: bold; color: var(--text-dim); }
         .wd-status { font-size: 10px; font-weight: bold; color: var(--yellow); text-shadow: 0 0 5px var(--yellow); }
-        
+
         .cookie-box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
         .cookie-box label { font-size: 9px; color: var(--text-dim); font-weight: bold; }
-        .cookie-input { background: #000; border: 1px solid var(--border); color: #fff; padding: 6px; border-radius: 4px; font-family: inherit; font-size: 9px; resize: none; height: 40px; }
-        
         .email-input { background: #000; border: 1px solid var(--border); color: #fff; padding: 8px; border-radius: 4px; font-family: inherit; font-size: 9px; width: 100%; margin-bottom: 5px; }
-        
         .btn-cookie { background: var(--purple); color: #fff; border: none; padding: 6px; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: inherit; font-size: 9px; transition: 0.2s; }
         .btn-cookie:hover { background: #9d00ff; box-shadow: 0 0 10px var(--purple); }
     </style>
@@ -345,6 +303,7 @@
 <body>
 
 <div class="cockpit">
+
     <div class="header">
         <div class="header-left">
             <img src="https://raw.githubusercontent.com/cryptoretjeh/termux/main/profile.jpg" alt="Profile" class="profile-pic" onerror="this.src='https://ui-avatars.com/api/?name=C&background=b026ff&color=fff'">
@@ -355,6 +314,7 @@
         </div>
         <div class="header-right">
             <div class="total-balance" id="total-saldo">$0.00</div>
+            <div class="total-balance-label">CLIPCOIN + LUCKYWATCH</div>
             <div class="sync-text" id="last-sync">Sync: -</div>
         </div>
     </div>
@@ -406,44 +366,75 @@
         </div>
     </div>
 
-    <!-- FAUCET ENGINE -->
-    <div class="faucet-window" id="card-faucet">
-        <div class="faucet-header">
-            <div class="faucet-header-left">
-                <span class="faucet-title">⚙️ FAUCET ENGINE</span>
-                <span id="faucet-engine-status" class="faucet-engine-status" style="color:var(--green);">● RUNNING</span>
+    <!-- NOCID_MINER PANEL -->
+    <div class="nocid-miner" id="card-nocid">
+        <div class="nm-header">
+            <div class="nm-header-left">
+                <span class="nm-title">⛏️ NOCID_MINER</span>
+                <span class="nm-badge idle" id="nm-status">● IDLE</span>
             </div>
             <div class="mini-ring-container">
                 <div class="mini-ring-track"></div>
-                <div class="mini-ring-spinner" id="faucet-spinner"></div>
-                <div class="mini-ring-dot" id="faucet-dot"></div>
-                <div class="mini-ring-text" id="faucet-ring-text">STOP</div>
+                <div class="mini-ring-spinner" id="nm-spinner"></div>
+                <div class="mini-ring-dot" id="nm-dot"></div>
+                <div class="mini-ring-text" id="nm-ring-text">STOP</div>
             </div>
         </div>
-        <div class="faucet-body">
-            <div class="faucet-sidebar">
-                <div class="fs-item">Status <span id="faucet-status-text">IDLE</span></div>
-                <div class="fs-item">Coin <span id="faucet-current-coin">-</span></div>
-                <div class="fs-item">Claims <span id="faucet-claims-24h">0</span></div>
-                <div class="fs-item" style="border-top: 1px dashed #333; padding-top: 6px; margin-top: 4px;">API Token <span id="faucet-api-token" style="color:#ffbb00;">0</span></div>
-                <div class="fs-item">Web Ping <span id="faucet-web-ping" style="color:var(--cyan);">0ms</span></div>
-                <div class="fs-item fs-time">
-                    <div class="time-label">⏰ Last Claim</div>
-                    <span class="time-value pulse" id="faucet-last-time">--:--:--</span>
-                    <span class="time-relative" id="faucet-last-relative">-</span>
+
+        <div class="nm-body">
+            <div class="nm-grid">
+                <div class="nm-stat">
+                    <div class="nm-stat-label">⚡ Hash Rate</div>
+                    <div class="nm-stat-value hash" id="nm-hashrate">0 GH/s</div>
+                </div>
+                <div class="nm-stat">
+                    <div class="nm-stat-label">🪙 Mining Coin</div>
+                    <div class="nm-stat-value coin" id="nm-current-coin">XMR</div>
+                </div>
+                <div class="nm-stat">
+                    <div class="nm-stat-label">💎 XMR Balance</div>
+                    <div class="nm-stat-value xmr" id="nm-xmr-balance">0.00000000</div>
+                </div>
+                <div class="nm-stat">
+                    <div class="nm-stat-label">💰 NCDT Balance</div>
+                    <div class="nm-stat-value ncdt" id="nm-ncdt-balance">0.00</div>
                 </div>
             </div>
-            <div class="faucet-log-container">
-                <div class="faucet-total-header">
-                    <span>TOTAL CLAIM</span>
-                    <span class="total-text" id="faucet-total-val">$0.00000</span>
+
+            <div class="nm-session">
+                <span class="nm-session-label">📈 SESSION INCOME</span>
+                <span class="nm-session-val" id="nm-session">+0 NCDT · +0.00000000 XMR</span>
+            </div>
+
+            <div class="nm-counter-row">
+                <div class="nm-counter faucet">
+                    <span class="num" id="nm-ct-faucet">0</span>
+                    <span class="lbl">FAUCET</span>
                 </div>
-                <div class="faucet-log-scroll" id="faucet-scroll-area">
-                    <div class="log-section-title"><span>📦 LOG KLAIM</span><span style="font-size:7px; color:#888;">waktu · jumlah</span></div>
-                    <div id="coin-data-list">
-                        <div style="color:#aaa; font-size:9px; text-align:center; margin:10px 0; text-shadow: 1px 1px 2px #000;">Menunggu log...</div>
-                    </div>
+                <div class="nm-counter ptc">
+                    <span class="num" id="nm-ct-ptc">0</span>
+                    <span class="lbl">PTC</span>
                 </div>
+                <div class="nm-counter bonus">
+                    <span class="num" id="nm-ct-bonus">0</span>
+                    <span class="lbl">BONUS</span>
+                </div>
+            </div>
+
+            <div class="nm-info-row">
+                <span>⏳ Next: <b class="next-claim" id="nm-next-claim">--:--</b></span>
+                <span>⚡ Uptime: <b class="uptime" id="nm-uptime">00:00:00</b></span>
+                <span>🔑 Solver: <b id="nm-solver">0</b></span>
+            </div>
+        </div>
+
+        <div class="nm-log-section">
+            <div class="nm-log-title">
+                <span>📜 ACTIVITY LOG</span>
+                <span id="nm-last-update">--:--:--</span>
+            </div>
+            <div id="nm-log-list">
+                <div class="nm-log-empty">Menunggu aktivitas miner...</div>
             </div>
         </div>
     </div>
@@ -491,52 +482,19 @@
     let lastCcSaldo = 0;
     let lastLwSaldo = 0;
 
-    let faucetAccumulatedUsd = 0;
-    let faucetResetMarker = null;
     let ccResetMarker = null;
     let lwResetMarker = null;
     let lastWdStatusKey = "";
     let prevCcSaldoUi = 0;
     let prevLwSaldoUi = 0;
-    let prevFaucetTotalUi = 0;
 
-    // === LIVE TRACKER WAKTU ===
-    // Menyimpan histori waktu klaim berdasarkan "Key" unik (Koin + Jumlah)
-    let claimTimeHistory = {};
-    let lastTopLogKey = "";
-    let lastKnownClaimTime = null; // Waktu klaim terakhir secara global
-
-    function getCoinGeckoId(symbol) {
-        const map = {
-            'BTC': 'bitcoin', 'ETH': 'ethereum', 'BNB': 'binancecoin',
-            'ADA': 'cardano', 'LTC': 'litecoin', 'DOGE': 'dogecoin',
-            'SOL': 'solana', 'TRX': 'tron', 'TON': 'the-open-network',
-            'POL': 'polygon-ecosystem-token', 'USDT': 'tether', 'PEPE': 'pepe',
-            'TRUMP': 'official-trump', 'XRP': 'ripple', 'DASH': 'dash',
-            'DGB': 'digibyte', 'BCH': 'bitcoin-cash'
-        };
-        return map[symbol] || null;
-    }
-
-    function getCoinEmoji(symbol) {
-        const map = {
-            'BTC': '₿', 'ETH': 'Ξ', 'BNB': '🔶', 'ADA': '₳', 'LTC': 'Ł',
-            'DOGE': '🐕', 'SOL': '◎', 'TRX': '⚡', 'TON': '💎', 'POL': '⬢',
-            'USDT': '💵', 'XRP': '✕', 'DASH': '⬡', 'DGB': '◆', 'BCH': '₿',
-            'PEPE': '🐸', 'TRUMP': '🇺🇸', 'PTC': '📺'
-        };
-        return map[symbol] || '🪙';
-    }
-
-    function isWdSuccess(status) {
-        if (!status) return false;
-        const s = status.toLowerCase();
-        return s.includes("sukses") || s.includes("berhasil") ||
-               s.includes("completed") || s.includes("success") ||
-               s.includes("done") || s.includes("selesai");
-    }
+    // NOCID live tracker
+    let prevNocidNcdt = 0;
+    let prevNocidXmr = 0;
+    let nocidUptimeStart = null;
 
     function triggerPop(el) {
+        if (!el) return;
         el.classList.remove('pop');
         void el.offsetWidth;
         el.classList.add('pop');
@@ -547,7 +505,6 @@
         const dot = document.getElementById(dotId);
         const text = document.getElementById(textId);
         if (!spinner || !dot || !text) return;
-        
         if (isRunning) {
             spinner.classList.add('active');
             dot.classList.add('active');
@@ -561,93 +518,27 @@
         }
     }
 
-    // === HELPER WAKTU ===
-    function formatTimeHMSS(date) {
-        if (!date || isNaN(date.getTime())) return '--:--:--';
-        const hh = String(date.getHours()).padStart(2,'0');
-        const mm = String(date.getMinutes()).padStart(2,'0');
-        const ss = String(date.getSeconds()).padStart(2,'0');
-        return `${hh}:${mm}:${ss}`;
+    function fmtHM(t) {
+        const h = String(t.getHours()).padStart(2,'0');
+        const m = String(t.getMinutes()).padStart(2,'0');
+        const s = String(t.getSeconds()).padStart(2,'0');
+        return `${h}:${m}:${s}`;
     }
 
-    function formatTimeAgo(date) {
-        if (!date || isNaN(date.getTime())) return '-';
-        const now = new Date();
-        const diffMs = now - date;
-        if (diffMs < 0) return 'baru saja';
-        const diffMin = Math.floor(diffMs / 60000);
-        if (diffMin < 1) return 'baru saja';
-        if (diffMin < 60) return `${diffMin} mnt lalu`;
-        const diffHour = Math.floor(diffMin / 60);
-        if (diffHour < 24) return `${diffHour} jam lalu`;
-        const diffDay = Math.floor(diffHour / 24);
-        return `${diffDay} hari lalu`;
+    function fmtDuration(sec) {
+        sec = Math.max(0, Math.floor(sec));
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = sec % 60;
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
 
-    // === FUNGSI PELACAK WAKTU (ANTI MELESET) ===
-    function trackLiveTimes(limeLogs) {
-        if (!limeLogs || limeLogs.length === 0) return;
-        
-        const now = new Date();
-        
-        // Cek log paling atas
-        const topLogStr = limeLogs[0];
-        const cleanTopLog = topLogStr.replace("✅ ", "").trim();
-        const parts = cleanTopLog.split(" | ");
-        const topKey = (parts.length === 3) ? `${parts[1].trim()}|${parts[2].trim()}` : cleanTopLog;
-
-        // Jika log teratas belum pernah dicatat
-        if (!claimTimeHistory[topKey]) {
-            // Jika ini pertama kali halaman dibuka (history kosong), isi estimasi ke belakang
-            if (!lastKnownClaimTime) {
-                for (let i = limeLogs.length - 1; i >= 0; i--) {
-                    let cLog = limeLogs[i].replace("✅ ", "").trim();
-                    let p = cLog.split(" | ");
-                    let k = (p.length === 3) ? `${p[1].trim()}|${p[2].trim()}` : cLog;
-                    // Estimasi mundur per 2 menit
-                    claimTimeHistory[k] = new Date(now.getTime() - (i * 2 * 60000));
-                }
-                // Karena yang teratas baru masuk, set Last Claim global = sekarang
-                claimTimeHistory[topKey] = now;
-                lastKnownClaimTime = now;
-            } else {
-                // Halaman sudah jalan, tiba-tiba ada log baru masuk di atas
-                claimTimeHistory[topKey] = now;
-                lastKnownClaimTime = now;
-            }
-            lastTopLogKey = topKey;
-        }
-
-        // Antisipasi jika bot upload 2 log sekaligus dalam 1 kali update
-        let topIndexInArray = -1;
-        for (let i = 0; i < limeLogs.length; i++) {
-            let cLog = limeLogs[i].replace("✅ ", "").trim();
-            let p = cLog.split(" | ");
-            let k = (p.length === 3) ? `${p[1].trim()}|${p[2].trim()}` : cLog;
-            if (k === lastTopLogKey) {
-                topIndexInArray = i;
-                break;
-            }
-        }
-        
-        // Jika log lama ternyata bergeser ke bawah (berarti ada log baru di atasnya)
-        if (topIndexInArray > 0) {
-            for (let i = 0; i < topIndexInArray; i++) {
-                let cLog = limeLogs[i].replace("✅ ", "").trim();
-                let p = cLog.split(" | ");
-                let k = (p.length === 3) ? `${p[1].trim()}|${p[2].trim()}` : cLog;
-                
-                if (!claimTimeHistory[k]) {
-                    // Beri waktu -10 detik dari waktu sekarang untuk log yang menumpuk
-                    claimTimeHistory[k] = new Date(now.getTime() - (i * 10000));
-                }
-            }
-            // Update acuan log teratas
-            let newTopLog = limeLogs[0].replace("✅ ", "").trim();
-            let newParts = newTopLog.split(" | ");
-            lastTopLogKey = (newParts.length === 3) ? `${newParts[1].trim()}|${newParts[2].trim()}` : newTopLog;
-            lastKnownClaimTime = claimTimeHistory[lastTopLogKey];
-        }
+    function isWdSuccess(status) {
+        if (!status) return false;
+        const s = status.toLowerCase();
+        return s.includes("sukses") || s.includes("berhasil") ||
+               s.includes("completed") || s.includes("success") ||
+               s.includes("done") || s.includes("selesai");
     }
 
     async function setCookie(bot) {
@@ -698,8 +589,9 @@
             const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
             const data = await res.json();
             const endPing = new Date().getTime();
-            document.getElementById('faucet-web-ping').innerText = (endPing - startPing) + "ms";
-            
+            const webPingEl = document.getElementById('net-ping');
+            if (webPingEl) webPingEl.innerText = (endPing - startPing) + "ms";
+
             liveBadge.innerText = "LIVE SYNC";
             liveBadge.className = "badge";
             liveBadge.prepend(liveDot);
@@ -707,7 +599,7 @@
             serverStatus.innerText = "ONLINE";
             serverStatus.style.color = "var(--green)";
             document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', {hour12:false});
-            
+
             state.cc_paused = data.cc_paused || false;
             state.lw_paused = data.lw_paused || false;
             const btnCC = document.getElementById('btn-pause-cc');
@@ -716,8 +608,7 @@
             const badgeLW = document.getElementById('lw-status');
             const cardCC = document.getElementById('card-cc');
             const cardLW = document.getElementById('card-lw');
-            const cardFaucet = document.getElementById('card-faucet');
-            
+
             // ClipCoin
             if (state.cc_paused) {
                 btnCC.innerText = "RESUME"; btnCC.classList.add('active');
@@ -749,7 +640,7 @@
                     prevCcSaldoUi = ccDisplay;
                 }
             }
-            
+
             // LuckyWatch
             if (state.lw_paused) {
                 btnLW.innerText = "RESUME"; btnLW.classList.add('active');
@@ -781,66 +672,24 @@
                     prevLwSaldoUi = lwDisplay;
                 }
             }
-            
+
             let ccSaldo = state.cc_paused ? lastCcSaldo : parseFloat(data.clipcoin?.saldo || 0);
             let lwSaldo = state.lw_paused ? lastLwSaldo : parseFloat(data.luckywatch?.saldo || 0);
-            
             if(!state.cc_paused) lastCcSaldo = ccSaldo;
             if(!state.lw_paused) lastLwSaldo = lwSaldo;
 
             let ccClaims = parseInt(data.clipcoin?.claims || 0);
             let lwClaims = parseInt(data.luckywatch?.claims || 0);
             let totalClaims = ccClaims + lwClaims;
-            
-            // FAUCET USD
-            let faucetUsd = 0;
-            if (data.lime_logs && data.lime_logs.length > 0) {
-                let coinAmounts = {};
-                let coinIds = [];
 
-                data.lime_logs.forEach((log) => {
-                    let cleanLog = log.replace("✅ ", "").trim();
-                    let parts = cleanLog.split(" | ");
-                    if (parts.length === 3) {
-                        let coin = parts[1].trim();
-                        let amountStr = parts[2].trim().replace("+", "");
-                        let amount = parseFloat(amountStr) || 0;
-                        coinAmounts[coin] = (coinAmounts[coin] || 0) + amount;
-                        let cgId = getCoinGeckoId(coin);
-                        if (cgId && !coinIds.includes(cgId)) coinIds.push(cgId);
-                    }
-                });
-
-                if (coinIds.length > 0) {
-                    try {
-                        const priceRes = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinIds.join(',')}&vs_currencies=usd`);
-                        const prices = await priceRes.json();
-                        for (const [coin, amount] of Object.entries(coinAmounts)) {
-                            let cgId = getCoinGeckoId(coin);
-                            if (cgId && prices[cgId] && prices[cgId].usd) {
-                                faucetUsd += amount * prices[cgId].usd;
-                            }
-                        }
-                    } catch (e) { console.error("Gagal ambil harga:", e); }
-                }
-            }
-            
-            faucetAccumulatedUsd = faucetUsd;
-            let faucetDisplay = (faucetResetMarker !== null) ? Math.max(0, faucetAccumulatedUsd - faucetResetMarker) : faucetAccumulatedUsd;
-            let faucetTotalEl = document.getElementById('faucet-total-val');
-            faucetTotalEl.innerText = "$" + faucetDisplay.toFixed(5);
-            if (Math.abs(faucetDisplay - prevFaucetTotalUi) > 0.000001 && faucetDisplay > 0) triggerPop(faucetTotalEl);
-            prevFaucetTotalUi = faucetDisplay;
-
-            // Deteksi WD sukses → reset marker
+            // WD success detection — reset marker
             let wdStatusRaw = data.wd_status || "BELUM ADA ANTREAN";
             let wdKey = wdStatusRaw + "|" + (data.wd_timestamp || "");
             if (isWdSuccess(wdStatusRaw) && wdKey !== lastWdStatusKey) {
-                faucetResetMarker = faucetAccumulatedUsd;
                 ccResetMarker = parseFloat(data.clipcoin?.saldo || 0);
                 lwResetMarker = parseFloat(data.luckywatch?.saldo || 0);
                 lastWdStatusKey = wdKey;
-                ['faucet-total-val','cc-saldo','lw-saldo'].forEach(id => {
+                ['cc-saldo','lw-saldo'].forEach(id => {
                     let el = document.getElementById(id);
                     el.classList.remove('pop');
                     void el.offsetWidth;
@@ -851,116 +700,13 @@
                 lastWdStatusKey = wdKey;
             }
 
+            // Header: USD murni (ClipCoin + LuckyWatch)
             let ccDisplayTotal = (ccResetMarker !== null) ? Math.max(0, ccSaldo - ccResetMarker) : ccSaldo;
             let lwDisplayTotal = (lwResetMarker !== null) ? Math.max(0, lwSaldo - lwResetMarker) : lwSaldo;
-            let grandTotal = ccDisplayTotal + lwDisplayTotal + faucetDisplay;
-            document.getElementById('total-saldo').innerText = "$" + grandTotal.toFixed(5);
-            document.getElementById('total-income').innerText = "$" + grandTotal.toFixed(5);
+            let grandTotalUsd = ccDisplayTotal + lwDisplayTotal;
+            document.getElementById('total-saldo').innerText = "$" + grandTotalUsd.toFixed(5);
+            document.getElementById('total-income').innerText = "$" + grandTotalUsd.toFixed(5);
             document.getElementById('total-claims').innerText = totalClaims;
-
-            // === LOG FAUCET & LIVE TIMER ===
-            if (data.lime_logs && data.lime_logs.length > 0) {
-                // 1. Deteksi log baru & simpan waktunya
-                trackLiveTimes(data.lime_logs);
-                
-                // 2. Update Last Claim di Sidebar secara akurat
-                if (lastKnownClaimTime) {
-                    const timeEl = document.getElementById('faucet-last-time');
-                    const relEl = document.getElementById('faucet-last-relative');
-                    timeEl.innerText = formatTimeHMSS(lastKnownClaimTime);
-                    relEl.innerText = formatTimeAgo(lastKnownClaimTime);
-                }
-
-                // 3. Render Log
-                let logHtml = "";
-                for (let i = 0; i < data.lime_logs.length; i++) {
-                    let log = data.lime_logs[i];
-                    let cleanLog = log.replace("✅ ", "").trim();
-                    let parts = cleanLog.split(" | ");
-                    let timeStr = "--:--:--";
-                    let timeAgo = "-";
-                    
-                    if (parts.length === 3) {
-                        let coin = parts[1].trim();
-                        let amountStr = parts[2].trim().replace("+", "");
-                        let amount = parseFloat(amountStr) || 0;
-                        let emoji = getCoinEmoji(coin);
-                        let key = `${coin}|${parts[2].trim()}`;
-
-                        // Ambil waktu dari history
-                        let coinTime = claimTimeHistory[key] || new Date();
-                        timeStr = formatTimeHMSS(coinTime);
-                        timeAgo = formatTimeAgo(coinTime);
-                        
-                        // Handle scientific notation
-                        let displayAmount = amountStr;
-                        if (displayAmount.includes('e') || displayAmount.includes('E')) {
-                            displayAmount = amount.toFixed(10).replace(/0+$/, "").replace(/\.$/, "");
-                        }
-
-                        logHtml += `
-                        <div class="log-item success">
-                            <div class="coin-info">
-                                <span class="coin-emoji">${emoji}</span>
-                                <span class="coin-name">${coin}</span>
-                            </div>
-                            <div class="coin-right">
-                                <span class="coin-amount">+${displayAmount}</span>
-                                <span class="coin-time">⏱ ${timeStr}</span>
-                                <span class="coin-time-rel">${timeAgo}</span>
-                            </div>
-                        </div>`;
-                    } else {
-                        logHtml += `<div class="log-item error">${log}</div>`;
-                    }
-                }
-                document.getElementById('coin-data-list').innerHTML = logHtml;
-            } else {
-                // Jika log kosong, reset tampilan Last Claim
-                document.getElementById('faucet-last-time').innerText = '--:--:--';
-                document.getElementById('faucet-last-relative').innerText = 'belum ada';
-            }
-
-            // Faucet status + efek
-            if (data.faucet) {
-                let fStatus = data.faucet.status || "IDLE";
-                let fStatusEl = document.getElementById('faucet-status-text');
-                if (fStatus === 'RUNNING' || fStatus === 'WATCHING') {
-                    fStatusEl.innerHTML = `<span class="text-blink">▶ ${fStatus}</span>`;
-                    cardFaucet.classList.add('running');
-                    setRingState('faucet-spinner', 'faucet-dot', 'faucet-ring-text', true);
-                } else {
-                    fStatusEl.innerText = fStatus;
-                    cardFaucet.classList.remove('running');
-                    setRingState('faucet-spinner', 'faucet-dot', 'faucet-ring-text', false);
-                }
-                
-                document.getElementById('faucet-current-coin').innerText = data.lime_coin ? data.lime_coin.toUpperCase() : '-';
-                
-                let now = new Date();
-                let claims24h = data.lime_claims || 0;
-                if (data.last_claim_date) {
-                    let lastClaimDate = new Date(data.last_claim_date);
-                    let hoursDiff = (now - lastClaimDate) / (1000 * 60 * 60);
-                    if (hoursDiff > 24) claims24h = 0;
-                }
-                document.getElementById('faucet-claims-24h').innerText = claims24h;
-                
-                let token_api = data.captcha?.token || 0;
-                document.getElementById('faucet-api-token').innerText = token_api;
-                
-                let fEngineStatus = document.getElementById('faucet-engine-status');
-                if (fStatus === "RUNNING") {
-                    fEngineStatus.innerText = "● RUNNING";
-                    fEngineStatus.style.color = "var(--green)";
-                } else if (fStatus === "PAUSED") {
-                    fEngineStatus.innerText = "⏸ PAUSED";
-                    fEngineStatus.style.color = "var(--yellow)";
-                } else {
-                    fEngineStatus.innerText = "● IDLE";
-                    fEngineStatus.style.color = "var(--red)";
-                }
-            }
 
             // WD
             let wdStatus = data.wd_status || "BELUM ADA ANTREAN";
@@ -968,31 +714,29 @@
             if(wdStatus.toLowerCase().includes("sukses") || wdStatus.toLowerCase().includes("berhasil") || wdStatus.toLowerCase().includes("success")) document.getElementById('wd-status').style.color = "var(--green)";
             else if(wdStatus.toLowerCase().includes("proses")) document.getElementById('wd-status').style.color = "var(--yellow)";
             else document.getElementById('wd-status').style.color = "var(--red)";
-            
+
             if(data.system) {
                 document.getElementById('cpu-val').innerText = data.system.cpu + "%";
                 document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
                 document.getElementById('ram-val').innerText = data.system.ram + "%";
                 document.getElementById('ram-bar').style.width = data.system.ram + "%";
-                document.getElementById('net-ping').innerText = data.system.ping + "ms";
                 document.getElementById('net-req').innerText = data.system.total_req;
             }
             if(data.captcha) document.getElementById('cap-token').innerText = data.captcha.token;
 
             if (data.cc_logs && data.cc_logs.length > 0) {
                 let logHtml = "";
-                data.cc_logs.slice(-3).forEach(log => {
-                    logHtml += `<div style="margin-bottom:2px;">${log}</div>`;
-                });
+                data.cc_logs.slice(-3).forEach(log => { logHtml += `<div style="margin-bottom:2px;">${log}</div>`; });
                 document.getElementById('cc-log-container').innerHTML = logHtml;
             }
             if (data.lw_logs && data.lw_logs.length > 0) {
                 let logHtml = "";
-                data.lw_logs.slice(-3).forEach(log => {
-                    logHtml += `<div style="margin-bottom:2px;">${log}</div>`;
-                });
+                data.lw_logs.slice(-3).forEach(log => { logHtml += `<div style="margin-bottom:2px;">${log}</div>`; });
                 document.getElementById('lw-log-container').innerHTML = logHtml;
             }
+
+            renderNocid(data);
+
         } catch (e) {
             liveBadge.innerText = "OFFLINE";
             liveBadge.className = "badge offline";
@@ -1003,9 +747,138 @@
             console.error(e);
         }
     }
-    
+
+    let nocidLastData = null;
+
+    function renderNocid(data) {
+        if (!data) return;
+        nocidLastData = data;
+
+        const nmStatus = document.getElementById('nm-status');
+        const cardNocid = document.getElementById('card-nocid');
+        const rawStatus = (data.nocid_status || "IDLE").toString().toUpperCase();
+        let statusClass = 'idle';
+        let statusIcon = '●';
+        let isRunning = false;
+
+        if (rawStatus.includes('MINING') || rawStatus.includes('CLAIM')) {
+            statusClass = 'mining'; statusIcon = '⛏'; isRunning = true;
+        } else if (rawStatus.includes('PTC') || rawStatus.includes('FAUCET') || rawStatus.includes('BONUS') || rawStatus.includes('CHALLENGE')) {
+            statusClass = 'claim'; statusIcon = '⚡'; isRunning = true;
+        } else if (rawStatus.includes('WAIT') || rawStatus.includes('COOLDOWN')) {
+            statusClass = 'wait'; statusIcon = '⏳';
+        } else if (rawStatus.includes('ERROR') || rawStatus.includes('EXPIRED')) {
+            statusClass = 'error'; statusIcon = '✖';
+        }
+
+        nmStatus.innerText = `${statusIcon} ${rawStatus}`;
+        nmStatus.className = `nm-badge ${statusClass}`;
+
+        if (isRunning) cardNocid.classList.add('running');
+        else cardNocid.classList.remove('running');
+        setRingState('nm-spinner', 'nm-dot', 'nm-ring-text', isRunning);
+
+        const hashrateEl = document.getElementById('nm-hashrate');
+        hashrateEl.innerText = data.nocid_hashrate || '0 GH/s';
+        document.getElementById('nm-current-coin').innerText = (data.nocid_current_coin || 'XMR').toUpperCase();
+
+        const xmrBal = parseFloat(data.nocid_xmr_balance || 0);
+        const ncdtBal = parseFloat(data.nocid_ncdt_balance || 0);
+
+        const xmrEl = document.getElementById('nm-xmr-balance');
+        xmrEl.innerText = xmrBal.toFixed(8);
+        if (Math.abs(xmrBal - prevNocidXmr) > 0.00000001) triggerPop(xmrEl);
+        prevNocidXmr = xmrBal;
+
+        const ncdtEl = document.getElementById('nm-ncdt-balance');
+        ncdtEl.innerText = ncdtBal.toFixed(2);
+        if (Math.abs(ncdtBal - prevNocidNcdt) > 0.0001) triggerPop(ncdtEl);
+        prevNocidNcdt = ncdtBal;
+
+        const sessionNcdt = parseFloat(data.nocid_session_ncdt || 0);
+        const sessionXmr = parseFloat(data.nocid_session_xmr || 0);
+        document.getElementById('nm-session').innerText =
+            `+${sessionNcdt.toFixed(2)} NCDT · +${sessionXmr.toFixed(8)} XMR`;
+
+        document.getElementById('nm-ct-faucet').innerText = data.nocid_total_faucet || 0;
+        document.getElementById('nm-ct-ptc').innerText = data.nocid_total_ptc || 0;
+        document.getElementById('nm-ct-bonus').innerText = data.nocid_total_challenges || 0;
+
+        const nextIn = parseInt(data.nocid_next_claim_in || 0);
+        const nextEl = document.getElementById('nm-next-claim');
+        if (nextIn > 0) nextEl.innerText = fmtDuration(nextIn);
+        else nextEl.innerText = 'READY';
+
+        if (data.nocid_uptime_start) {
+            const upStart = new Date(data.nocid_uptime_start).getTime();
+            if (!isNaN(upStart)) nocidUptimeStart = upStart;
+        }
+        const uptimeEl = document.getElementById('nm-uptime');
+        if (nocidUptimeStart) {
+            const uptimeSec = (Date.now() - nocidUptimeStart) / 1000;
+            uptimeEl.innerText = fmtDuration(uptimeSec);
+        }
+
+        document.getElementById('nm-solver').innerText = data.nocid_solver_balance || 0;
+
+        const upd = data.nocid_updated_at ? new Date(data.nocid_updated_at) : new Date();
+        document.getElementById('nm-last-update').innerText = fmtHM(upd);
+
+        const logs = data.nocid_logs || [];
+        const logList = document.getElementById('nm-log-list');
+        if (!logs.length) {
+            logList.innerHTML = `<div class="nm-log-empty">Menunggu aktivitas miner...</div>`;
+        } else {
+            let html = '';
+            logs.slice().reverse().forEach(item => {
+                let tsStr = '--:--';
+                try {
+                    if (item.ts) {
+                        const d = new Date(item.ts);
+                        tsStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                    }
+                } catch(e) {}
+                const t = (item.type || 'INFO').toUpperCase();
+                html += `
+                    <div class="nm-log-item">
+                        <span class="ts">${tsStr}</span>
+                        <span class="type ${t}">${t}</span>
+                        <span class="reward">${item.reward || ''}</span>
+                    </div>`;
+            });
+            logList.innerHTML = html;
+        }
+    }
+
+    async function fetchNocidOnly() {
+        try {
+            const res = await fetch(JSON_URL + "?t=" + Date.now() + "_n");
+            const data = await res.json();
+            renderNocid(data);
+        } catch (e) {}
+    }
+
+    setInterval(() => {
+        if (!nocidLastData) return;
+        if (nocidUptimeStart) {
+            const uptimeSec = (Date.now() - nocidUptimeStart) / 1000;
+            const el = document.getElementById('nm-uptime');
+            if (el) el.innerText = fmtDuration(uptimeSec);
+        }
+        const nextEl = document.getElementById('nm-next-claim');
+        if (nextEl && nextEl.innerText !== 'READY') {
+            const parts = nextEl.innerText.split(':').map(Number);
+            if (parts.length === 3 && !parts.some(isNaN)) {
+                let total = parts[0]*3600 + parts[1]*60 + parts[2];
+                if (total > 0) total -= 1;
+                nextEl.innerText = total > 0 ? fmtDuration(total) : 'READY';
+            }
+        }
+    }, 1000);
+
     fetchDashboard();
     setInterval(fetchDashboard, 3000);
+    setInterval(fetchNocidOnly, 2000);
 </script>
 </body>
 </html>

@@ -23,7 +23,7 @@
         }
 
         .cockpit { display: flex; flex-direction: column; gap: 8px; max-width: 600px; margin: 0 auto; }
-        .header, .info-bar, .bot-card, .nocid-miner, .box, .wd-hub, .cookie-box { position: relative; transition: 0.3s; }
+        .header, .bot-card, .nocid-miner, .box, .wd-hub, .cookie-box { position: relative; transition: 0.3s; }
 
         /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; border-left: 3px solid var(--purple); overflow: hidden; }
@@ -41,13 +41,11 @@
         .total-balance { font-size: 16px; font-weight: 600; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.3); line-height: 1.2; }
         .total-balance-label { font-size: 7px; color: #aaa; letter-spacing: 1px; }
 
-
-        /* ==== FIX BOT CARDS (BALANCE) ==== */
+        /* BOT CARDS */
         .bot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .bot-card { 
             background: var(--panel); border: 1px solid var(--border); border-radius: 8px; 
             padding: 10px; display: flex; flex-direction: column; overflow: hidden; 
-            /* Hapus height fixed, biarkan auto biar nyesuaiin isi */
         }
         .bot-card::before { content: ''; position: absolute; inset: 0; background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg'); background-size: cover; opacity: 0.3; z-index: 0; }
         .bot-card > * { position: relative; z-index: 1; }
@@ -64,12 +62,10 @@
         
         .stat-row { display: flex; justify-content: space-between; font-size: 8px; margin-bottom: 2px; }
         
-        /* Log Box disesuaikan tingginya */
         .bot-log { 
             font-size: 7px; color: #aaa; margin-top: 6px; 
             border-top: 1px dashed #444; padding-top: 4px; 
-            min-height: 25px; /* Ubah dari height fixed ke min-height */
-            max-height: 40px; overflow: hidden; 
+            min-height: 25px; max-height: 40px; overflow: hidden; 
             display: flex; flex-direction: column; justify-content: flex-end; 
             font-family: 'Courier New', monospace;
         }
@@ -259,7 +255,8 @@
         </div>
     </div>
 
-    <!-- BOT CARDS DIPERKECIL & DISEIMBANGKAN -->
+    <!-- INFO BAR DIHAPUS (LANGSUNG KE BOT CARDS) -->
+
     <div class="bot-grid">
         <div class="bot-card clip" id="card-cc">
             <div class="bot-header">
@@ -637,8 +634,6 @@
 
             let ccS = parseFloat(data.clipcoin?.saldo || 0), lwS = parseFloat(data.luckywatch?.saldo || 0);
             document.getElementById('total-saldo').innerText = "$" + (ccS + lwS).toFixed(5);
-            document.getElementById('total-income').innerText = "$" + (ccS + lwS).toFixed(5);
-            document.getElementById('total-claims').innerText = parseInt(data.clipcoin?.claims || 0) + parseInt(data.luckywatch?.claims || 0);
 
             if (data.system) {
                 document.getElementById('cpu-bar').style.width = data.system.cpu + "%";

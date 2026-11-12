@@ -143,7 +143,6 @@
         }
         .bot-card.clip.running { animation: runningPulsePink 2s infinite; }
         .bot-card.lucky.running { animation: runningPulseCyan 2s infinite; }
-        .nocid-miner.running { animation: runningPulseOrange 2s infinite; }
 
         @keyframes textBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .text-blink { animation: textBlink 1s infinite; }
@@ -174,7 +173,7 @@
         .bar-bg { background: rgba(0,0,0,0.8); height: 4px; border-radius: 3px; overflow: hidden; margin-top: 3px; border: 1px solid #222; }
         .bar-fill { height: 100%; }
 
-        /* NOCID_MINER PANEL */
+        /* ================= NOCID MINER ================= */
         .nocid-miner {
             background: linear-gradient(180deg, rgba(20,10,0,0.9) 0%, rgba(10,5,0,0.95) 100%);
             border: 1px solid var(--border);
@@ -185,6 +184,7 @@
             margin-top: 5px;
             position: relative;
             box-shadow: 0 4px 20px rgba(255,136,0,0.15);
+            transition: box-shadow 0.6s ease, border-color 0.6s ease;
         }
         .nocid-miner::before {
             content: '';
@@ -192,8 +192,44 @@
             background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-log.jpg');
             background-size: cover; background-position: center;
             opacity: 0.15; z-index: 0;
+            transition: opacity 0.6s ease;
         }
         .nocid-miner > * { position: relative; z-index: 1; }
+
+        /* Living running state */
+        .nocid-miner.running {
+            border-color: transparent;
+            background-clip: padding-box;
+            animation: nmAuroraBorder 4s linear infinite, nmPulseGlow 2.2s ease-in-out infinite;
+        }
+        .nocid-miner.running::before { opacity: 0.28; }
+        .nocid-miner.running::after {
+            content: '';
+            position: absolute; inset: -1px;
+            border-radius: 8px;
+            padding: 1px;
+            background: linear-gradient(120deg, #ff8800, #ff007f, #b026ff, #00e5ff, #ffbb00, #ff8800);
+            background-size: 300% 300%;
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+                    mask-composite: exclude;
+            animation: nmAuroraShift 3s linear infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+        @keyframes nmAuroraBorder {
+            0% { box-shadow: 0 0 0 rgba(255,136,0,0), 0 4px 20px rgba(255,136,0,0.15); }
+            50% { box-shadow: 0 0 25px rgba(255,0,127,0.35), 0 6px 30px rgba(255,136,0,0.3); }
+            100% { box-shadow: 0 0 0 rgba(255,136,0,0), 0 4px 20px rgba(255,136,0,0.15); }
+        }
+        @keyframes nmAuroraShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+        @keyframes nmPulseGlow {
+            0%,100% { filter: brightness(1); }
+            50% { filter: brightness(1.08); }
+        }
 
         .nm-header {
             background: linear-gradient(90deg, rgba(255,136,0,0.25) 0%, rgba(255,0,127,0.15) 50%, rgba(176,38,255,0.2) 100%);
@@ -201,29 +237,73 @@
             padding: 10px 12px;
             display: flex; justify-content: space-between; align-items: center;
             gap: 8px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.4s ease;
+        }
+        .nocid-miner.running .nm-header { border-bottom-color: transparent; }
+        .nocid-miner.running .nm-header::after {
+            content: '';
+            position: absolute; top: 0; bottom: 0; width: 60px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+            animation: nmSweep 2.4s linear infinite;
+            pointer-events: none;
+        }
+        .nocid-miner.running .nm-header::before {
+            content: '';
+            position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+            background: linear-gradient(90deg, #ff8800, #ff007f, #b026ff, #00e5ff, #ffbb00, #ff8800);
+            background-size: 300% 100%;
+            animation: nmAuroraShift 3s linear infinite;
+        }
+        @keyframes nmSweep {
+            0% { left: -80px; }
+            100% { left: 105%; }
         }
         .nm-header-left { display: flex; align-items: center; gap: 8px; }
+
         .nm-title {
             font-weight: 800; font-size: 12px; letter-spacing: 1px;
             background: linear-gradient(90deg, #ffbb00, #ff8800, #ff007f);
             -webkit-background-clip: text; background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 6px rgba(255,136,0,0.5));
+            transition: filter 0.4s ease;
         }
+        .nocid-miner.running .nm-title {
+            background: linear-gradient(90deg, #ffbb00, #ff8800, #ff007f, #b026ff, #00e5ff, #ffbb00);
+            background-size: 300% 100%;
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: nmTitleShimmer 2.5s linear infinite;
+            filter: drop-shadow(0 0 10px rgba(255,136,0,0.8));
+        }
+        @keyframes nmTitleShimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
         .nm-badge {
             font-size: 8px; padding: 2px 8px; border-radius: 10px; font-weight: bold;
             display: inline-flex; align-items: center; gap: 4px;
             border: 1px solid var(--orange); color: var(--orange);
             background: rgba(0,0,0,0.5);
         }
-        .nm-badge.mining { color: var(--green); border-color: var(--green); background: rgba(0,255,136,0.1); }
+        .nm-badge.mining { color: var(--green); border-color: var(--green); background: rgba(0,255,136,0.1); position: relative; overflow: hidden; }
         .nm-badge.wait { color: var(--yellow); border-color: var(--yellow); background: rgba(255,187,0,0.1); }
         .nm-badge.idle { color: var(--text-dim); border-color: var(--text-dim); }
         .nm-badge.claim { color: var(--pink); border-color: var(--pink); background: rgba(255,0,127,0.1); }
         .nm-badge.error { color: var(--red); border-color: var(--red); background: rgba(255,51,51,0.15); }
+        .nocid-miner.running .nm-badge.mining {
+            animation: nmBadgePulse 1.4s ease-in-out infinite;
+            box-shadow: 0 0 12px rgba(0,255,136,0.4);
+        }
+        @keyframes nmBadgePulse {
+            0%,100% { box-shadow: 0 0 6px rgba(0,255,136,0.25); }
+            50% { box-shadow: 0 0 16px rgba(0,255,136,0.6); }
+        }
 
         .nm-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
-
         .nm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .nm-stat {
             background: rgba(0,0,0,0.45);
@@ -242,6 +322,13 @@
         .nm-stat-value.ncdt { color: var(--green); text-shadow: 0 0 8px rgba(0,255,136,0.5); }
         .nm-stat-value.xmr  { color: var(--cyan); text-shadow: 0 0 8px rgba(0,229,255,0.5); }
         .nm-stat-value.coin { color: var(--purple); text-shadow: 0 0 8px rgba(176,38,255,0.5); }
+        .nocid-miner.running .nm-stat-value.hash { animation: nmHashFlicker 1.8s ease-in-out infinite; }
+        @keyframes nmHashFlicker {
+            0%,100% { opacity: 1; transform: translateX(0); }
+            25% { opacity: 0.85; transform: translateX(-0.5px); }
+            50% { opacity: 1; transform: translateX(0.5px); }
+            75% { opacity: 0.9; transform: translateX(0); }
+        }
 
         .nm-session {
             background: rgba(255,136,0,0.06);
@@ -253,6 +340,15 @@
         }
         .nm-session-label { color: var(--text-dim); letter-spacing: 0.5px; }
         .nm-session-val { color: var(--orange); font-weight: bold; text-shadow: 0 0 6px rgba(255,136,0,0.6); }
+        .nocid-miner.running .nm-session {
+            border-color: rgba(255,136,0,0.6);
+            background: rgba(255,136,0,0.12);
+            animation: nmSessionPulse 2s ease-in-out infinite;
+        }
+        @keyframes nmSessionPulse {
+            0%,100% { box-shadow: 0 0 0 rgba(255,136,0,0); }
+            50% { box-shadow: 0 0 14px rgba(255,136,0,0.25); }
+        }
 
         .nm-counter-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 8px; text-align: center; }
         .nm-counter {
@@ -269,6 +365,11 @@
         .nm-counter.ptc .num { color: var(--cyan); }
         .nm-counter.bonus .num { color: var(--green); }
         .nm-counter .lbl { color: var(--text-dim); font-size: 7px; letter-spacing: 0.5px; }
+        .nocid-miner.running .nm-counter .num { animation: nmCounterGlow 3s ease-in-out infinite; }
+        @keyframes nmCounterGlow {
+            0%,100% { text-shadow: 0 0 6px currentColor; }
+            50% { text-shadow: 0 0 12px currentColor, 0 0 20px currentColor; }
+        }
 
         .nm-info-row { display: flex; justify-content: space-between; gap: 6px; font-size: 8px; color: var(--text-dim); padding: 4px 0; border-top: 1px dashed rgba(255,136,0,0.2); }
         .nm-info-row span b { color: #fff; }
@@ -285,6 +386,27 @@
         .nm-log-item .type.BONUS { color: var(--green); }
         .nm-log-item .reward { color: var(--green); text-align: right; }
         .nm-log-empty { text-align: center; color: var(--text-dim); font-size: 9px; padding: 10px; }
+
+        /* Faster + brighter ring when running */
+        .nocid-miner.running .mini-ring-spinner {
+            animation-duration: 0.9s !important;
+            filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 14px currentColor);
+        }
+        .nocid-miner.running .mini-ring-dot {
+            animation-duration: 0.9s !important;
+            box-shadow: 0 0 8px #fff, 0 0 16px currentColor;
+        }
+        .nocid-miner.running .mini-ring-track {
+            border-color: rgba(255,136,0,0.4);
+            box-shadow: inset 0 0 12px rgba(255,136,0,0.4), 0 0 12px rgba(255,136,0,0.3);
+        }
+        .nocid-miner.running .mini-ring-text {
+            animation: nmRingText 1.2s ease-in-out infinite;
+        }
+        @keyframes nmRingText {
+            0%,100% { text-shadow: 0 0 4px currentColor; }
+            50% { text-shadow: 0 0 10px currentColor, 0 0 18px currentColor; }
+        }
 
         /* WD & Cookie */
         .wd-box { background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--border); border-left: 3px solid var(--yellow); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -368,7 +490,7 @@
     <div class="nocid-miner" id="card-nocid">
         <div class="nm-header">
             <div class="nm-header-left">
-                <span class="nm-title">⛏️ NOCID_MINER</span>
+                <span class="nm-title">⛏️ CryptoRetjeh V1.3.8</span>
                 <span class="nm-badge idle" id="nm-status">● IDLE</span>
             </div>
             <div class="mini-ring-container">
@@ -464,6 +586,7 @@
     <div class="cookie-box">
         <label>🍪 Update Cookie / Email</label>
         <div>
+            <input type="text" class="email-input" id="cookie-input" placeholder="Cookie (ClipCoin / LuckyWatch)...">
             <input type="text" class="email-input" id="lime-email" placeholder="Email LimeFaucet...">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
                 <button class="btn-cookie" style="font-size:8px; padding:4px;" onclick="setCookie('clipcoin')">ClipCoin</button>
@@ -486,10 +609,10 @@
     let prevCcSaldoUi = 0;
     let prevLwSaldoUi = 0;
 
-    // NOCID live tracker
     let prevNocidNcdt = 0;
     let prevNocidXmr = 0;
     let nocidUptimeStart = null;
+    let nocidLastData = null;
 
     function triggerPop(el) {
         if (!el) return;
@@ -517,9 +640,9 @@
     }
 
     function fmtHM(t) {
-        const h = String(t.getHours()).padStart(2,'0');
-        const m = String(t.getMinutes()).padStart(2,'0');
-        const s = String(t.getSeconds()).padStart(2,'0');
+        const h = String(t.getHours()).padStart(2, '0');
+        const m = String(t.getMinutes()).padStart(2, '0');
+        const s = String(t.getSeconds()).padStart(2, '0');
         return `${h}:${m}:${s}`;
     }
 
@@ -528,7 +651,7 @@
         const h = Math.floor(sec / 3600);
         const m = Math.floor((sec % 3600) / 60);
         const s = sec % 60;
-        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
     function isWdSuccess(status) {
@@ -541,12 +664,12 @@
 
     async function setCookie(bot) {
         const cookieVal = document.getElementById('cookie-input')?.value.trim();
-        if(!cookieVal) return alert("Cookie tidak boleh kosong!");
+        if (!cookieVal) return alert("Cookie tidak boleh kosong!");
         try {
             const r = await fetch(JSON_URL);
             const data = await r.json();
-            if(bot === 'clipcoin') data.cc_cookie = cookieVal;
-            if(bot === 'luckywatch') data.lw_cookie = cookieVal;
+            if (bot === 'clipcoin') data.cc_cookie = cookieVal;
+            if (bot === 'luckywatch') data.lw_cookie = cookieVal;
             await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             alert(`Cookie ${bot.toUpperCase()} berhasil dikirim ke antrean.`);
         } catch (e) { alert("Gagal update cookie: " + e); }
@@ -554,11 +677,11 @@
 
     async function setEmail(bot) {
         const emailVal = document.getElementById('lime-email')?.value.trim();
-        if(!emailVal) return alert("Email tidak boleh kosong!");
+        if (!emailVal) return alert("Email tidak boleh kosong!");
         try {
             const r = await fetch(JSON_URL);
             const data = await r.json();
-            if(bot === 'lime') data.lime_email = emailVal;
+            if (bot === 'lime') data.lime_email = emailVal;
             await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             alert(`Email Faucet berhasil dikirim ke antrean.`);
             document.getElementById('lime-email').value = "";
@@ -596,7 +719,7 @@
             liveDot.className = "dot";
             serverStatus.innerText = "ONLINE";
             serverStatus.style.color = "var(--green)";
-            document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', {hour12:false});
+            document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', { hour12: false });
 
             state.cc_paused = data.cc_paused || false;
             state.lw_paused = data.lw_paused || false;
@@ -607,7 +730,6 @@
             const cardCC = document.getElementById('card-cc');
             const cardLW = document.getElementById('card-lw');
 
-            // ClipCoin
             if (state.cc_paused) {
                 btnCC.innerText = "RESUME"; btnCC.classList.add('active');
                 badgeCC.innerText = "PAUSED"; badgeCC.style.color = "var(--red)"; badgeCC.style.borderColor = "var(--red)";
@@ -615,7 +737,7 @@
                 setRingState('cc-spinner', 'cc-dot', 'cc-ring-text', false);
             } else {
                 btnCC.innerText = "PAUSE"; btnCC.classList.remove('active');
-                if(data.clipcoin) {
+                if (data.clipcoin) {
                     let statusText = data.clipcoin.status;
                     if (statusText === 'RUNNING' || statusText === 'WATCHING') {
                         badgeCC.innerHTML = `<span class="text-blink">▶ ${statusText}</span>`;
@@ -639,7 +761,6 @@
                 }
             }
 
-            // LuckyWatch
             if (state.lw_paused) {
                 btnLW.innerText = "RESUME"; btnLW.classList.add('active');
                 badgeLW.innerText = "PAUSED"; badgeLW.style.color = "var(--red)"; badgeLW.style.borderColor = "var(--red)";
@@ -647,7 +768,7 @@
                 setRingState('lw-spinner', 'lw-dot', 'lw-ring-text', false);
             } else {
                 btnLW.innerText = "PAUSE"; btnLW.classList.remove('active');
-                if(data.luckywatch) {
+                if (data.luckywatch) {
                     let statusText = data.luckywatch.status;
                     if (statusText === 'RUNNING' || statusText === 'WATCHING') {
                         badgeLW.innerHTML = `<span class="text-blink">▶ ${statusText}</span>`;
@@ -673,21 +794,20 @@
 
             let ccSaldo = state.cc_paused ? lastCcSaldo : parseFloat(data.clipcoin?.saldo || 0);
             let lwSaldo = state.lw_paused ? lastLwSaldo : parseFloat(data.luckywatch?.saldo || 0);
-            if(!state.cc_paused) lastCcSaldo = ccSaldo;
-            if(!state.lw_paused) lastLwSaldo = lwSaldo;
+            if (!state.cc_paused) lastCcSaldo = ccSaldo;
+            if (!state.lw_paused) lastLwSaldo = lwSaldo;
 
             let ccClaims = parseInt(data.clipcoin?.claims || 0);
             let lwClaims = parseInt(data.luckywatch?.claims || 0);
             let totalClaims = ccClaims + lwClaims;
 
-            // WD success detection — reset marker
             let wdStatusRaw = data.wd_status || "BELUM ADA ANTREAN";
             let wdKey = wdStatusRaw + "|" + (data.wd_timestamp || "");
             if (isWdSuccess(wdStatusRaw) && wdKey !== lastWdStatusKey) {
                 ccResetMarker = parseFloat(data.clipcoin?.saldo || 0);
                 lwResetMarker = parseFloat(data.luckywatch?.saldo || 0);
                 lastWdStatusKey = wdKey;
-                ['cc-saldo','lw-saldo'].forEach(id => {
+                ['cc-saldo', 'lw-saldo'].forEach(id => {
                     let el = document.getElementById(id);
                     el.classList.remove('pop');
                     void el.offsetWidth;
@@ -698,7 +818,6 @@
                 lastWdStatusKey = wdKey;
             }
 
-            // Header: USD murni (ClipCoin + LuckyWatch)
             let ccDisplayTotal = (ccResetMarker !== null) ? Math.max(0, ccSaldo - ccResetMarker) : ccSaldo;
             let lwDisplayTotal = (lwResetMarker !== null) ? Math.max(0, lwSaldo - lwResetMarker) : lwSaldo;
             let grandTotalUsd = ccDisplayTotal + lwDisplayTotal;
@@ -706,21 +825,20 @@
             document.getElementById('total-income').innerText = "$" + grandTotalUsd.toFixed(5);
             document.getElementById('total-claims').innerText = totalClaims;
 
-            // WD
             let wdStatus = data.wd_status || "BELUM ADA ANTREAN";
             document.getElementById('wd-status').innerText = wdStatus;
-            if(wdStatus.toLowerCase().includes("sukses") || wdStatus.toLowerCase().includes("berhasil") || wdStatus.toLowerCase().includes("success")) document.getElementById('wd-status').style.color = "var(--green)";
-            else if(wdStatus.toLowerCase().includes("proses")) document.getElementById('wd-status').style.color = "var(--yellow)";
+            if (wdStatus.toLowerCase().includes("sukses") || wdStatus.toLowerCase().includes("berhasil") || wdStatus.toLowerCase().includes("success")) document.getElementById('wd-status').style.color = "var(--green)";
+            else if (wdStatus.toLowerCase().includes("proses")) document.getElementById('wd-status').style.color = "var(--yellow)";
             else document.getElementById('wd-status').style.color = "var(--red)";
 
-            if(data.system) {
+            if (data.system) {
                 document.getElementById('cpu-val').innerText = data.system.cpu + "%";
                 document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
                 document.getElementById('ram-val').innerText = data.system.ram + "%";
                 document.getElementById('ram-bar').style.width = data.system.ram + "%";
                 document.getElementById('net-req').innerText = data.system.total_req;
             }
-            if(data.captcha) document.getElementById('cap-token').innerText = data.captcha.token;
+            if (data.captcha) document.getElementById('cap-token').innerText = data.captcha.token;
 
             if (data.cc_logs && data.cc_logs.length > 0) {
                 let logHtml = "";
@@ -746,22 +864,19 @@
         }
     }
 
-    let nocidLastData = null;
-
     function renderNocid(data) {
         if (!data) return;
         nocidLastData = data;
 
         const nmStatus = document.getElementById('nm-status');
         const cardNocid = document.getElementById('card-nocid');
+        if (!nmStatus || !cardNocid) return;
 
-        // Cek Banned Terlebih Dahulu
         if (data.nocid_banned) {
             nmStatus.innerText = "🚫 BANNED";
             nmStatus.className = "nm-badge error";
             cardNocid.classList.remove('running');
             setRingState('nm-spinner', 'nm-dot', 'nm-ring-text', false);
-            // Masih render sisa data di bawahnya agar informatif
         } else {
             const rawStatus = (data.nocid_status || "IDLE").toString().toUpperCase();
             let statusClass = 'idle';
@@ -778,7 +893,11 @@
                 statusClass = 'error'; statusIcon = '✖';
             }
 
-            nmStatus.innerText = `${statusIcon} ${rawStatus}`;
+            if (isRunning && rawStatus.includes('MINING')) {
+                nmStatus.innerText = `⛏ MINING`;
+            } else {
+                nmStatus.innerText = `${statusIcon} ${rawStatus}`;
+            }
             nmStatus.className = `nm-badge ${statusClass}`;
 
             if (isRunning) cardNocid.classList.add('running');
@@ -786,55 +905,63 @@
             setRingState('nm-spinner', 'nm-dot', 'nm-ring-text', isRunning);
         }
 
-        // Stats
         const hashrateEl = document.getElementById('nm-hashrate');
-        hashrateEl.innerText = data.nocid_hashrate || '0 GH/s';
-        document.getElementById('nm-current-coin').innerText = (data.nocid_current_coin || 'XMR').toUpperCase();
+        if (hashrateEl) hashrateEl.innerText = data.nocid_hashrate || '0 GH/s';
+        const coinEl = document.getElementById('nm-current-coin');
+        if (coinEl) coinEl.innerText = (data.nocid_current_coin || 'XMR').toUpperCase();
 
         const xmrBal = parseFloat(data.nocid_xmr_balance || 0);
         const ncdtBal = parseFloat(data.nocid_ncdt_balance || 0);
 
         const xmrEl = document.getElementById('nm-xmr-balance');
-        xmrEl.innerText = xmrBal.toFixed(8);
-        if (Math.abs(xmrBal - prevNocidXmr) > 0.00000001) triggerPop(xmrEl);
+        if (xmrEl) {
+            xmrEl.innerText = xmrBal.toFixed(8);
+            if (Math.abs(xmrBal - prevNocidXmr) > 0.00000001) triggerPop(xmrEl);
+        }
         prevNocidXmr = xmrBal;
 
         const ncdtEl = document.getElementById('nm-ncdt-balance');
-        ncdtEl.innerText = ncdtBal.toFixed(2);
-        if (Math.abs(ncdtBal - prevNocidNcdt) > 0.0001) triggerPop(ncdtEl);
+        if (ncdtEl) {
+            ncdtEl.innerText = ncdtBal.toFixed(2);
+            if (Math.abs(ncdtBal - prevNocidNcdt) > 0.0001) triggerPop(ncdtEl);
+        }
         prevNocidNcdt = ncdtBal;
 
         const sessionNcdt = parseFloat(data.nocid_session_ncdt || 0);
         const sessionXmr = parseFloat(data.nocid_session_xmr || 0);
-        document.getElementById('nm-session').innerText =
-            `+${sessionNcdt.toFixed(2)} NCDT · +${sessionXmr.toFixed(8)} XMR`;
+        const sessEl = document.getElementById('nm-session');
+        if (sessEl) sessEl.innerText = `+${sessionNcdt.toFixed(2)} NCDT · +${sessionXmr.toFixed(8)} XMR`;
 
-        document.getElementById('nm-ct-faucet').innerText = data.nocid_total_faucet || 0;
-        document.getElementById('nm-ct-ptc').innerText = data.nocid_total_ptc || 0;
-        document.getElementById('nm-ct-bonus').innerText = data.nocid_total_challenges || 0;
+        const ctF = document.getElementById('nm-ct-faucet');
+        const ctP = document.getElementById('nm-ct-ptc');
+        const ctB = document.getElementById('nm-ct-bonus');
+        if (ctF) ctF.innerText = data.nocid_total_faucet || 0;
+        if (ctP) ctP.innerText = data.nocid_total_ptc || 0;
+        if (ctB) ctB.innerText = data.nocid_total_challenges || 0;
 
         const nextIn = parseInt(data.nocid_next_claim_in || 0);
         const nextEl = document.getElementById('nm-next-claim');
-        if (nextIn > 0) nextEl.innerText = fmtDuration(nextIn);
-        else nextEl.innerText = 'READY';
+        if (nextEl) nextEl.innerText = nextIn > 0 ? fmtDuration(nextIn) : 'READY';
 
         if (data.nocid_uptime_start) {
             const upStart = new Date(data.nocid_uptime_start).getTime();
             if (!isNaN(upStart)) nocidUptimeStart = upStart;
         }
         const uptimeEl = document.getElementById('nm-uptime');
-        if (nocidUptimeStart) {
-            const uptimeSec = (Date.now() - nocidUptimeStart) / 1000;
-            uptimeEl.innerText = fmtDuration(uptimeSec);
+        if (uptimeEl && nocidUptimeStart) {
+            uptimeEl.innerText = fmtDuration((Date.now() - nocidUptimeStart) / 1000);
         }
 
-        document.getElementById('nm-solver').innerText = data.nocid_solver_balance || 0;
+        const solverEl = document.getElementById('nm-solver');
+        if (solverEl) solverEl.innerText = data.nocid_solver_balance || 0;
 
         const upd = data.nocid_updated_at ? new Date(data.nocid_updated_at) : new Date();
-        document.getElementById('nm-last-update').innerText = fmtHM(upd);
+        const updEl = document.getElementById('nm-last-update');
+        if (updEl) updEl.innerText = fmtHM(upd);
 
         const logs = data.nocid_logs || [];
         const logList = document.getElementById('nm-log-list');
+        if (!logList) return;
         if (!logs.length) {
             logList.innerHTML = `<div class="nm-log-empty">Menunggu aktivitas miner...</div>`;
         } else {
@@ -844,9 +971,9 @@
                 try {
                     if (item.ts) {
                         const d = new Date(item.ts);
-                        tsStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                        tsStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
                     }
-                } catch(e) {}
+                } catch (e) {}
                 const t = (item.type || 'INFO').toUpperCase();
                 html += `
                     <div class="nm-log-item">
@@ -878,7 +1005,7 @@
         if (nextEl && nextEl.innerText !== 'READY') {
             const parts = nextEl.innerText.split(':').map(Number);
             if (parts.length === 3 && !parts.some(isNaN)) {
-                let total = parts[0]*3600 + parts[1]*60 + parts[2];
+                let total = parts[0] * 3600 + parts[1] * 60 + parts[2];
                 if (total > 0) total -= 1;
                 nextEl.innerText = total > 0 ? fmtDuration(total) : 'READY';
             }

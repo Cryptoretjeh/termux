@@ -78,7 +78,7 @@
         .bot-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 6px; }
         .bot-header-left { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
         .bot-title { font-size: 10px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; text-shadow: 1px 1px 2px #000; white-space: nowrap; }
-        .bot-status { font-size: 7px; padding: 1px 6px; border-radius: 10px; font-weight: bold; align-self: flex-start; }
+        .bot-status { font-size: 7px; padding: 1px 6px; border-radius: 10px; font-weight: bold; align-self: flex-start; transition: color 0.3s, border-color 0.3s; }
         .bot-status.idle { color: var(--green); border: 1px solid var(--green); background: rgba(0,0,0,0.5); }
         .bot-status.watching { color: var(--yellow); border: 1px solid var(--yellow); background: rgba(0,0,0,0.5); }
         .bot-status.paused { color: var(--red); border: 1px solid var(--red); background: rgba(0,0,0,0.5); }
@@ -92,6 +92,7 @@
             background: rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
+            transition: border-color 0.4s, box-shadow 0.4s;
         }
         .mini-ring-spinner {
             position: absolute; inset: 0; border-radius: 50%;
@@ -137,10 +138,6 @@
             0%, 100% { border-color: var(--border); box-shadow: 0 0 0 rgba(0,229,255,0); }
             50% { border-color: var(--cyan); box-shadow: 0 0 15px rgba(0,229,255,0.35); }
         }
-        @keyframes runningPulseOrange {
-            0%, 100% { border-color: var(--border); box-shadow: 0 0 0 rgba(255,136,0,0); }
-            50% { border-color: var(--orange); box-shadow: 0 0 15px rgba(255,136,0,0.4); }
-        }
         .bot-card.clip.running { animation: runningPulsePink 2s infinite; }
         .bot-card.lucky.running { animation: runningPulseCyan 2s infinite; }
 
@@ -171,19 +168,19 @@
         .box > * { position: relative; z-index: 1; }
         .box-title { font-size: 9px; font-weight: bold; color: var(--text-dim); margin-bottom: 6px; border-bottom: 1px dashed var(--border); padding-bottom: 4px; display: flex; justify-content: space-between; }
         .bar-bg { background: rgba(0,0,0,0.8); height: 4px; border-radius: 3px; overflow: hidden; margin-top: 3px; border: 1px solid #222; }
-        .bar-fill { height: 100%; }
+        .bar-fill { height: 100%; transition: width 0.6s ease; }
 
-        /* ================= NOCID MINER ================= */
+        /* ================= NOCID MINER (v2 enhanced) ================= */
         .nocid-miner {
-            background: linear-gradient(180deg, rgba(20,10,0,0.9) 0%, rgba(10,5,0,0.95) 100%);
+            background: linear-gradient(180deg, rgba(20,10,0,0.92) 0%, rgba(8,4,0,0.97) 100%);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             margin-top: 5px;
             position: relative;
-            box-shadow: 0 4px 20px rgba(255,136,0,0.15);
+            box-shadow: 0 6px 24px rgba(255,136,0,0.18);
             transition: box-shadow 0.6s ease, border-color 0.6s ease;
         }
         .nocid-miner::before {
@@ -196,6 +193,30 @@
         }
         .nocid-miner > * { position: relative; z-index: 1; }
 
+        /* Floating particles layer (visible only when running) */
+        .nocid-miner .nm-particles {
+            position: absolute; inset: 0; z-index: 0; pointer-events: none;
+            opacity: 0; transition: opacity 0.6s ease; overflow: hidden;
+        }
+        .nocid-miner.running .nm-particles { opacity: 1; }
+        .nocid-miner .nm-particles span {
+            position: absolute; bottom: -10px; width: 2px; height: 2px;
+            background: #ffbb00; border-radius: 50%;
+            box-shadow: 0 0 6px #ffbb00;
+            animation: nmFloat 6s linear infinite;
+        }
+        .nocid-miner .nm-particles span:nth-child(1) { left: 10%; animation-delay: 0s; background:#ff8800; box-shadow:0 0 6px #ff8800; }
+        .nocid-miner .nm-particles span:nth-child(2) { left: 25%; animation-delay: 1.2s; background:#ff007f; box-shadow:0 0 6px #ff007f; }
+        .nocid-miner .nm-particles span:nth-child(3) { left: 42%; animation-delay: 2.4s; background:#b026ff; box-shadow:0 0 6px #b026ff; }
+        .nocid-miner .nm-particles span:nth-child(4) { left: 58%; animation-delay: 0.6s; background:#00e5ff; box-shadow:0 0 6px #00e5ff; }
+        .nocid-miner .nm-particles span:nth-child(5) { left: 73%; animation-delay: 1.8s; background:#ffbb00; box-shadow:0 0 6px #ffbb00; }
+        .nocid-miner .nm-particles span:nth-child(6) { left: 88%; animation-delay: 3.0s; background:#ff8800; box-shadow:0 0 6px #ff8800; }
+        @keyframes nmFloat {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-220px) scale(1); opacity: 0; }
+        }
+
         /* Living running state */
         .nocid-miner.running {
             border-color: transparent;
@@ -206,7 +227,7 @@
         .nocid-miner.running::after {
             content: '';
             position: absolute; inset: -1px;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 1px;
             background: linear-gradient(120deg, #ff8800, #ff007f, #b026ff, #00e5ff, #ffbb00, #ff8800);
             background-size: 300% 300%;
@@ -218,9 +239,9 @@
             pointer-events: none;
         }
         @keyframes nmAuroraBorder {
-            0% { box-shadow: 0 0 0 rgba(255,136,0,0), 0 4px 20px rgba(255,136,0,0.15); }
-            50% { box-shadow: 0 0 25px rgba(255,0,127,0.35), 0 6px 30px rgba(255,136,0,0.3); }
-            100% { box-shadow: 0 0 0 rgba(255,136,0,0), 0 4px 20px rgba(255,136,0,0.15); }
+            0% { box-shadow: 0 0 0 rgba(255,136,0,0), 0 6px 24px rgba(255,136,0,0.18); }
+            50% { box-shadow: 0 0 28px rgba(255,0,127,0.4), 0 8px 34px rgba(255,136,0,0.35); }
+            100% { box-shadow: 0 0 0 rgba(255,136,0,0), 0 6px 24px rgba(255,136,0,0.18); }
         }
         @keyframes nmAuroraShift {
             0% { background-position: 0% 50%; }
@@ -232,9 +253,9 @@
         }
 
         .nm-header {
-            background: linear-gradient(90deg, rgba(255,136,0,0.25) 0%, rgba(255,0,127,0.15) 50%, rgba(176,38,255,0.2) 100%);
+            background: linear-gradient(90deg, rgba(255,136,0,0.28) 0%, rgba(255,0,127,0.18) 50%, rgba(176,38,255,0.24) 100%);
             border-bottom: 2px solid var(--orange);
-            padding: 10px 12px;
+            padding: 12px 14px;
             display: flex; justify-content: space-between; align-items: center;
             gap: 8px;
             position: relative;
@@ -245,7 +266,7 @@
         .nocid-miner.running .nm-header::after {
             content: '';
             position: absolute; top: 0; bottom: 0; width: 60px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             animation: nmSweep 2.4s linear infinite;
             pointer-events: none;
         }
@@ -260,10 +281,10 @@
             0% { left: -80px; }
             100% { left: 105%; }
         }
-        .nm-header-left { display: flex; align-items: center; gap: 8px; }
+        .nm-header-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
         .nm-title {
-            font-weight: 800; font-size: 12px; letter-spacing: 1px;
+            font-weight: 800; font-size: 13px; letter-spacing: 1px;
             background: linear-gradient(90deg, #ffbb00, #ff8800, #ff007f);
             -webkit-background-clip: text; background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -276,7 +297,7 @@
             -webkit-background-clip: text; background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: nmTitleShimmer 2.5s linear infinite;
-            filter: drop-shadow(0 0 10px rgba(255,136,0,0.8));
+            filter: drop-shadow(0 0 10px rgba(255,136,0,0.85));
         }
         @keyframes nmTitleShimmer {
             0% { background-position: 0% 50%; }
@@ -284,34 +305,57 @@
         }
 
         .nm-badge {
-            font-size: 8px; padding: 2px 8px; border-radius: 10px; font-weight: bold;
+            font-size: 8px; padding: 3px 9px; border-radius: 10px; font-weight: bold;
             display: inline-flex; align-items: center; gap: 4px;
             border: 1px solid var(--orange); color: var(--orange);
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.55);
+            letter-spacing: 0.4px;
+            transition: color 0.3s, border-color 0.3s, background 0.3s;
         }
-        .nm-badge.mining { color: var(--green); border-color: var(--green); background: rgba(0,255,136,0.1); position: relative; overflow: hidden; }
-        .nm-badge.wait { color: var(--yellow); border-color: var(--yellow); background: rgba(255,187,0,0.1); }
+        .nm-badge.mining { color: var(--green); border-color: var(--green); background: rgba(0,255,136,0.12); position: relative; overflow: hidden; }
+        .nm-badge.wait { color: var(--yellow); border-color: var(--yellow); background: rgba(255,187,0,0.12); }
         .nm-badge.idle { color: var(--text-dim); border-color: var(--text-dim); }
-        .nm-badge.claim { color: var(--pink); border-color: var(--pink); background: rgba(255,0,127,0.1); }
-        .nm-badge.error { color: var(--red); border-color: var(--red); background: rgba(255,51,51,0.15); }
+        .nm-badge.claim { color: var(--pink); border-color: var(--pink); background: rgba(255,0,127,0.12); }
+        .nm-badge.error { color: var(--red); border-color: var(--red); background: rgba(255,51,51,0.18); }
         .nocid-miner.running .nm-badge.mining {
             animation: nmBadgePulse 1.4s ease-in-out infinite;
-            box-shadow: 0 0 12px rgba(0,255,136,0.4);
+            box-shadow: 0 0 12px rgba(0,255,136,0.45);
         }
         @keyframes nmBadgePulse {
             0%,100% { box-shadow: 0 0 6px rgba(0,255,136,0.25); }
-            50% { box-shadow: 0 0 16px rgba(0,255,136,0.6); }
+            50% { box-shadow: 0 0 16px rgba(0,255,136,0.65); }
+        }
+
+        /* Live pulse bar under header when running */
+        .nm-pulse-bar {
+            height: 2px; width: 100%; background: rgba(0,0,0,0.4); overflow: hidden;
+            position: relative; z-index: 1;
+        }
+        .nm-pulse-bar::after {
+            content: ''; position: absolute; top: 0; left: -30%; width: 30%; height: 100%;
+            background: linear-gradient(90deg, transparent, var(--orange), var(--pink), var(--purple), transparent);
+            opacity: 0; transition: opacity 0.4s;
+        }
+        .nocid-miner.running .nm-pulse-bar::after {
+            opacity: 1;
+            animation: nmPulseSlide 2s linear infinite;
+        }
+        @keyframes nmPulseSlide {
+            0% { left: -30%; }
+            100% { left: 100%; }
         }
 
         .nm-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
         .nm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .nm-stat {
-            background: rgba(0,0,0,0.45);
+            background: rgba(0,0,0,0.5);
             border: 1px solid rgba(255,136,0,0.15);
             border-radius: 6px;
-            padding: 6px 8px;
-            display: flex; flex-direction: column; gap: 2px;
+            padding: 7px 9px;
+            display: flex; flex-direction: column; gap: 3px;
+            transition: border-color 0.4s, background 0.4s;
         }
+        .nocid-miner.running .nm-stat { border-color: rgba(255,136,0,0.35); background: rgba(20,10,0,0.6); }
         .nm-stat-label { font-size: 7px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; }
         .nm-stat-value {
             font-size: 12px; font-weight: 800; color: #fff;
@@ -334,33 +378,36 @@
             background: rgba(255,136,0,0.06);
             border: 1px dashed rgba(255,136,0,0.3);
             border-radius: 6px;
-            padding: 6px 10px;
+            padding: 7px 10px;
             display: flex; justify-content: space-between; align-items: center;
             font-size: 9px;
+            transition: border-color 0.4s, background 0.4s;
         }
         .nm-session-label { color: var(--text-dim); letter-spacing: 0.5px; }
         .nm-session-val { color: var(--orange); font-weight: bold; text-shadow: 0 0 6px rgba(255,136,0,0.6); }
         .nocid-miner.running .nm-session {
-            border-color: rgba(255,136,0,0.6);
-            background: rgba(255,136,0,0.12);
+            border-color: rgba(255,136,0,0.65);
+            background: rgba(255,136,0,0.14);
             animation: nmSessionPulse 2s ease-in-out infinite;
         }
         @keyframes nmSessionPulse {
             0%,100% { box-shadow: 0 0 0 rgba(255,136,0,0); }
-            50% { box-shadow: 0 0 14px rgba(255,136,0,0.25); }
+            50% { box-shadow: 0 0 16px rgba(255,136,0,0.3); }
         }
 
-        .nm-counter-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 8px; text-align: center; }
+        .nm-counter-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; font-size: 8px; text-align: center; }
         .nm-counter {
-            background: rgba(0,0,0,0.4);
-            border-radius: 4px;
-            padding: 4px 2px;
+            background: rgba(0,0,0,0.45);
+            border-radius: 5px;
+            padding: 5px 2px;
             border-bottom: 2px solid;
+            transition: background 0.3s, transform 0.3s;
         }
         .nm-counter.faucet { border-color: var(--pink); }
         .nm-counter.ptc { border-color: var(--cyan); }
         .nm-counter.bonus { border-color: var(--green); }
-        .nm-counter .num { display: block; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 0 6px currentColor; }
+        .nocid-miner.running .nm-counter { background: rgba(20,10,0,0.65); }
+        .nm-counter .num { display: block; font-size: 14px; font-weight: 800; color: #fff; text-shadow: 0 0 6px currentColor; transition: transform 0.3s; }
         .nm-counter.faucet .num { color: var(--pink); }
         .nm-counter.ptc .num { color: var(--cyan); }
         .nm-counter.bonus .num { color: var(--green); }
@@ -371,20 +418,52 @@
             50% { text-shadow: 0 0 12px currentColor, 0 0 20px currentColor; }
         }
 
-        .nm-info-row { display: flex; justify-content: space-between; gap: 6px; font-size: 8px; color: var(--text-dim); padding: 4px 0; border-top: 1px dashed rgba(255,136,0,0.2); }
+        .nm-info-row {
+            display: flex; justify-content: space-between; gap: 6px;
+            font-size: 8px; color: var(--text-dim);
+            padding: 6px 0 2px; border-top: 1px dashed rgba(255,136,0,0.2);
+        }
         .nm-info-row span b { color: #fff; }
-        .nm-info-row .next-claim { color: var(--yellow); font-weight: bold; }
-        .nm-info-row .uptime { color: var(--cyan); font-weight: bold; }
+        .nm-info-row .next-claim {
+            color: var(--yellow); font-weight: bold;
+            background: rgba(255,187,0,0.12); padding: 1px 5px; border-radius: 3px;
+        }
+        .nm-info-row .uptime {
+            color: var(--cyan); font-weight: bold;
+            background: rgba(0,229,255,0.12); padding: 1px 5px; border-radius: 3px;
+        }
+        .nm-info-row .solver {
+            color: var(--purple); font-weight: bold;
+        }
 
-        .nm-log-section { background: rgba(0,0,0,0.55); border-top: 1px solid rgba(255,136,0,0.3); padding: 8px 12px; max-height: 140px; overflow-y: auto; }
+        .nm-log-section {
+            background: rgba(0,0,0,0.6);
+            border-top: 1px solid rgba(255,136,0,0.3);
+            padding: 8px 12px; max-height: 150px; overflow-y: auto;
+            scrollbar-width: thin; scrollbar-color: var(--orange) transparent;
+        }
+        .nm-log-section::-webkit-scrollbar { width: 4px; }
+        .nm-log-section::-webkit-scrollbar-thumb { background: var(--orange); border-radius: 2px; }
         .nm-log-title { font-size: 8px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 6px; display: flex; justify-content: space-between; }
-        .nm-log-item { display: grid; grid-template-columns: 50px 60px 1fr; gap: 8px; font-size: 9px; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.03); align-items: center; }
+        .nm-log-item {
+            display: grid; grid-template-columns: 50px 60px 1fr; gap: 8px;
+            font-size: 9px; padding: 4px 6px; margin-bottom: 2px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            border-left: 2px solid transparent;
+            align-items: center;
+            border-radius: 3px;
+            animation: nmLogFade 0.4s ease;
+        }
+        @keyframes nmLogFade { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
         .nm-log-item .ts { color: var(--yellow); font-weight: bold; }
         .nm-log-item .type { color: var(--cyan); font-weight: bold; text-transform: uppercase; }
         .nm-log-item .type.FAUCET { color: var(--pink); }
         .nm-log-item .type.PTC { color: var(--cyan); }
         .nm-log-item .type.BONUS { color: var(--green); }
-        .nm-log-item .reward { color: var(--green); text-align: right; }
+        .nm-log-item .reward { color: var(--green); text-align: right; font-weight: bold; }
+        .nm-log-item:has(.type.FAUCET) { border-left-color: var(--pink); background: rgba(255,0,127,0.05); }
+        .nm-log-item:has(.type.PTC) { border-left-color: var(--cyan); background: rgba(0,229,255,0.05); }
+        .nm-log-item:has(.type.BONUS) { border-left-color: var(--green); background: rgba(0,255,136,0.05); }
         .nm-log-empty { text-align: center; color: var(--text-dim); font-size: 9px; padding: 10px; }
 
         /* Faster + brighter ring when running */
@@ -397,8 +476,8 @@
             box-shadow: 0 0 8px #fff, 0 0 16px currentColor;
         }
         .nocid-miner.running .mini-ring-track {
-            border-color: rgba(255,136,0,0.4);
-            box-shadow: inset 0 0 12px rgba(255,136,0,0.4), 0 0 12px rgba(255,136,0,0.3);
+            border-color: rgba(255,136,0,0.5);
+            box-shadow: inset 0 0 12px rgba(255,136,0,0.4), 0 0 12px rgba(255,136,0,0.35);
         }
         .nocid-miner.running .mini-ring-text {
             animation: nmRingText 1.2s ease-in-out infinite;
@@ -486,8 +565,11 @@
         </div>
     </div>
 
-    <!-- NOCID_MINER PANEL -->
+    <!-- ================= NOCID MINER PANEL v2 ================= -->
     <div class="nocid-miner" id="card-nocid">
+        <div class="nm-particles">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
         <div class="nm-header">
             <div class="nm-header-left">
                 <span class="nm-title">⛏️ CryptoRetjeh V1.3.8</span>
@@ -500,6 +582,7 @@
                 <div class="mini-ring-text" id="nm-ring-text">STOP</div>
             </div>
         </div>
+        <div class="nm-pulse-bar"></div>
 
         <div class="nm-body">
             <div class="nm-grid">
@@ -544,7 +627,7 @@
             <div class="nm-info-row">
                 <span>⏳ Next: <b class="next-claim" id="nm-next-claim">--:--</b></span>
                 <span>⚡ Uptime: <b class="uptime" id="nm-uptime">00:00:00</b></span>
-                <span>🔑 Solver: <b id="nm-solver">0</b></span>
+                <span>🔑 Solver: <b class="solver" id="nm-solver">0</b></span>
             </div>
         </div>
 
@@ -599,6 +682,8 @@
 
 <script>
     const JSON_URL = "https://api.npoint.io/c34c77001e31bcce50f0";
+    const STALE_MS = 10 * 60 * 1000; // 10 menit
+
     let state = { cc_paused: false, lw_paused: false };
     let lastCcSaldo = 0;
     let lastLwSaldo = 0;
@@ -611,9 +696,25 @@
 
     let prevNocidNcdt = 0;
     let prevNocidXmr = 0;
+    let prevNocidCounters = { faucet: 0, ptc: 0, bonus: 0 };
     let nocidUptimeStart = null;
     let nocidLastData = null;
+    let lastDataTs = 0;
 
+    // ============================================================
+    // DETEKSI STATUS AKTIF (fleksibel, bukan exact match)
+    // ============================================================
+    function isActiveStatus(status) {
+        if (!status) return false;
+        const s = String(status).toUpperCase();
+        return s.includes('RUN') || s.includes('WATCH') || s.includes('MINING') ||
+               s.includes('CLAIM') || s.includes('PTC') || s.includes('FAUCET') ||
+               s.includes('BONUS') || s.includes('CHALLENGE') || s.includes('ACTIVE');
+    }
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
     function triggerPop(el) {
         if (!el) return;
         el.classList.remove('pop');
@@ -639,6 +740,19 @@
         }
     }
 
+    function forceAllStop(reason) {
+        setRingState('cc-spinner', 'cc-dot', 'cc-ring-text', false);
+        setRingState('lw-spinner', 'lw-dot', 'lw-ring-text', false);
+        setRingState('nm-spinner', 'nm-dot', 'nm-ring-text', false);
+        document.getElementById('card-cc')?.classList.remove('running');
+        document.getElementById('card-lw')?.classList.remove('running');
+        document.getElementById('card-nocid')?.classList.remove('running');
+        const liveBadge = document.getElementById('live-badge');
+        const serverStatus = document.getElementById('server-status');
+        if (liveBadge) { liveBadge.innerText = reason || 'STALE'; liveBadge.className = 'badge offline'; }
+        if (serverStatus) { serverStatus.innerText = reason || 'STALE'; serverStatus.style.color = 'var(--red)'; }
+    }
+
     function fmtHM(t) {
         const h = String(t.getHours()).padStart(2, '0');
         const m = String(t.getMinutes()).padStart(2, '0');
@@ -662,6 +776,9 @@
                s.includes("done") || s.includes("selesai");
     }
 
+    // ============================================================
+    // COOKIE / EMAIL
+    // ============================================================
     async function setCookie(bot) {
         const cookieVal = document.getElementById('cookie-input')?.value.trim();
         if (!cookieVal) return alert("Cookie tidak boleh kosong!");
@@ -701,6 +818,9 @@
         } catch (e) { console.error(e); }
     }
 
+    // ============================================================
+    // MAIN DASHBOARD FETCH
+    // ============================================================
     async function fetchDashboard() {
         const liveBadge = document.getElementById('live-badge');
         const liveDot = document.getElementById('live-dot');
@@ -710,6 +830,8 @@
             const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
             const data = await res.json();
             const endPing = new Date().getTime();
+            lastDataTs = Date.now();
+
             const webPingEl = document.getElementById('net-ping');
             if (webPingEl) webPingEl.innerText = (endPing - startPing) + "ms";
 
@@ -721,8 +843,8 @@
             serverStatus.style.color = "var(--green)";
             document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', { hour12: false });
 
-            state.cc_paused = data.cc_paused || false;
-            state.lw_paused = data.lw_paused || false;
+            state.cc_paused = !!data.cc_paused;
+            state.lw_paused = !!data.lw_paused;
             const btnCC = document.getElementById('btn-pause-cc');
             const btnLW = document.getElementById('btn-pause-lw');
             const badgeCC = document.getElementById('cc-status');
@@ -730,6 +852,7 @@
             const cardCC = document.getElementById('card-cc');
             const cardLW = document.getElementById('card-lw');
 
+            // ---------- ClipCoin ----------
             if (state.cc_paused) {
                 btnCC.innerText = "RESUME"; btnCC.classList.add('active');
                 badgeCC.innerText = "PAUSED"; badgeCC.style.color = "var(--red)"; badgeCC.style.borderColor = "var(--red)";
@@ -737,18 +860,19 @@
                 setRingState('cc-spinner', 'cc-dot', 'cc-ring-text', false);
             } else {
                 btnCC.innerText = "PAUSE"; btnCC.classList.remove('active');
+                badgeCC.style.color = ""; badgeCC.style.borderColor = "";
                 if (data.clipcoin) {
-                    let statusText = data.clipcoin.status;
-                    if (statusText === 'RUNNING' || statusText === 'WATCHING') {
-                        badgeCC.innerHTML = `<span class="text-blink">▶ ${statusText}</span>`;
+                    const active = isActiveStatus(data.clipcoin.status);
+                    if (active) {
+                        badgeCC.innerHTML = `<span class="text-blink">▶ ${data.clipcoin.status}</span>`;
                         cardCC.classList.add('running');
                         setRingState('cc-spinner', 'cc-dot', 'cc-ring-text', true);
                     } else {
-                        badgeCC.innerText = statusText;
+                        badgeCC.innerText = data.clipcoin.status || 'IDLE';
                         cardCC.classList.remove('running');
                         setRingState('cc-spinner', 'cc-dot', 'cc-ring-text', false);
                     }
-                    badgeCC.className = `bot-status ${data.clipcoin.status === 'WATCHING' ? 'watching' : 'idle'}`;
+                    badgeCC.className = `bot-status ${active ? 'watching' : 'idle'}`;
                     document.getElementById('cc-claims').innerText = data.clipcoin.claims || 0;
                     document.getElementById('cc-limit').innerText = data.clipcoin.limit || 540;
                     let rawCcSaldo = parseFloat(data.clipcoin.saldo || 0);
@@ -761,6 +885,7 @@
                 }
             }
 
+            // ---------- LuckyWatch ----------
             if (state.lw_paused) {
                 btnLW.innerText = "RESUME"; btnLW.classList.add('active');
                 badgeLW.innerText = "PAUSED"; badgeLW.style.color = "var(--red)"; badgeLW.style.borderColor = "var(--red)";
@@ -768,18 +893,19 @@
                 setRingState('lw-spinner', 'lw-dot', 'lw-ring-text', false);
             } else {
                 btnLW.innerText = "PAUSE"; btnLW.classList.remove('active');
+                badgeLW.style.color = ""; badgeLW.style.borderColor = "";
                 if (data.luckywatch) {
-                    let statusText = data.luckywatch.status;
-                    if (statusText === 'RUNNING' || statusText === 'WATCHING') {
-                        badgeLW.innerHTML = `<span class="text-blink">▶ ${statusText}</span>`;
+                    const active = isActiveStatus(data.luckywatch.status);
+                    if (active) {
+                        badgeLW.innerHTML = `<span class="text-blink">▶ ${data.luckywatch.status}</span>`;
                         cardLW.classList.add('running');
                         setRingState('lw-spinner', 'lw-dot', 'lw-ring-text', true);
                     } else {
-                        badgeLW.innerText = statusText;
+                        badgeLW.innerText = data.luckywatch.status || 'IDLE';
                         cardLW.classList.remove('running');
                         setRingState('lw-spinner', 'lw-dot', 'lw-ring-text', false);
                     }
-                    badgeLW.className = `bot-status ${data.luckywatch.status === 'WATCHING' ? 'watching' : 'idle'}`;
+                    badgeLW.className = `bot-status ${active ? 'watching' : 'idle'}`;
                     document.getElementById('lw-claims').innerText = data.luckywatch.claims || 0;
                     document.getElementById('lw-limits').innerText = data.luckywatch.limit || 820;
                     let rawLwSaldo = parseFloat(data.luckywatch.saldo || 0);
@@ -792,6 +918,7 @@
                 }
             }
 
+            // ---------- Totals ----------
             let ccSaldo = state.cc_paused ? lastCcSaldo : parseFloat(data.clipcoin?.saldo || 0);
             let lwSaldo = state.lw_paused ? lastLwSaldo : parseFloat(data.luckywatch?.saldo || 0);
             if (!state.cc_paused) lastCcSaldo = ccSaldo;
@@ -799,8 +926,8 @@
 
             let ccClaims = parseInt(data.clipcoin?.claims || 0);
             let lwClaims = parseInt(data.luckywatch?.claims || 0);
-            let totalClaims = ccClaims + lwClaims;
 
+            // WD reset marker
             let wdStatusRaw = data.wd_status || "BELUM ADA ANTREAN";
             let wdKey = wdStatusRaw + "|" + (data.wd_timestamp || "");
             if (isWdSuccess(wdStatusRaw) && wdKey !== lastWdStatusKey) {
@@ -823,14 +950,16 @@
             let grandTotalUsd = ccDisplayTotal + lwDisplayTotal;
             document.getElementById('total-saldo').innerText = "$" + grandTotalUsd.toFixed(5);
             document.getElementById('total-income').innerText = "$" + grandTotalUsd.toFixed(5);
-            document.getElementById('total-claims').innerText = totalClaims;
+            document.getElementById('total-claims').innerText = ccClaims + lwClaims;
 
+            // WD status
             let wdStatus = data.wd_status || "BELUM ADA ANTREAN";
             document.getElementById('wd-status').innerText = wdStatus;
-            if (wdStatus.toLowerCase().includes("sukses") || wdStatus.toLowerCase().includes("berhasil") || wdStatus.toLowerCase().includes("success")) document.getElementById('wd-status').style.color = "var(--green)";
+            if (isWdSuccess(wdStatus)) document.getElementById('wd-status').style.color = "var(--green)";
             else if (wdStatus.toLowerCase().includes("proses")) document.getElementById('wd-status').style.color = "var(--yellow)";
             else document.getElementById('wd-status').style.color = "var(--red)";
 
+            // System
             if (data.system) {
                 document.getElementById('cpu-val').innerText = data.system.cpu + "%";
                 document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
@@ -840,6 +969,7 @@
             }
             if (data.captcha) document.getElementById('cap-token').innerText = data.captcha.token;
 
+            // Logs
             if (data.cc_logs && data.cc_logs.length > 0) {
                 let logHtml = "";
                 data.cc_logs.slice(-3).forEach(log => { logHtml += `<div style="margin-bottom:2px;">${log}</div>`; });
@@ -854,16 +984,14 @@
             renderNocid(data);
 
         } catch (e) {
-            liveBadge.innerText = "OFFLINE";
-            liveBadge.className = "badge offline";
-            liveBadge.prepend(liveDot);
-            liveDot.className = "dot offline";
-            serverStatus.innerText = "OFFLINE";
-            serverStatus.style.color = "var(--red)";
+            forceAllStop('OFFLINE');
             console.error(e);
         }
     }
 
+    // ============================================================
+    // NOCID RENDER
+    // ============================================================
     function renderNocid(data) {
         if (!data) return;
         nocidLastData = data;
@@ -872,6 +1000,7 @@
         const cardNocid = document.getElementById('card-nocid');
         if (!nmStatus || !cardNocid) return;
 
+        // Banned → paksa STOP
         if (data.nocid_banned) {
             nmStatus.innerText = "🚫 BANNED";
             nmStatus.className = "nm-badge error";
@@ -905,6 +1034,7 @@
             setRingState('nm-spinner', 'nm-dot', 'nm-ring-text', isRunning);
         }
 
+        // Stats
         const hashrateEl = document.getElementById('nm-hashrate');
         if (hashrateEl) hashrateEl.innerText = data.nocid_hashrate || '0 GH/s';
         const coinEl = document.getElementById('nm-current-coin');
@@ -932,17 +1062,25 @@
         const sessEl = document.getElementById('nm-session');
         if (sessEl) sessEl.innerText = `+${sessionNcdt.toFixed(2)} NCDT · +${sessionXmr.toFixed(8)} XMR`;
 
+        // Counters with pop
+        const cFaucet = parseInt(data.nocid_total_faucet || 0);
+        const cPtc    = parseInt(data.nocid_total_ptc || 0);
+        const cBonus  = parseInt(data.nocid_total_challenges || 0);
+
         const ctF = document.getElementById('nm-ct-faucet');
         const ctP = document.getElementById('nm-ct-ptc');
         const ctB = document.getElementById('nm-ct-bonus');
-        if (ctF) ctF.innerText = data.nocid_total_faucet || 0;
-        if (ctP) ctP.innerText = data.nocid_total_ptc || 0;
-        if (ctB) ctB.innerText = data.nocid_total_challenges || 0;
+        if (ctF) { ctF.innerText = cFaucet; if (cFaucet !== prevNocidCounters.faucet) triggerPop(ctF); }
+        if (ctP) { ctP.innerText = cPtc;    if (cPtc !== prevNocidCounters.ptc)       triggerPop(ctP); }
+        if (ctB) { ctB.innerText = cBonus;  if (cBonus !== prevNocidCounters.bonus)   triggerPop(ctB); }
+        prevNocidCounters = { faucet: cFaucet, ptc: cPtc, bonus: cBonus };
 
+        // Next claim
         const nextIn = parseInt(data.nocid_next_claim_in || 0);
         const nextEl = document.getElementById('nm-next-claim');
         if (nextEl) nextEl.innerText = nextIn > 0 ? fmtDuration(nextIn) : 'READY';
 
+        // Uptime
         if (data.nocid_uptime_start) {
             const upStart = new Date(data.nocid_uptime_start).getTime();
             if (!isNaN(upStart)) nocidUptimeStart = upStart;
@@ -959,6 +1097,7 @@
         const updEl = document.getElementById('nm-last-update');
         if (updEl) updEl.innerText = fmtHM(upd);
 
+        // Logs
         const logs = data.nocid_logs || [];
         const logList = document.getElementById('nm-log-list');
         if (!logList) return;
@@ -986,20 +1125,26 @@
         }
     }
 
+    // ============================================================
+    // NOCID-ONLY POLLER
+    // ============================================================
     async function fetchNocidOnly() {
         try {
             const res = await fetch(JSON_URL + "?t=" + Date.now() + "_n");
             const data = await res.json();
+            lastDataTs = Date.now();
             renderNocid(data);
         } catch (e) {}
     }
 
+    // ============================================================
+    // LIVE TICKER (uptime + countdown)
+    // ============================================================
     setInterval(() => {
         if (!nocidLastData) return;
         if (nocidUptimeStart) {
-            const uptimeSec = (Date.now() - nocidUptimeStart) / 1000;
             const el = document.getElementById('nm-uptime');
-            if (el) el.innerText = fmtDuration(uptimeSec);
+            if (el) el.innerText = fmtDuration((Date.now() - nocidUptimeStart) / 1000);
         }
         const nextEl = document.getElementById('nm-next-claim');
         if (nextEl && nextEl.innerText !== 'READY') {
@@ -1012,6 +1157,19 @@
         }
     }, 1000);
 
+    // ============================================================
+    // WATCHDOG 10 MENIT
+    // ============================================================
+    setInterval(() => {
+        if (lastDataTs === 0) return;
+        if ((Date.now() - lastDataTs) > STALE_MS) {
+            forceAllStop('STALE');
+        }
+    }, 5000);
+
+    // ============================================================
+    // BOOT
+    // ============================================================
     fetchDashboard();
     setInterval(fetchDashboard, 3000);
     setInterval(fetchNocidOnly, 2000);

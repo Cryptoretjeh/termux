@@ -440,6 +440,8 @@
     let graphInterval = null;
     let miningHistory = []; 
     let lastKnownXmr = 0;
+    let lastKnownNcdt = 0;
+    let lastUpdateTime = 0; // UNTUK VALIDASI WAKTU
     let soundEnabled = false;
     
     let audioCtx = null;
@@ -610,6 +612,16 @@
                 return;
             }
 
+            // ==== VALIDASI WAKTU (ANTI DATA LAMA) ====
+            if (data.nocid_updated_at) {
+                let serverTime = new Date(data.nocid_updated_at).getTime();
+                if (serverTime <= lastUpdateTime) {
+                    // Jika data dari server lebih lama, abaikan!
+                    return; 
+                }
+                lastUpdateTime = serverTime;
+            }
+
             document.getElementById('net-ping').innerText = (new Date().getTime() - startPing) + "ms";
             document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', { hour12: false });
             
@@ -709,7 +721,6 @@
         document.getElementById('nm-current-coin').innerText = "XMR (RX/0)";
         document.getElementById('label-coin-balance').innerText = "💎 XMR BALANCE";
         
-        // Ambil saldo XMR asli dari server
         const newXmrBal = parseFloat(data.nocid_xmr_balance || 0);
         document.getElementById('nm-xmr-balance').innerText = newXmrBal.toFixed(8);
         
@@ -727,7 +738,9 @@
         }
         lastKnownXmr = newXmrBal;
 
-        document.getElementById('nm-ncdt-balance').innerText = parseFloat(data.nocid_ncdt_balance || 0).toFixed(2);
+        const newNcdtBal = parseFloat(data.nocid_ncdt_balance || 0);
+        document.getElementById('nm-ncdt-balance').innerText = newNcdtBal.toFixed(2);
+
         document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} XMR`;
         
         const pingEl = document.getElementById('nm-ping-nocid');

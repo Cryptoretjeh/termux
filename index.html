@@ -441,11 +441,6 @@
     let miningHistory = JSON.parse(localStorage.getItem('miningHistory') || "[]"); 
     let lastXmrBal = localStorage.getItem('lastXmrBal') ? parseFloat(localStorage.getItem('lastXmrBal')) : null; 
     let cacheLogs = JSON.parse(localStorage.getItem('cacheLogs') || "{}");
-    
-    // === SISTEM ANTI KEDIP (DATA HANTU) ===
-    let lastValidNcdt = 0;
-    let lastValidCoin = "XMR";
-    let lastValidCoinBal = 0;
 
     let soundEnabled = false;
     let lastConsoleLog = "";
@@ -672,7 +667,6 @@
 
         } catch (e) { 
             console.log("Fetch error/timeout:", e.message);
-            // Jika error, jangan update UI, biarkan data lama tampil
         }
     }
 
@@ -704,40 +698,23 @@
 
         document.getElementById('nm-hashrate').innerText = data.nocid_hashrate || '0 GH/s';
         
-        // === LOGIKA FILTER DATA HANTU (ANTI KEDIP) ===
+        // === TAMPILKAN DATA MENTAH DARI PYTHON (TANPA FILTER) ===
         let ncdtRaw = parseFloat(data.nocid_ncdt_balance || 0);
         let coinRaw = (data.nocid_current_coin || 'XMR').toUpperCase();
         let coinBalRaw = parseFloat(data.nocid_xmr_balance || 0);
 
-        // 1. Filter NCDT: Tolak jika lonjakannya lebih dari 1000
-        if (lastValidNcdt === 0) {
-            lastValidNcdt = ncdtRaw;
-        } else if (Math.abs(ncdtRaw - lastValidNcdt) < 1000 && ncdtRaw > 0) {
-            lastValidNcdt = ncdtRaw;
-        } 
-        
-        // 2. Filter Koin & Algo: Tolak jika saldonya turun tiba-tiba
-        if (lastValidCoinBal === 0) {
-            lastValidCoin = coinRaw;
-            lastValidCoinBal = coinBalRaw;
-        } else if (coinBalRaw >= lastValidCoinBal) {
-            lastValidCoin = coinRaw;
-            lastValidCoinBal = coinBalRaw;
-        }
-
-        // Tampilkan Data yang sudah difilter
-        document.getElementById('nm-ncdt-balance').innerText = lastValidNcdt.toFixed(2);
-        document.getElementById('nm-xmr-balance').innerText = lastValidCoinBal.toFixed(8);
+        document.getElementById('nm-ncdt-balance').innerText = ncdtRaw.toFixed(2);
+        document.getElementById('nm-xmr-balance').innerText = coinBalRaw.toFixed(8);
 
         let algo = "RX/0"; 
-        if (lastValidCoin === "LTC") algo = "Scrypt";
-        else if (lastValidCoin === "BTC") algo = "SHA-256";
-        else if (lastValidCoin === "DOGE" || lastValidCoin === "DOGECOIN") algo = "Scrypt";
+        if (coinRaw === "LTC") algo = "Scrypt";
+        else if (coinRaw === "BTC") algo = "SHA-256";
+        else if (coinRaw === "DOGE" || coinRaw === "DOGECOIN") algo = "Scrypt";
         
-        document.getElementById('nm-current-coin').innerText = `${lastValidCoin} (${algo})`;
-        document.getElementById('label-coin-balance').innerText = `💎 ${lastValidCoin} BALANCE`;
+        document.getElementById('nm-current-coin').innerText = `${coinRaw} (${algo})`;
+        document.getElementById('label-coin-balance').innerText = `💎 ${coinRaw} BALANCE`;
 
-        document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} ${lastValidCoin}`;
+        document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} ${coinRaw}`;
         
         const pingEl = document.getElementById('nm-ping-nocid');
         pingEl.innerText = `${data.nocid_server_ping || 0} ms`;

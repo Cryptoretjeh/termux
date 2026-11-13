@@ -396,7 +396,6 @@
         if (pendingPauseBot) { doTogglePause(pendingPauseBot); closeModal(); }
     };
 
-    // Fitur Pause via Web dinonaktifkan sementara karena menggunakan token (bisa dimodifikasi nanti)
     async function doTogglePause(bot) {
         alert("Untuk mem-pause bot, silakan ketik /pause (CC) atau /pauselwh (LW) di Bot Telegram Anda.");
     }
@@ -412,17 +411,23 @@
     async function fetchCCState() {
         const res = await fetch(`${UPSTASH_URL}/get/cc_state`, { headers: upstashHeaders });
         const data = await res.json();
-        return data.result || {};
+        let result = data.result || {};
+        if (typeof result === 'string') { try { result = JSON.parse(result); } catch(e){} }
+        return result;
     }
     async function fetchLWState() {
         const res = await fetch(`${UPSTASH_URL}/get/lw_state`, { headers: upstashHeaders });
         const data = await res.json();
-        return data.result || {};
+        let result = data.result || {};
+        if (typeof result === 'string') { try { result = JSON.parse(result); } catch(e){} }
+        return result;
     }
     async function fetchNOState() {
         const res = await fetch(`${UPSTASH_URL}/get/nocid_state`, { headers: upstashHeaders });
         const data = await res.json();
-        return data.result || {};
+        let result = data.result || {};
+        if (typeof result === 'string') { try { result = JSON.parse(result); } catch(e){} }
+        return result;
     }
 
     async function fetchDashboard() {

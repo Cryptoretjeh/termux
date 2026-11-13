@@ -363,24 +363,14 @@
         </div>
         <div class="wd-status" id="wd-status">BELUM ADA ANTREAN</div>
     </div>
-
-    <div class="cookie-box">
-        <label style="font-size:8px; color:var(--text-dim);">🍪 Direct Fetch via API (Bypass Nol)</label>
-        <input type="text" class="email-input" id="direct-cc" placeholder="Cookie ClipCoin (opsional)">
-        <input type="text" class="email-input" id="direct-lw" placeholder="Cookie LuckyWatch (opsional)">
-        <input type="text" class="email-input" id="direct-nocid" placeholder="Cookie Nocid (opsional)">
-        <button class="btn-cookie" onclick="saveCookies()">Simpan Cookie & Tarik Data</button>
-    </div>
 </div>
 
 <script>
     // ==========================================
-    // KONFIGURASI UPSTASH (HARUS READ-ONLY TOKEN!)
+    // KONFIGURASI UPSTASH (Sudah dimasukkan token Anda)
     // ==========================================
     const UPSTASH_URL = "https://vast-bear-200826.upstash.io";
-    
-    // ⚠️ GANTI DENGAN READ-ONLY TOKEN ANDA
-    const UPSTASH_TOKEN = "TOKEN_READ_ONLY_ANDA_DI_SINI"; 
+    const UPSTASH_TOKEN = "ggAAAAAAAxB6AAIgcDFUWuLENNttmwL-DTgiTVp2odi07trzwnbXGcKqAZv7fg"; 
 
     const upstashHeaders = {
         "Authorization": `Bearer ${UPSTASH_TOKEN}`
@@ -388,25 +378,6 @@
 
     let state = { cc_paused: false, lw_paused: false };
     let cacheLogs = JSON.parse(localStorage.getItem('cacheLogs') || "{}");
-    let cookieCC = localStorage.getItem('direct_cc') || "";
-    let cookieLW = localStorage.getItem('direct_lw') || "";
-    let cookieNO = localStorage.getItem('direct_nocid') || "";
-
-    window.onload = () => {
-        if(cookieCC) document.getElementById('direct-cc').value = cookieCC;
-        if(cookieLW) document.getElementById('direct-lw').value = cookieLW;
-        if(cookieNO) document.getElementById('direct-nocid').value = cookieNO;
-    };
-
-    function saveCookies() {
-        cookieCC = document.getElementById('direct-cc').value.trim();
-        cookieLW = document.getElementById('direct-lw').value.trim();
-        cookieNO = document.getElementById('direct-nocid').value.trim();
-        localStorage.setItem('direct_cc', cookieCC);
-        localStorage.setItem('direct_lw', cookieLW);
-        localStorage.setItem('direct_nocid', cookieNO);
-        alert("Cookie disimpan lokal!");
-    }
 
     let pendingPauseBot = null;
     function askPause(bot) {
@@ -425,8 +396,7 @@
         if (pendingPauseBot) { doTogglePause(pendingPauseBot); closeModal(); }
     };
 
-    // Karena Token Frontend hanya Read-Only, fitur pause lewat web tidak akan bekerja secara langsung (butuh write).
-    // Kita ubah agar frontend memberikan notifikasi untuk pakai Telegram.
+    // Fitur Pause via Web dinonaktifkan sementara karena menggunakan token (bisa dimodifikasi nanti)
     async function doTogglePause(bot) {
         alert("Untuk mem-pause bot, silakan ketik /pause (CC) atau /pauselwh (LW) di Bot Telegram Anda.");
     }
@@ -465,6 +435,7 @@
 
             document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', { hour12: false });
 
+            // --- RENDER CLIPCOIN ---
             if (dataCC && dataCC.clipcoin) {
                 state.cc_paused = !!dataCC.cc_paused;
                 setRingState('cc-spinner', 'cc-ring-text', dataCC.clipcoin.status === 'RUNNING' || dataCC.clipcoin.status === 'WATCHING');
@@ -483,6 +454,7 @@
                 else { btnCC.innerText = "PAUSE"; btnCC.classList.remove('active'); }
             }
 
+            // --- RENDER LUCKYWATCH ---
             if (dataLW && dataLW.luckywatch) {
                 state.lw_paused = !!dataLW.lw_paused;
                 setRingState('lw-spinner', 'lw-ring-text', dataLW.luckywatch.status === 'RUNNING' || dataLW.luckywatch.status === 'WATCHING');
@@ -502,6 +474,7 @@
             }
             localStorage.setItem('cacheLogs', JSON.stringify(cacheLogs));
 
+            // --- RENDER NOCID ---
             if (dataNO) {
                 document.getElementById('nm-status').innerText = "⚡ RUNNING";
                 document.getElementById('nm-hashrate').innerText = dataNO.nocid_hashrate || '0 GH/s';
@@ -512,6 +485,7 @@
                 if(dataNO.nocid_total_faucet) document.getElementById('nm-ct-faucet').innerText = dataNO.nocid_total_faucet;
                 if(dataNO.nocid_total_ptc) document.getElementById('nm-ct-ptc').innerText = dataNO.nocid_total_ptc;
                 if(dataNO.nocid_total_challenges) document.getElementById('nm-ct-bonus').innerText = dataNO.nocid_total_challenges;
+                
                 if(dataNO.nocid_next_claim_in > 0) {
                     let m = Math.floor(dataNO.nocid_next_claim_in / 60);
                     let s = dataNO.nocid_next_claim_in % 60;
@@ -529,6 +503,7 @@
         }
     }
 
+    // Mulai ambil data
     fetchDashboard();
     setInterval(fetchDashboard, 5000); // Tarik data tiap 5 detik
 </script>

@@ -437,9 +437,9 @@
     let countdownTimer = null;
     let graphInterval = null;
     
-    // === SISTEM CACHE 100% ANTI HILANG ===
-    let miningHistory = JSON.parse(localStorage.getItem('miningHistory') || "[]"); 
-    let lastXmrBal = localStorage.getItem('lastXmrBal') ? parseFloat(localStorage.getItem('lastXmrBal')) : null; 
+    // === SISTEM CACHE 100% ANTI HILANG (DIPERBARUI) ===
+    // Kita hapus miningHistory agar log DOGE lama dari jam 17:38 hilang total
+    let miningHistory = []; 
     let cacheLogs = JSON.parse(localStorage.getItem('cacheLogs') || "{}");
 
     let soundEnabled = false;
@@ -592,7 +592,7 @@
         const startPing = new Date().getTime();
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout 5 detik biar gak freeze
+            const timeoutId = setTimeout(() => controller.abort(), 5000); 
             
             const res = await fetch(JSON_URL + "?t=" + new Date().getTime(), { signal: controller.signal });
             clearTimeout(timeoutId);

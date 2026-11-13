@@ -43,10 +43,7 @@
 
         /* BOT CARDS */
         .bot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .bot-card { 
-            background: var(--panel); border: 1px solid var(--border); border-radius: 8px; 
-            padding: 10px; display: flex; flex-direction: column; overflow: hidden; 
-        }
+        .bot-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
         .bot-card::before { content: ''; position: absolute; inset: 0; background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg'); background-size: cover; opacity: 0.3; z-index: 0; }
         .bot-card > * { position: relative; z-index: 1; }
         .bot-card.clip { border-top: 2px solid var(--pink); }
@@ -62,10 +59,11 @@
         
         .stat-row { display: flex; justify-content: space-between; font-size: 8px; margin-bottom: 2px; }
         
+        /* PERBESAR KOTAK LOG BOT */
         .bot-log { 
             font-size: 7px; color: #aaa; margin-top: 6px; 
             border-top: 1px dashed #444; padding-top: 4px; 
-            min-height: 25px; max-height: 40px; overflow: hidden; 
+            min-height: 35px; max-height: 65px; overflow-y: auto; /* Bisa di-scroll */
             display: flex; flex-direction: column; justify-content: flex-end; 
             font-family: 'Courier New', monospace;
         }
@@ -376,7 +374,7 @@
                 <span id="nm-last-update">--:--:--</span>
             </div>
             <div id="nm-log-list">
-                <div class="nm-log-empty">Menunggu koin pertama ditambang...</div>
+                <div class="nm-log-empty">Menunggu share koin pertama...</div>
             </div>
         </div>
     </div>
@@ -436,9 +434,15 @@
     let nocidUptimeStart = null;
     let countdownTimer = null;
     let graphInterval = null;
-    let miningHistory = []; 
-    let lastXmrBal = 0;
+    
+    // === SISTEM CACHE 100% ANTI HILANG ===
+    // Menyimpan history koin dan log di browser agar tidak hilang saat npoint down / di-refresh
+    let miningHistory = JSON.parse(localStorage.getItem('miningHistory') || "[]"); 
+    let lastXmrBal = localStorage.getItem('lastXmrBal') ? parseFloat(localStorage.getItem('lastXmrBal')) : null; 
+    let cacheLogs = JSON.parse(localStorage.getItem('cacheLogs') || "{}");
+    
     let soundEnabled = false;
+    let lastConsoleLog = "";
     
     // AUDIO SYSTEM
     let audioCtx = null;
@@ -446,9 +450,7 @@
     let fanGain = null;
 
     function initAudio() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
 
     function playCoinSound() {
@@ -479,11 +481,7 @@
     }
 
     function stopFanSound() {
-        if (fanOsc) {
-            fanOsc.stop();
-            fanOsc.disconnect();
-            fanOsc = null;
-        }
+        if (fanOsc) { fanOsc.stop(); fanOsc.disconnect(); fanOsc = null; }
     }
 
     function toggleSound() {
@@ -503,6 +501,9 @@
     }
 
     function addConsoleLog(text, type="") {
+        if (text === lastConsoleLog) return; // Anti Spam Console
+        lastConsoleLog = text;
+
         const term = document.getElementById('mini-term');
         if (!term) return;
         const div = document.createElement('div');
@@ -549,6 +550,7 @@
         if(isRunning) { s.classList.add('active'); t.innerText='RUN'; }
         else { s.classList.remove('active'); t.innerText='STOP'; }
     }
+    
     function fmtDuration(sec) {
         sec = Math.max(0, Math.floor(sec));
         return `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
@@ -597,13 +599,20 @@
             state.cc_paused = !!data.cc_paused;
             state.lw_paused = !!data.lw_paused;
 
+            // ==== PEMBACAAN LOG CLIPCOIN & LUCKYWATCH ====
             if (data.clipcoin) {
                 const isAct = data.clipcoin.status === 'RUNNING' || data.clipcoin.status === 'WATCHING';
                 setRingState('cc-spinner', 'cc-ring-text', isAct);
                 document.getElementById('cc-status').innerText = data.clipcoin.status || 'IDLE';
                 document.getElementById('cc-claims').innerText = data.clipcoin.claims || 0;
                 document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
-                if (data.cc_logs) document.getElementById('cc-log-container').innerHTML = data.cc_logs.slice(-3).join('<br>');
+                
+                if (data.logs) {
+                    const ccLogs = data.logs.filter(l => l.includes('[CLIPCOIN]')).slice(-3);
+                    if (ccLogs.length > 0) cacheLogs.cc = ccLogs; // Update cache jika ada log baru
+                }
+                // Tampilkan dari cache agar tidak "Menunggu aktivitas" jika bot sedang jeda
+                document.getElementById('cc-log-container').innerHTML = cacheLogs.cc ? cacheLogs.cc.join('<br>') : '<div>Menunggu aktivitas...</div>';
                 
                 const btnCC = document.getElementById('btn-pause-cc');
                 if(state.cc_paused) { btnCC.innerText = "RESUME"; btnCC.classList.add('active'); }
@@ -615,12 +624,19 @@
                 document.getElementById('lw-status').innerText = data.luckywatch.status || 'IDLE';
                 document.getElementById('lw-claims').innerText = data.luckywatch.claims || 0;
                 document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
-                if (data.lw_logs) document.getElementById('lw-log-container').innerHTML = data.lw_logs.slice(-3).join('<br>');
+                
+                if (data.logs) {
+                    const lwLogs = data.logs.filter(l => l.includes('[LUCKYWATCH]')).slice(-3);
+                    if (lwLogs.length > 0) cacheLogs.lw = lwLogs; // Update cache jika ada log baru
+                }
+                document.getElementById('lw-log-container').innerHTML = cacheLogs.lw ? cacheLogs.lw.join('<br>') : '<div>Menunggu aktivitas...</div>';
                 
                 const btnLW = document.getElementById('btn-pause-lw');
                 if(state.lw_paused) { btnLW.innerText = "RESUME"; btnLW.classList.add('active'); }
                 else { btnLW.innerText = "PAUSE"; btnLW.classList.remove('active'); }
             }
+            localStorage.setItem('cacheLogs', JSON.stringify(cacheLogs)); // Simpan permanen ke browser
+            // ========================================================
 
             let ccS = parseFloat(data.clipcoin?.saldo || 0), lwS = parseFloat(data.luckywatch?.saldo || 0);
             document.getElementById('total-saldo').innerText = "$" + (ccS + lwS).toFixed(5);
@@ -661,27 +677,25 @@
         if (isBanned) {
             nmStatus.innerText = "🚫 BANNED"; nmStatus.className = "nm-badge error";
             cardNocid.classList.remove('running'); setRingState('nm-spinner', 'nm-ring-text', false);
-            stopGraphAnimation();
-            stopFanSound();
+            stopGraphAnimation(); stopFanSound();
             addConsoleLog("ERROR: BANNED DETECTED! Halting operations.", "err");
         } else if (isCooldown) {
             nmStatus.innerText = "⏳ COOLDOWN"; nmStatus.className = "nm-badge cooldown";
             cardNocid.classList.add('running'); setRingState('nm-spinner', 'nm-ring-text', true);
-            startGraphAnimation();
-            stopFanSound();
+            startGraphAnimation(); stopFanSound();
             addConsoleLog("INFO: Cooling down. Waiting for next block...", "warn");
         } else {
             nmStatus.innerText = "⚡ RUNNING"; nmStatus.className = "nm-badge running";
             cardNocid.classList.add('running'); setRingState('nm-spinner', 'nm-ring-text', true);
-            startGraphAnimation();
-            startFanSound();
+            startGraphAnimation(); startFanSound();
+            addConsoleLog("Mining active. Calculating hashes...", "info");
         }
 
         document.getElementById('nm-hashrate').innerText = data.nocid_hashrate || '0 GH/s';
         const xmrBal = parseFloat(data.nocid_xmr_balance || 0);
         
-        // ==== LOGIKA XMR MASUK (REAL-TIME) ====
-        if (xmrBal > lastXmrBal && lastXmrBal !== 0) {
+        // ==== LOGIKA XMR MASUK PERMANEN ====
+        if (lastXmrBal !== null && xmrBal > lastXmrBal) {
             const diff = (xmrBal - lastXmrBal).toFixed(8);
             playCoinSound();
             
@@ -692,9 +706,12 @@
             const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
             miningHistory.unshift({ time: ts, amount: diff, type: data.nocid_current_coin });
             if (miningHistory.length > 10) miningHistory.pop();
+            
+            localStorage.setItem('miningHistory', JSON.stringify(miningHistory)); // Simpan history
         }
-        lastXmrBal = xmrBal;
-        // =======================================
+        lastXmrBal = xmrBal; 
+        localStorage.setItem('lastXmrBal', lastXmrBal); // Simpan saldo terakhir
+        // ========================================================
 
         document.getElementById('nm-xmr-balance').innerText = xmrBal.toFixed(8);
 

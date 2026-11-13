@@ -439,17 +439,9 @@
     let countdownTimer = null;
     let graphInterval = null;
     let miningHistory = []; 
-    
-    // ==== DATA CACHE ====
-    let cachedData = {
-        xmrBal: 0,
-        ncdtBal: 0,
-        hashrate: '0 GH/s',
-        ccSaldo: 0,
-        lwSaldo: 0
-    };
-
+    let lastKnownXmr = 0;
     let soundEnabled = false;
+    
     let audioCtx = null;
     let fanOsc = null;
     let fanGain = null;
@@ -522,7 +514,7 @@
         if (term.children.length > 25) term.removeChild(term.firstChild);
     }
 
-    // ==== LOGIKA PAUSE ====
+    // ==== LOGIKA PAUSE (INSTAN) ====
     let pendingPauseBot = null;
     function askPause(bot) {
         const isPaused = bot === 'cc' ? state.cc_paused : state.lw_paused;
@@ -611,12 +603,11 @@
             const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
             const data = await res.json();
             
-            // Cek koneksi
             const liveBadge = document.getElementById('live-badge');
             if (data === null || Object.keys(data).length === 0) {
                 liveBadge.innerText = "STALE DATA";
                 liveBadge.className = "badge offline";
-                return; // Abaikan update kalau data kosong
+                return;
             }
 
             document.getElementById('net-ping').innerText = (new Date().getTime() - startPing) + "ms";
@@ -628,14 +619,13 @@
             state.cc_paused = !!data.cc_paused;
             state.lw_paused = !!data.lw_paused;
 
-            // ==== LOGIKA TAMPILAN CLIPCOIN & LUCKYWATCH ====
+            // ClipCoin & LuckyWatch
             if (data.clipcoin) {
                 const isAct = data.clipcoin.status === 'RUNNING' || data.clipcoin.status === 'WATCHING';
                 setRingState('cc-spinner', 'cc-ring-text', isAct);
                 document.getElementById('cc-status').innerText = data.clipcoin.status || 'IDLE';
                 document.getElementById('cc-claims').innerText = data.clipcoin.claims || 0;
                 document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
-                
                 if (data.cc_logs) document.getElementById('cc-log-container').innerHTML = data.cc_logs.slice(-3).join('<br>');
                 
                 const btnCC = document.getElementById('btn-pause-cc');
@@ -648,7 +638,6 @@
                 document.getElementById('lw-status').innerText = data.luckywatch.status || 'IDLE';
                 document.getElementById('lw-claims').innerText = data.luckywatch.claims || 0;
                 document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
-                
                 if (data.lw_logs) document.getElementById('lw-log-container').innerHTML = data.lw_logs.slice(-3).join('<br>');
                 
                 const btnLW = document.getElementById('btn-pause-lw');
@@ -684,7 +673,6 @@
             const liveBadge = document.getElementById('live-badge');
             liveBadge.innerText = "CONN ERROR";
             liveBadge.className = "badge offline";
-            console.error(e); 
         }
     }
 
@@ -721,12 +709,13 @@
         document.getElementById('nm-current-coin').innerText = "XMR (RX/0)";
         document.getElementById('label-coin-balance').innerText = "💎 XMR BALANCE";
         
+        // Ambil saldo XMR asli dari server
         const newXmrBal = parseFloat(data.nocid_xmr_balance || 0);
         document.getElementById('nm-xmr-balance').innerText = newXmrBal.toFixed(8);
         
         // Log koin real-time (hanya kalau angka bertambah)
-        if (newXmrBal > cachedData.xmrBal && cachedData.xmrBal !== 0) {
-            const diff = (newXmrBal - cachedData.xmrBal).toFixed(8);
+        if (newXmrBal > lastKnownXmr && lastKnownXmr !== 0) {
+            const diff = (newXmrBal - lastKnownXmr).toFixed(8);
             playCoinSound();
             addConsoleLog(`SUCCESS: +${diff} XMR Masuk.`, "share");
             addConsoleLog(`SALDO: ${newXmrBal.toFixed(8)} XMR`, "info");
@@ -736,11 +725,9 @@
             miningHistory.unshift({ time: ts, amount: diff, type: "XMR" });
             if (miningHistory.length > 10) miningHistory.pop();
         }
-        cachedData.xmrBal = newXmrBal;
+        lastKnownXmr = newXmrBal;
 
-        // Tampilan NCDT (Langsung ikut Npoint)
         document.getElementById('nm-ncdt-balance').innerText = parseFloat(data.nocid_ncdt_balance || 0).toFixed(2);
-
         document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} XMR`;
         
         const pingEl = document.getElementById('nm-ping-nocid');

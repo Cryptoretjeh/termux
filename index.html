@@ -35,7 +35,9 @@
         .title-area h1 span.text-cyan { color: var(--cyan); font-weight: 600; }
         .title-area h1 span.text-purple { color: var(--purple); font-weight: 600; }
         .badge { font-size: 8px; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--green); color: var(--green); background: rgba(0,0,0,0.6); display: inline-flex; gap: 4px; }
+        .badge.offline { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.2); }
         .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 1s infinite alternate; }
+        .dot.offline { background: var(--red); }
         @keyframes blink { from { opacity: 1; } to { opacity: 0.2; } }
         .header-right { text-align: right; }
         .total-balance { font-size: 16px; font-weight: 600; color: var(--green); text-shadow: 0 0 10px rgba(0,255,136,0.3); line-height: 1.2; }
@@ -43,7 +45,10 @@
 
         /* BOT CARDS */
         .bot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .bot-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; overflow: hidden; }
+        .bot-card { 
+            background: var(--panel); border: 1px solid var(--border); border-radius: 8px; 
+            padding: 10px; display: flex; flex-direction: column; overflow: hidden; 
+        }
         .bot-card::before { content: ''; position: absolute; inset: 0; background-image: url('https://raw.githubusercontent.com/cryptoretjeh/termux/main/bg-card.jpg'); background-size: cover; opacity: 0.3; z-index: 0; }
         .bot-card > * { position: relative; z-index: 1; }
         .bot-card.clip { border-top: 2px solid var(--pink); }
@@ -59,18 +64,15 @@
         
         .stat-row { display: flex; justify-content: space-between; font-size: 8px; margin-bottom: 2px; }
         
-        /* KOTAK LOG BOT */
         .bot-log { 
-            font-size: 7.5px; color: #aaa; margin-top: 8px; 
-            border-top: 1px dashed #444; padding-top: 6px; 
-            min-height: 45px; max-height: 75px; overflow-y: auto; 
+            font-size: 7px; color: #aaa; margin-top: 6px; 
+            border-top: 1px dashed #444; padding-top: 4px; 
+            min-height: 25px; max-height: 40px; overflow: hidden; 
             display: flex; flex-direction: column; justify-content: flex-end; 
-            font-family: 'Courier New', monospace; line-height: 1.3;
+            font-family: 'Courier New', monospace;
         }
-        .bot-log::-webkit-scrollbar { width: 3px; }
-        .bot-log::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
         
-        .btn-pause { width: 100%; padding: 8px; margin-top: 8px; background: rgba(0,0,0,0.8); border: 1px solid var(--border); color: var(--text); border-radius: 4px; font-size: 9px; cursor: pointer; transition: 0.2s; font-weight: 600;}
+        .btn-pause { width: 100%; padding: 6px; margin-top: 6px; background: rgba(0,0,0,0.7); border: 1px solid var(--border); color: var(--text); border-radius: 4px; font-size: 8px; cursor: pointer; transition: 0.2s;}
         .btn-pause:hover { background: rgba(255,255,255,0.1); }
         .btn-pause.active { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.2); }
 
@@ -436,22 +438,26 @@
     let nocidUptimeStart = null;
     let countdownTimer = null;
     let graphInterval = null;
-    
-    // === SISTEM CACHE 100% ANTI HILANG (DIPERBARUI) ===
-    // Kita hapus miningHistory agar log DOGE lama dari jam 17:38 hilang total
     let miningHistory = []; 
-    let cacheLogs = JSON.parse(localStorage.getItem('cacheLogs') || "{}");
+    
+    // ==== DATA CACHE (ANTI RESET KE NOL) ====
+    let cachedData = {
+        xmrBal: 0,
+        ncdtBal: 0,
+        hashrate: '0 GH/s',
+        ccSaldo: 0,
+        lwSaldo: 0
+    };
 
     let soundEnabled = false;
-    let lastConsoleLog = "";
-    
-    // AUDIO SYSTEM
     let audioCtx = null;
     let fanOsc = null;
     let fanGain = null;
 
     function initAudio() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
     }
 
     function playCoinSound() {
@@ -482,7 +488,11 @@
     }
 
     function stopFanSound() {
-        if (fanOsc) { fanOsc.stop(); fanOsc.disconnect(); fanOsc = null; }
+        if (fanOsc) {
+            fanOsc.stop();
+            fanOsc.disconnect();
+            fanOsc = null;
+        }
     }
 
     function toggleSound() {
@@ -502,9 +512,6 @@
     }
 
     function addConsoleLog(text, type="") {
-        if (text === lastConsoleLog) return; // Anti Spam
-        lastConsoleLog = text;
-
         const term = document.getElementById('mini-term');
         if (!term) return;
         const div = document.createElement('div');
@@ -515,6 +522,7 @@
         if (term.children.length > 25) term.removeChild(term.firstChild);
     }
 
+    // ==== LOGIKA PAUSE (DIPERBAIKI) ====
     let pendingPauseBot = null;
     function askPause(bot) {
         const isPaused = bot === 'cc' ? state.cc_paused : state.lw_paused;
@@ -535,13 +543,23 @@
     async function doTogglePause(bot) {
         if (bot === 'cc') state.cc_paused = !state.cc_paused;
         if (bot === 'lw') state.lw_paused = !state.lw_paused;
+        
+        // UI Update Instan
+        const btn = document.getElementById('btn-pause-' + bot);
+        if (bot === 'cc') {
+            if(state.cc_paused) { btn.innerText = "RESUME"; btn.classList.add('active'); }
+            else { btn.innerText = "PAUSE"; btn.classList.remove('active'); }
+        } else {
+            if(state.lw_paused) { btn.innerText = "RESUME"; btn.classList.add('active'); }
+            else { btn.innerText = "PAUSE"; btn.classList.remove('active'); }
+        }
+
         try {
             const r = await fetch(JSON_URL);
             const data = await r.json();
             data.cc_paused = state.cc_paused;
             data.lw_paused = state.lw_paused;
             await fetch(JSON_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            fetchDashboard();
         } catch (e) { console.error(e); }
     }
 
@@ -551,7 +569,6 @@
         if(isRunning) { s.classList.add('active'); t.innerText='RUN'; }
         else { s.classList.remove('active'); t.innerText='STOP'; }
     }
-    
     function fmtDuration(sec) {
         sec = Math.max(0, Math.floor(sec));
         return `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
@@ -591,32 +608,40 @@
     async function fetchDashboard() {
         const startPing = new Date().getTime();
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000); 
-            
-            const res = await fetch(JSON_URL + "?t=" + new Date().getTime(), { signal: controller.signal });
-            clearTimeout(timeoutId);
+            const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
             const data = await res.json();
             
+            // Cek koneksi
+            const liveBadge = document.getElementById('live-badge');
+            if (data === null || Object.keys(data).length === 0) {
+                liveBadge.innerText = "STALE DATA";
+                liveBadge.className = "badge offline";
+                return; // Abaikan update kalau data kosong
+            }
+
             document.getElementById('net-ping').innerText = (new Date().getTime() - startPing) + "ms";
             document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', { hour12: false });
+            
+            liveBadge.innerText = "LIVE SYNC";
+            liveBadge.className = "badge";
 
             state.cc_paused = !!data.cc_paused;
             state.lw_paused = !!data.lw_paused;
 
-            // ==== LOG CLIPCOIN & LUCKYWATCH ====
+            // ==== LOGIKA ANTI RESET (CLIPCOIN & LUCKYWATCH) ====
             if (data.clipcoin) {
                 const isAct = data.clipcoin.status === 'RUNNING' || data.clipcoin.status === 'WATCHING';
                 setRingState('cc-spinner', 'cc-ring-text', isAct);
                 document.getElementById('cc-status').innerText = data.clipcoin.status || 'IDLE';
                 document.getElementById('cc-claims').innerText = data.clipcoin.claims || 0;
-                document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
                 
-                if (data.logs) {
-                    const ccLogs = data.logs.filter(l => l.includes('[CLIPCOIN]')).slice(-3);
-                    if (ccLogs.length > 0) cacheLogs.cc = ccLogs;
+                let newSaldo = parseFloat(data.clipcoin.saldo || 0);
+                if (newSaldo > 0 || cachedData.ccSaldo === 0) {
+                    cachedData.ccSaldo = newSaldo;
                 }
-                document.getElementById('cc-log-container').innerHTML = cacheLogs.cc ? cacheLogs.cc.join('<br>') : '<div>Menunggu aktivitas...</div>';
+                document.getElementById('cc-saldo').innerText = "$" + cachedData.ccSaldo.toFixed(5);
+                
+                if (data.cc_logs) document.getElementById('cc-log-container').innerHTML = data.cc_logs.slice(-3).join('<br>');
                 
                 const btnCC = document.getElementById('btn-pause-cc');
                 if(state.cc_paused) { btnCC.innerText = "RESUME"; btnCC.classList.add('active'); }
@@ -627,22 +652,22 @@
                 setRingState('lw-spinner', 'lw-ring-text', isAct);
                 document.getElementById('lw-status').innerText = data.luckywatch.status || 'IDLE';
                 document.getElementById('lw-claims').innerText = data.luckywatch.claims || 0;
-                document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
                 
-                if (data.logs) {
-                    const lwLogs = data.logs.filter(l => l.includes('[LUCKYWATCH]')).slice(-3);
-                    if (lwLogs.length > 0) cacheLogs.lw = lwLogs;
+                let newSaldo = parseFloat(data.luckywatch.saldo || 0);
+                if (newSaldo > 0 || cachedData.lwSaldo === 0) {
+                    cachedData.lwSaldo = newSaldo;
                 }
-                document.getElementById('lw-log-container').innerHTML = cacheLogs.lw ? cacheLogs.lw.join('<br>') : '<div>Menunggu aktivitas...</div>';
+                document.getElementById('lw-saldo').innerText = "$" + cachedData.lwSaldo.toFixed(5);
+                
+                if (data.lw_logs) document.getElementById('lw-log-container').innerHTML = data.lw_logs.slice(-3).join('<br>');
                 
                 const btnLW = document.getElementById('btn-pause-lw');
                 if(state.lw_paused) { btnLW.innerText = "RESUME"; btnLW.classList.add('active'); }
                 else { btnLW.innerText = "PAUSE"; btnLW.classList.remove('active'); }
             }
-            localStorage.setItem('cacheLogs', JSON.stringify(cacheLogs));
 
-            let ccS = parseFloat(data.clipcoin?.saldo || 0), lwS = parseFloat(data.luckywatch?.saldo || 0);
-            document.getElementById('total-saldo').innerText = "$" + (ccS + lwS).toFixed(5);
+            let totalUsd = cachedData.ccSaldo + cachedData.lwSaldo;
+            document.getElementById('total-saldo').innerText = "$" + totalUsd.toFixed(5);
 
             if (data.system) {
                 document.getElementById('cpu-bar').style.width = data.system.cpu + "%";
@@ -666,7 +691,10 @@
             renderNocid(data);
 
         } catch (e) { 
-            console.log("Fetch error/timeout:", e.message);
+            const liveBadge = document.getElementById('live-badge');
+            liveBadge.innerText = "CONN ERROR";
+            liveBadge.className = "badge offline";
+            console.error(e); 
         }
     }
 
@@ -682,39 +710,52 @@
         if (isBanned) {
             nmStatus.innerText = "🚫 BANNED"; nmStatus.className = "nm-badge error";
             cardNocid.classList.remove('running'); setRingState('nm-spinner', 'nm-ring-text', false);
-            stopGraphAnimation(); stopFanSound();
+            stopGraphAnimation();
+            stopFanSound();
             addConsoleLog("ERROR: BANNED DETECTED! Halting operations.", "err");
         } else if (isCooldown) {
             nmStatus.innerText = "⏳ COOLDOWN"; nmStatus.className = "nm-badge cooldown";
             cardNocid.classList.add('running'); setRingState('nm-spinner', 'nm-ring-text', true);
-            startGraphAnimation(); stopFanSound();
+            startGraphAnimation();
+            stopFanSound();
             addConsoleLog("INFO: Cooling down. Waiting for next block...", "warn");
         } else {
             nmStatus.innerText = "⚡ RUNNING"; nmStatus.className = "nm-badge running";
             cardNocid.classList.add('running'); setRingState('nm-spinner', 'nm-ring-text', true);
-            startGraphAnimation(); startFanSound();
-            addConsoleLog("Mining active. Calculating hashes...", "info");
+            startGraphAnimation();
+            startFanSound();
         }
 
-        document.getElementById('nm-hashrate').innerText = data.nocid_hashrate || '0 GH/s';
+        // === KUNCI 100% KE XMR ===
+        let hashrate = data.nocid_hashrate || '0 GH/s';
+        if (hashrate !== '0 GH/s') cachedData.hashrate = hashrate;
+        document.getElementById('nm-hashrate').innerText = cachedData.hashrate;
         
-        // === TAMPILKAN DATA MENTAH DARI PYTHON (TANPA FILTER) ===
-        let ncdtRaw = parseFloat(data.nocid_ncdt_balance || 0);
-        let coinRaw = (data.nocid_current_coin || 'XMR').toUpperCase();
-        let coinBalRaw = parseFloat(data.nocid_xmr_balance || 0);
-
-        document.getElementById('nm-ncdt-balance').innerText = ncdtRaw.toFixed(2);
-        document.getElementById('nm-xmr-balance').innerText = coinBalRaw.toFixed(8);
-
-        let algo = "RX/0"; 
-        if (coinRaw === "LTC") algo = "Scrypt";
-        else if (coinRaw === "BTC") algo = "SHA-256";
-        else if (coinRaw === "DOGE" || coinRaw === "DOGECOIN") algo = "Scrypt";
+        document.getElementById('nm-current-coin').innerText = "XMR (RX/0)";
+        document.getElementById('label-coin-balance').innerText = "💎 XMR BALANCE";
         
-        document.getElementById('nm-current-coin').innerText = `${coinRaw} (${algo})`;
-        document.getElementById('label-coin-balance').innerText = `💎 ${coinRaw} BALANCE`;
+        const newXmrBal = parseFloat(data.nocid_xmr_balance || 0);
+        if (newXmrBal > 0 || cachedData.xmrBal === 0) {
+            if (newXmrBal > cachedData.xmrBal && cachedData.xmrBal !== 0) {
+                const diff = (newXmrBal - cachedData.xmrBal).toFixed(8);
+                playCoinSound();
+                addConsoleLog(`SUCCESS: +${diff} XMR Masuk.`, "share");
+                addConsoleLog(`SALDO: ${newXmrBal.toFixed(8)} XMR`, "info");
+                
+                const now = new Date();
+                const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                miningHistory.unshift({ time: ts, amount: diff, type: "XMR" });
+                if (miningHistory.length > 10) miningHistory.pop();
+            }
+            cachedData.xmrBal = newXmrBal;
+        }
+        document.getElementById('nm-xmr-balance').innerText = cachedData.xmrBal.toFixed(8);
 
-        document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} ${coinRaw}`;
+        const newNcdtBal = parseFloat(data.nocid_ncdt_balance || 0);
+        if (newNcdtBal > 0 || cachedData.ncdtBal === 0) cachedData.ncdtBal = newNcdtBal;
+        document.getElementById('nm-ncdt-balance').innerText = cachedData.ncdtBal.toFixed(2);
+
+        document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} XMR`;
         
         const pingEl = document.getElementById('nm-ping-nocid');
         pingEl.innerText = `${data.nocid_server_ping || 0} ms`;
@@ -755,8 +796,8 @@
             html += `
             <div class="nm-log-item" style="border-left-color: var(--green)">
                 <span class="ts">${item.time}</span>
-                <span class="type" style="color:var(--green)">💎 ${item.type}</span>
-                <span class="reward">+${item.amount} <span>${item.type}</span></span>
+                <span class="type" style="color:var(--green)">💎 XMR</span>
+                <span class="reward">+${item.amount} <span>XMR</span></span>
             </div>`;
         });
         logList.innerHTML = html;

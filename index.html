@@ -59,16 +59,18 @@
         
         .stat-row { display: flex; justify-content: space-between; font-size: 8px; margin-bottom: 2px; }
         
-        /* PERBESAR KOTAK LOG BOT */
+        /* PERBAIKAN TAMPILAN LOG BOT */
         .bot-log { 
-            font-size: 7px; color: #aaa; margin-top: 6px; 
-            border-top: 1px dashed #444; padding-top: 4px; 
-            min-height: 35px; max-height: 65px; overflow-y: auto; /* Bisa di-scroll */
+            font-size: 7.5px; color: #aaa; margin-top: 8px; 
+            border-top: 1px dashed #444; padding-top: 6px; 
+            min-height: 45px; max-height: 75px; overflow-y: auto; /* Bisa di-scroll */
             display: flex; flex-direction: column; justify-content: flex-end; 
-            font-family: 'Courier New', monospace;
+            font-family: 'Courier New', monospace; line-height: 1.3;
         }
+        .bot-log::-webkit-scrollbar { width: 3px; }
+        .bot-log::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
         
-        .btn-pause { width: 100%; padding: 6px; margin-top: 6px; background: rgba(0,0,0,0.7); border: 1px solid var(--border); color: var(--text); border-radius: 4px; font-size: 8px; cursor: pointer; transition: 0.2s;}
+        .btn-pause { width: 100%; padding: 8px; margin-top: 8px; background: rgba(0,0,0,0.8); border: 1px solid var(--border); color: var(--text); border-radius: 4px; font-size: 9px; cursor: pointer; transition: 0.2s; font-weight: 600;}
         .btn-pause:hover { background: rgba(255,255,255,0.1); }
         .btn-pause.active { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.2); }
 
@@ -374,7 +376,7 @@
                 <span id="nm-last-update">--:--:--</span>
             </div>
             <div id="nm-log-list">
-                <div class="nm-log-empty">Menunggu share koin pertama...</div>
+                <div class="nm-log-empty">Menunggu koin pertama ditambang...</div>
             </div>
         </div>
     </div>
@@ -436,11 +438,15 @@
     let graphInterval = null;
     
     // === SISTEM CACHE 100% ANTI HILANG ===
-    // Menyimpan history koin dan log di browser agar tidak hilang saat npoint down / di-refresh
     let miningHistory = JSON.parse(localStorage.getItem('miningHistory') || "[]"); 
     let lastXmrBal = localStorage.getItem('lastXmrBal') ? parseFloat(localStorage.getItem('lastXmrBal')) : null; 
     let cacheLogs = JSON.parse(localStorage.getItem('cacheLogs') || "{}");
     
+    // === SISTEM ANTI KEDIP (DATA HANTU) ===
+    let lastValidNcdt = 0;
+    let lastValidCoin = "XMR";
+    let lastValidCoinBal = 0;
+
     let soundEnabled = false;
     let lastConsoleLog = "";
     
@@ -501,7 +507,7 @@
     }
 
     function addConsoleLog(text, type="") {
-        if (text === lastConsoleLog) return; // Anti Spam Console
+        if (text === lastConsoleLog) return; // Anti Spam
         lastConsoleLog = text;
 
         const term = document.getElementById('mini-term');
@@ -590,7 +596,11 @@
     async function fetchDashboard() {
         const startPing = new Date().getTime();
         try {
-            const res = await fetch(JSON_URL + "?t=" + new Date().getTime());
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout 5 detik biar gak freeze
+            
+            const res = await fetch(JSON_URL + "?t=" + new Date().getTime(), { signal: controller.signal });
+            clearTimeout(timeoutId);
             const data = await res.json();
             
             document.getElementById('net-ping').innerText = (new Date().getTime() - startPing) + "ms";
@@ -599,7 +609,7 @@
             state.cc_paused = !!data.cc_paused;
             state.lw_paused = !!data.lw_paused;
 
-            // ==== PEMBACAAN LOG CLIPCOIN & LUCKYWATCH ====
+            // ==== LOG CLIPCOIN & LUCKYWATCH ====
             if (data.clipcoin) {
                 const isAct = data.clipcoin.status === 'RUNNING' || data.clipcoin.status === 'WATCHING';
                 setRingState('cc-spinner', 'cc-ring-text', isAct);
@@ -609,9 +619,8 @@
                 
                 if (data.logs) {
                     const ccLogs = data.logs.filter(l => l.includes('[CLIPCOIN]')).slice(-3);
-                    if (ccLogs.length > 0) cacheLogs.cc = ccLogs; // Update cache jika ada log baru
+                    if (ccLogs.length > 0) cacheLogs.cc = ccLogs;
                 }
-                // Tampilkan dari cache agar tidak "Menunggu aktivitas" jika bot sedang jeda
                 document.getElementById('cc-log-container').innerHTML = cacheLogs.cc ? cacheLogs.cc.join('<br>') : '<div>Menunggu aktivitas...</div>';
                 
                 const btnCC = document.getElementById('btn-pause-cc');
@@ -627,7 +636,7 @@
                 
                 if (data.logs) {
                     const lwLogs = data.logs.filter(l => l.includes('[LUCKYWATCH]')).slice(-3);
-                    if (lwLogs.length > 0) cacheLogs.lw = lwLogs; // Update cache jika ada log baru
+                    if (lwLogs.length > 0) cacheLogs.lw = lwLogs;
                 }
                 document.getElementById('lw-log-container').innerHTML = cacheLogs.lw ? cacheLogs.lw.join('<br>') : '<div>Menunggu aktivitas...</div>';
                 
@@ -635,8 +644,7 @@
                 if(state.lw_paused) { btnLW.innerText = "RESUME"; btnLW.classList.add('active'); }
                 else { btnLW.innerText = "PAUSE"; btnLW.classList.remove('active'); }
             }
-            localStorage.setItem('cacheLogs', JSON.stringify(cacheLogs)); // Simpan permanen ke browser
-            // ========================================================
+            localStorage.setItem('cacheLogs', JSON.stringify(cacheLogs));
 
             let ccS = parseFloat(data.clipcoin?.saldo || 0), lwS = parseFloat(data.luckywatch?.saldo || 0);
             document.getElementById('total-saldo').innerText = "$" + (ccS + lwS).toFixed(5);
@@ -662,7 +670,10 @@
 
             renderNocid(data);
 
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.log("Fetch error/timeout:", e.message);
+            // Jika error, jangan update UI, biarkan data lama tampil
+        }
     }
 
     function renderNocid(data) {
@@ -692,39 +703,41 @@
         }
 
         document.getElementById('nm-hashrate').innerText = data.nocid_hashrate || '0 GH/s';
-        const xmrBal = parseFloat(data.nocid_xmr_balance || 0);
         
-        // ==== LOGIKA XMR MASUK PERMANEN ====
-        if (lastXmrBal !== null && xmrBal > lastXmrBal) {
-            const diff = (xmrBal - lastXmrBal).toFixed(8);
-            playCoinSound();
-            
-            addConsoleLog(`SUCCESS: +${diff} ${data.nocid_current_coin} Masuk.`, "share");
-            addConsoleLog(`SALDO: ${xmrBal.toFixed(8)} ${data.nocid_current_coin}`, "info");
-            
-            const now = new Date();
-            const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-            miningHistory.unshift({ time: ts, amount: diff, type: data.nocid_current_coin });
-            if (miningHistory.length > 10) miningHistory.pop();
-            
-            localStorage.setItem('miningHistory', JSON.stringify(miningHistory)); // Simpan history
+        // === LOGIKA FILTER DATA HANTU (ANTI KEDIP) ===
+        let ncdtRaw = parseFloat(data.nocid_ncdt_balance || 0);
+        let coinRaw = (data.nocid_current_coin || 'XMR').toUpperCase();
+        let coinBalRaw = parseFloat(data.nocid_xmr_balance || 0);
+
+        // 1. Filter NCDT: Tolak jika lonjakannya lebih dari 1000
+        if (lastValidNcdt === 0) {
+            lastValidNcdt = ncdtRaw;
+        } else if (Math.abs(ncdtRaw - lastValidNcdt) < 1000 && ncdtRaw > 0) {
+            lastValidNcdt = ncdtRaw;
+        } 
+        
+        // 2. Filter Koin & Algo: Tolak jika saldonya turun tiba-tiba
+        if (lastValidCoinBal === 0) {
+            lastValidCoin = coinRaw;
+            lastValidCoinBal = coinBalRaw;
+        } else if (coinBalRaw >= lastValidCoinBal) {
+            lastValidCoin = coinRaw;
+            lastValidCoinBal = coinBalRaw;
         }
-        lastXmrBal = xmrBal; 
-        localStorage.setItem('lastXmrBal', lastXmrBal); // Simpan saldo terakhir
-        // ========================================================
 
-        document.getElementById('nm-xmr-balance').innerText = xmrBal.toFixed(8);
+        // Tampilkan Data yang sudah difilter
+        document.getElementById('nm-ncdt-balance').innerText = lastValidNcdt.toFixed(2);
+        document.getElementById('nm-xmr-balance').innerText = lastValidCoinBal.toFixed(8);
 
-        let currentCoin = (data.nocid_current_coin || 'XMR').toUpperCase();
         let algo = "RX/0"; 
-        if (currentCoin === "LTC") algo = "Scrypt";
-        else if (currentCoin === "BTC") algo = "SHA-256";
+        if (lastValidCoin === "LTC") algo = "Scrypt";
+        else if (lastValidCoin === "BTC") algo = "SHA-256";
+        else if (lastValidCoin === "DOGE" || lastValidCoin === "DOGECOIN") algo = "Scrypt";
         
-        document.getElementById('nm-current-coin').innerText = `${currentCoin} (${algo})`;
-        document.getElementById('label-coin-balance').innerText = `💎 ${currentCoin} BALANCE`;
+        document.getElementById('nm-current-coin').innerText = `${lastValidCoin} (${algo})`;
+        document.getElementById('label-coin-balance').innerText = `💎 ${lastValidCoin} BALANCE`;
 
-        document.getElementById('nm-ncdt-balance').innerText = parseFloat(data.nocid_ncdt_balance || 0).toFixed(2);
-        document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} ${currentCoin}`;
+        document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} ${lastValidCoin}`;
         
         const pingEl = document.getElementById('nm-ping-nocid');
         pingEl.innerText = `${data.nocid_server_ping || 0} ms`;

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NealZz CryptoRetjeh</title>
+    <title>NealZz CryptoRetjeh - Direct Fetch</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&display=swap');
 
@@ -196,6 +196,7 @@
         .wd-item.miner .status { color: var(--green); }
         .wd-status { font-size: 9px; font-weight: 600; color: var(--yellow); display: block; border-top: 1px dashed #333; padding-top: 6px; margin-top: 2px; text-align: center; letter-spacing: 1px;}
         
+        /* COOKIE BOX */
         .cookie-box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 4px; margin-top: 4px;}
         .email-input { background: #000; border: 1px solid var(--border); color: #fff; padding: 6px; border-radius: 4px; font-size: 8px; width: 100%; }
         .btn-cookie { background: var(--purple); color: #fff; border: none; padding: 6px; border-radius: 4px; font-weight: 400; font-size: 8px; cursor: pointer; }
@@ -409,21 +410,19 @@
         <div class="wd-status" id="wd-status">BELUM ADA ANTREAN</div>
     </div>
 
+    <!-- INPUT COOKIE LANGSUNG UNTUK DIRECT FETCH -->
     <div class="cookie-box">
-        <label style="font-size:8px; color:var(--text-dim);">🍪 Update Cookie / Email</label>
-        <input type="text" class="email-input" id="cookie-input" placeholder="Cookie (ClipCoin / LuckyWatch)...">
-        <input type="text" class="email-input" id="lime-email" placeholder="Email LimeFaucet...">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-            <button class="btn-cookie" onclick="setCookie('clipcoin')">Set ClipCoin</button>
-            <button class="btn-cookie" style="background: var(--cyan); color: #000;" onclick="setCookie('luckywatch')">Set LuckyWatch</button>
-            <button class="btn-cookie" style="background: var(--pink); color: #000; grid-column: span 2;" onclick="setEmail('lime')">🌸 Kirim Email Faucet</button>
-        </div>
+        <label style="font-size:8px; color:var(--text-dim);">🍪 Cookie untuk Direct Fetch (Bypass Nol)</label>
+        <input type="text" class="email-input" id="direct-cc" placeholder="Cookie ClipCoin (cth: session=abc...)">
+        <input type="text" class="email-input" id="direct-lw" placeholder="Cookie LuckyWatch (cth: PHPSESSID=abc...)">
+        <input type="text" class="email-input" id="direct-nocid" placeholder="Cookie Nocid (cth: nocid_mining_sess=abc...)">
+        <button class="btn-cookie" onclick="saveCookies()">Simpan Cookie & Tarik Data</button>
     </div>
 </div>
 
 <script>
     // ==========================================
-    // KONFIGURASI 3 NPOINT TERPISAH
+    // KONFIGURASI 3 NPOINT (Cadangan)
     // ==========================================
     const URL_CC = "https://api.npoint.io/bedfd3c36945891d8442"; 
     const URL_LW = "https://api.npoint.io/c34c77001e31bcce50f0"; 
@@ -432,13 +431,38 @@
     let state = { cc_paused: false, lw_paused: false };
     let cacheLogs = JSON.parse(localStorage.getItem('cacheLogs') || "{}");
     
+    // Simpan Cookie di Browser
+    let cookieCC = localStorage.getItem('direct_cc') || "";
+    let cookieLW = localStorage.getItem('direct_lw') || "";
+    let cookieNO = localStorage.getItem('direct_nocid') || "";
+
+    // Load Cookie ke Input saat pertama buka
+    window.onload = () => {
+        if(cookieCC) document.getElementById('direct-cc').value = cookieCC;
+        if(cookieLW) document.getElementById('direct-lw').value = cookieLW;
+        if(cookieNO) document.getElementById('direct-nocid').value = cookieNO;
+    };
+
+    function saveCookies() {
+        cookieCC = document.getElementById('direct-cc').value.trim();
+        cookieLW = document.getElementById('direct-lw').value.trim();
+        cookieNO = document.getElementById('direct-nocid').value.trim();
+        
+        localStorage.setItem('direct_cc', cookieCC);
+        localStorage.setItem('direct_lw', cookieLW);
+        localStorage.setItem('direct_nocid', cookieNO);
+        
+        alert("Cookie disimpan! Data akan ditarik secara langsung.");
+        fetchDashboard();
+    }
+
     let pendingPauseBot = null;
     function askPause(bot) {
         const isPaused = bot === 'cc' ? state.cc_paused : state.lw_paused;
         if (isPaused) { doTogglePause(bot); return; }
         pendingPauseBot = bot;
         const name = bot === 'cc' ? 'ClipCoin' : 'LuckyWatch';
-        document.getElementById('modal-desc').innerText = `Yakin ingin mem-pause bot ${name}? Bot akan berhenti bekerja.`;
+        document.getElementById('modal-desc').innerText = `Yakin ingin mem-pause bot ${name}?`;
         document.getElementById('pause-modal').classList.add('active');
     }
     function closeModal() {
@@ -470,61 +494,101 @@
         if(isRunning) { s.classList.add('active'); t.innerText='RUN'; }
         else { s.classList.remove('active'); t.innerText='STOP'; }
     }
-    
-    function fmtDuration(sec) {
-        sec = Math.max(0, Math.floor(sec));
-        return `${String(Math.floor(sec/3600)).padStart(2,'0')}:${String(Math.floor((sec%3600)/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
-    }
 
     async function fetchDashboard() {
         try {
-            // Ambil data dari 3 Npoint sekaligus
+            // 1. Ambil data dari Npoint (sebagai cadangan jika cookie kosong)
             const [resCC, resLW, resNO] = await Promise.all([
                 fetch(URL_CC + "?t=" + new Date().getTime()),
                 fetch(URL_LW + "?t=" + new Date().getTime()),
                 fetch(URL_NOCID + "?t=" + new Date().getTime())
             ]);
             
-            const dataCC = await resCC.json();
-            const dataLW = await resLW.json();
-            const dataNO = await resNO.json();
+            let dataCC = await resCC.json();
+            let dataLW = await resLW.json();
+            let dataNO = await resNO.json();
 
+            // 2. DIRECT FETCH (Menembak API asli menggunakan Cookie)
+            
+            // --- CLIPCOIN ---
+            if (cookieCC) {
+                try {
+                    const pUrl = "https://api.allorigins.win/raw?url=";
+                    const apiCC = "https://clipcoin.pro/api/user/";
+                    const rDirect = await fetch(pUrl + encodeURIComponent(apiCC), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': cookieCC },
+                        body: 'method=getCurrentUser'
+                    });
+                    const dCC = await rDirect.json();
+                    if(dCC.status === "ok") {
+                        dataCC.clipcoin = { 
+                            ...dataCC.clipcoin, 
+                            saldo: dCC.data.balance, 
+                            status: "RUNNING" 
+                        };
+                    }
+                } catch(e) { console.log("Direct CC Gagal"); }
+            }
+
+            // --- NOCID ---
+            if (cookieNO) {
+                try {
+                    const pUrl = "https://api.allorigins.win/raw?url=";
+                    const apiNO = "https://nocid.fun/api/stats";
+                    const rDirect = await fetch(pUrl + encodeURIComponent(apiNO), {
+                        method: 'GET',
+                        headers: { 'Cookie': cookieNO, 'Referer': 'https://nocid.fun/room' }
+                    });
+                    const dNO = await rDirect.json();
+                    if(dNO.ok) {
+                        dataNO.nocid_ncdt_balance = dNO.balance || dNO.balance_key || 0;
+                        dataNO.nocid_hashrate = dNO.hashrate || "0 GH/s";
+                        // Ambil koin terbesar
+                        let maxC = "XMR"; let maxV = 0;
+                        for(let k in dNO.coins) {
+                            if(dNO.coins[k] > maxV) { maxV = dNO.coins[k]; maxC = k.toUpperCase(); }
+                        }
+                        dataNO.nocid_current_coin = maxC;
+                        dataNO.nocid_xmr_balance = maxV;
+                        dataNO.nocid_status = "RUNNING";
+                    }
+                } catch(e) { console.log("Direct NOCID Gagal"); }
+            }
+
+            // === RENDER UI ===
             document.getElementById('last-sync').innerText = "Sync: " + new Date().toLocaleTimeString('id-ID', { hour12: false });
 
-            // ==== DATA CLIPCOIN ====
-            if (dataCC) {
+            if (dataCC && dataCC.clipcoin) {
                 state.cc_paused = !!dataCC.cc_paused;
-                const isAct = dataCC.clipcoin?.status === 'RUNNING' || dataCC.clipcoin?.status === 'WATCHING';
-                setRingState('cc-spinner', 'cc-ring-text', isAct);
-                document.getElementById('cc-status').innerText = dataCC.clipcoin?.status || 'IDLE';
-                document.getElementById('cc-claims').innerText = dataCC.clipcoin?.claims || 0;
-                document.getElementById('cc-saldo').innerText = "$" + parseFloat(dataCC.clipcoin?.saldo || 0).toFixed(5);
+                setRingState('cc-spinner', 'cc-ring-text', dataCC.clipcoin.status === 'RUNNING');
+                document.getElementById('cc-status').innerText = dataCC.clipcoin.status || 'IDLE';
+                document.getElementById('cc-claims').innerText = dataCC.clipcoin.claims || 0;
+                document.getElementById('cc-saldo').innerText = "$" + parseFloat(dataCC.clipcoin.saldo || 0).toFixed(5);
                 
                 if (dataCC.logs) {
                     const ccLogs = dataCC.logs.filter(l => l.includes('[CLIPCOIN]')).slice(-3);
                     if (ccLogs.length > 0) cacheLogs.cc = ccLogs;
                 }
-                document.getElementById('cc-log-container').innerHTML = cacheLogs.cc ? cacheLogs.cc.join('<br>') : '<div>Menunggu aktivitas...</div>';
+                document.getElementById('cc-log-container').innerHTML = cacheLogs.cc ? cacheLogs.cc.join('<br>') : '<div>Menunggu...</div>';
                 
                 const btnCC = document.getElementById('btn-pause-cc');
                 if(state.cc_paused) { btnCC.innerText = "RESUME"; btnCC.classList.add('active'); }
                 else { btnCC.innerText = "PAUSE"; btnCC.classList.remove('active'); }
             }
 
-            // ==== DATA LUCKYWATCH ====
-            if (dataLW) {
+            if (dataLW && dataLW.luckywatch) {
                 state.lw_paused = !!dataLW.lw_paused;
-                const isAct = dataLW.luckywatch?.status === 'RUNNING' || dataLW.luckywatch?.status === 'WATCHING';
-                setRingState('lw-spinner', 'lw-ring-text', isAct);
-                document.getElementById('lw-status').innerText = dataLW.luckywatch?.status || 'IDLE';
-                document.getElementById('lw-claims').innerText = dataLW.luckywatch?.claims || 0;
-                document.getElementById('lw-saldo').innerText = "$" + parseFloat(dataLW.luckywatch?.saldo || 0).toFixed(5);
+                setRingState('lw-spinner', 'lw-ring-text', dataLW.luckywatch.status === 'RUNNING');
+                document.getElementById('lw-status').innerText = dataLW.luckywatch.status || 'IDLE';
+                document.getElementById('lw-claims').innerText = dataLW.luckywatch.claims || 0;
+                document.getElementById('lw-saldo').innerText = "$" + parseFloat(dataLW.luckywatch.saldo || 0).toFixed(5);
                 
                 if (dataLW.logs) {
                     const lwLogs = dataLW.logs.filter(l => l.includes('[LUCKYWATCH]')).slice(-3);
                     if (lwLogs.length > 0) cacheLogs.lw = lwLogs;
                 }
-                document.getElementById('lw-log-container').innerHTML = cacheLogs.lw ? cacheLogs.lw.join('<br>') : '<div>Menunggu aktivitas...</div>';
+                document.getElementById('lw-log-container').innerHTML = cacheLogs.lw ? cacheLogs.lw.join('<br>') : '<div>Menunggu...</div>';
                 
                 const btnLW = document.getElementById('btn-pause-lw');
                 if(state.lw_paused) { btnLW.innerText = "RESUME"; btnLW.classList.add('active'); }
@@ -532,57 +596,24 @@
             }
             localStorage.setItem('cacheLogs', JSON.stringify(cacheLogs));
 
-            // ==== DATA NOCID ====
-            if (dataNO && dataNO.nocid_status) {
-                let nmStatus = document.getElementById('nm-status');
-                const isBanned = dataNO.nocid_banned === true;
-                const rawStatus = (dataNO.nocid_status || "RUNNING").toUpperCase();
-                const isCooldown = rawStatus.includes("COOLDOWN") || rawStatus.includes("WAIT");
-
-                if (isBanned) {
-                    nmStatus.innerText = "🚫 BANNED"; nmStatus.className = "nm-badge error";
-                } else if (isCooldown) {
-                    nmStatus.innerText = "⏳ COOLDOWN"; nmStatus.className = "nm-badge cooldown";
-                } else {
-                    nmStatus.innerText = "⚡ RUNNING"; nmStatus.className = "nm-badge running";
-                }
-
+            if (dataNO) {
+                document.getElementById('nm-status').innerText = "⚡ RUNNING";
                 document.getElementById('nm-hashrate').innerText = dataNO.nocid_hashrate || '0 GH/s';
                 document.getElementById('nm-ncdt-balance').innerText = parseFloat(dataNO.nocid_ncdt_balance || 0).toFixed(2);
                 document.getElementById('nm-xmr-balance').innerText = parseFloat(dataNO.nocid_xmr_balance || 0).toFixed(8);
                 document.getElementById('nm-current-coin').innerText = dataNO.nocid_current_coin || "XMR";
-                
-                document.getElementById('nm-ct-faucet').innerText = parseInt(dataNO.nocid_total_faucet || 0);
-                document.getElementById('nm-ct-ptc').innerText = parseInt(dataNO.nocid_total_ptc || 0);
-                document.getElementById('nm-ct-bonus').innerText = parseInt(dataNO.nocid_total_challenges || 0);
-                
-                document.getElementById('nm-ping-nocid').innerText = `${dataNO.nocid_server_ping || 0} ms`;
             }
 
-            // ==== TOTAL SALDO ====
             let ccS = parseFloat(dataCC?.clipcoin?.saldo || 0), lwS = parseFloat(dataLW?.luckywatch?.saldo || 0);
             document.getElementById('total-saldo').innerText = "$" + (ccS + lwS).toFixed(5);
 
-            // ==== WITHDRAWAL STATUS ====
-            let wdStatus = dataCC?.wd_status || dataLW?.wd_status || "waiting";
-            document.getElementById('wd-status').innerText = wdStatus.toUpperCase();
-            const isSukses = wdStatus.toLowerCase().includes("sukses") || wdStatus.toLowerCase().includes("success");
-            const isProses = wdStatus.toLowerCase().includes("proses");
-            let color = isSukses ? 'var(--green)' : (isProses ? 'var(--yellow)' : 'var(--text-dim)');
-            let text = isSukses ? 'SUCCESS' : (isProses ? 'PROCESS' : 'WAITING');
-            
-            ['wd-cc-status', 'wd-lw-status', 'wd-nm-status'].forEach(id => {
-                let el = document.getElementById(id);
-                if(el) { el.innerText = text; el.style.color = color; el.style.textShadow = `0 0 5px ${color}`; }
-            });
-
         } catch (e) { 
-            console.log("Fetch error/timeout:", e.message);
+            console.log("Fetch error:", e.message);
         }
     }
 
     fetchDashboard();
-    setInterval(fetchDashboard, 2000);
+    setInterval(fetchDashboard, 5000); // Tarik data tiap 5 detik
 </script>
 </body>
 </html>

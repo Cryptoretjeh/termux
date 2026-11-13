@@ -440,7 +440,7 @@
     let graphInterval = null;
     let miningHistory = []; 
     
-    // ==== DATA CACHE (ANTI RESET KE NOL) ====
+    // ==== DATA CACHE ====
     let cachedData = {
         xmrBal: 0,
         ncdtBal: 0,
@@ -522,7 +522,7 @@
         if (term.children.length > 25) term.removeChild(term.firstChild);
     }
 
-    // ==== LOGIKA PAUSE (DIPERBAIKI) ====
+    // ==== LOGIKA PAUSE ====
     let pendingPauseBot = null;
     function askPause(bot) {
         const isPaused = bot === 'cc' ? state.cc_paused : state.lw_paused;
@@ -628,18 +628,13 @@
             state.cc_paused = !!data.cc_paused;
             state.lw_paused = !!data.lw_paused;
 
-            // ==== LOGIKA ANTI RESET (CLIPCOIN & LUCKYWATCH) ====
+            // ==== LOGIKA TAMPILAN CLIPCOIN & LUCKYWATCH ====
             if (data.clipcoin) {
                 const isAct = data.clipcoin.status === 'RUNNING' || data.clipcoin.status === 'WATCHING';
                 setRingState('cc-spinner', 'cc-ring-text', isAct);
                 document.getElementById('cc-status').innerText = data.clipcoin.status || 'IDLE';
                 document.getElementById('cc-claims').innerText = data.clipcoin.claims || 0;
-                
-                let newSaldo = parseFloat(data.clipcoin.saldo || 0);
-                if (newSaldo > 0 || cachedData.ccSaldo === 0) {
-                    cachedData.ccSaldo = newSaldo;
-                }
-                document.getElementById('cc-saldo').innerText = "$" + cachedData.ccSaldo.toFixed(5);
+                document.getElementById('cc-saldo').innerText = "$" + parseFloat(data.clipcoin.saldo || 0).toFixed(5);
                 
                 if (data.cc_logs) document.getElementById('cc-log-container').innerHTML = data.cc_logs.slice(-3).join('<br>');
                 
@@ -652,12 +647,7 @@
                 setRingState('lw-spinner', 'lw-ring-text', isAct);
                 document.getElementById('lw-status').innerText = data.luckywatch.status || 'IDLE';
                 document.getElementById('lw-claims').innerText = data.luckywatch.claims || 0;
-                
-                let newSaldo = parseFloat(data.luckywatch.saldo || 0);
-                if (newSaldo > 0 || cachedData.lwSaldo === 0) {
-                    cachedData.lwSaldo = newSaldo;
-                }
-                document.getElementById('lw-saldo').innerText = "$" + cachedData.lwSaldo.toFixed(5);
+                document.getElementById('lw-saldo').innerText = "$" + parseFloat(data.luckywatch.saldo || 0).toFixed(5);
                 
                 if (data.lw_logs) document.getElementById('lw-log-container').innerHTML = data.lw_logs.slice(-3).join('<br>');
                 
@@ -666,7 +656,7 @@
                 else { btnLW.innerText = "PAUSE"; btnLW.classList.remove('active'); }
             }
 
-            let totalUsd = cachedData.ccSaldo + cachedData.lwSaldo;
+            let totalUsd = parseFloat(data.clipcoin?.saldo || 0) + parseFloat(data.luckywatch?.saldo || 0);
             document.getElementById('total-saldo').innerText = "$" + totalUsd.toFixed(5);
 
             if (data.system) {
@@ -727,33 +717,29 @@
         }
 
         // === KUNCI 100% KE XMR ===
-        let hashrate = data.nocid_hashrate || '0 GH/s';
-        if (hashrate !== '0 GH/s') cachedData.hashrate = hashrate;
-        document.getElementById('nm-hashrate').innerText = cachedData.hashrate;
-        
+        document.getElementById('nm-hashrate').innerText = data.nocid_hashrate || '0 GH/s';
         document.getElementById('nm-current-coin').innerText = "XMR (RX/0)";
         document.getElementById('label-coin-balance').innerText = "💎 XMR BALANCE";
         
         const newXmrBal = parseFloat(data.nocid_xmr_balance || 0);
-        if (newXmrBal > 0 || cachedData.xmrBal === 0) {
-            if (newXmrBal > cachedData.xmrBal && cachedData.xmrBal !== 0) {
-                const diff = (newXmrBal - cachedData.xmrBal).toFixed(8);
-                playCoinSound();
-                addConsoleLog(`SUCCESS: +${diff} XMR Masuk.`, "share");
-                addConsoleLog(`SALDO: ${newXmrBal.toFixed(8)} XMR`, "info");
-                
-                const now = new Date();
-                const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-                miningHistory.unshift({ time: ts, amount: diff, type: "XMR" });
-                if (miningHistory.length > 10) miningHistory.pop();
-            }
-            cachedData.xmrBal = newXmrBal;
+        document.getElementById('nm-xmr-balance').innerText = newXmrBal.toFixed(8);
+        
+        // Log koin real-time (hanya kalau angka bertambah)
+        if (newXmrBal > cachedData.xmrBal && cachedData.xmrBal !== 0) {
+            const diff = (newXmrBal - cachedData.xmrBal).toFixed(8);
+            playCoinSound();
+            addConsoleLog(`SUCCESS: +${diff} XMR Masuk.`, "share");
+            addConsoleLog(`SALDO: ${newXmrBal.toFixed(8)} XMR`, "info");
+            
+            const now = new Date();
+            const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            miningHistory.unshift({ time: ts, amount: diff, type: "XMR" });
+            if (miningHistory.length > 10) miningHistory.pop();
         }
-        document.getElementById('nm-xmr-balance').innerText = cachedData.xmrBal.toFixed(8);
+        cachedData.xmrBal = newXmrBal;
 
-        const newNcdtBal = parseFloat(data.nocid_ncdt_balance || 0);
-        if (newNcdtBal > 0 || cachedData.ncdtBal === 0) cachedData.ncdtBal = newNcdtBal;
-        document.getElementById('nm-ncdt-balance').innerText = cachedData.ncdtBal.toFixed(2);
+        // Tampilan NCDT (Langsung ikut Npoint)
+        document.getElementById('nm-ncdt-balance').innerText = parseFloat(data.nocid_ncdt_balance || 0).toFixed(2);
 
         document.getElementById('nm-session').innerText = `+${parseFloat(data.nocid_session_ncdt||0).toFixed(2)} NCDT · +${parseFloat(data.nocid_session_xmr||0).toFixed(8)} XMR`;
         

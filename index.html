@@ -24,7 +24,6 @@
             overflow-x: hidden;
         }
 
-        /* EFEK SCANLINE HALUS */
         body::after {
             content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 999;
             background: linear-gradient(rgba(0,0,0,0) 50%, rgba(0,255,136,0.02) 50%);
@@ -34,7 +33,6 @@
 
         .cockpit { display: flex; flex-direction: column; gap: 10px; max-width: 600px; margin: 0 auto; position: relative; z-index: 10;}
 
-        /* EFEK KACA (GLASSMORPHISM) DENGAN ANIMASI PULSE */
         .glass-panel {
             background: var(--panel);
             backdrop-filter: blur(16px);
@@ -54,7 +52,6 @@
         }
         .glass-panel > * { position: relative; z-index: 1; }
 
-        /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-left: 4px solid var(--purple); }
         .header-left { display: flex; align-items: center; gap: 12px; }
         .profile-pic { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--purple); box-shadow: 0 0 15px rgba(176,38,255,0.5); }
@@ -70,7 +67,6 @@
         .total-balance:active { transform: scale(0.95); }
         .total-balance-label { font-size: 7px; color: var(--text-dim); letter-spacing: 1.5px; font-weight: 800; margin-bottom: 2px;}
 
-        /* BOT CARDS CC & LW (RAPIH & SEIMBANG) */
         .bot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .bot-card { padding: 12px; display: flex; flex-direction: column; }
         .bot-card.clip { border-top: 3px solid var(--pink); box-shadow: 0 -3px 20px rgba(255,0,127,0.15); }
@@ -98,7 +94,6 @@
         .btn-pause:hover { background: rgba(255,255,255,0.1); }
         .btn-pause.active { border-color: var(--red); color: var(--red); background: rgba(255,51,51,0.15); }
 
-        /* MINI RING ANIMATION (DIPERBAIKI & SELALU BERPUTAR) */
         .mini-ring-container { position: relative; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; flex-shrink: 0;}
         .mini-ring-track { position: absolute; inset: 0; border-radius: 50%; background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.05); }
         .mini-ring-spinner { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg, transparent 180deg, currentColor 280deg, #fff 360deg); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); animation: miniSpin 1.5s linear infinite; opacity: 0.3; transition: opacity 0.3s; }
@@ -108,7 +103,6 @@
         .bot-card.lucky .mini-ring-spinner, .bot-card.lucky .mini-ring-text { color: var(--cyan); }
         @keyframes miniSpin { 100% { transform: rotate(360deg); } }
 
-        /* NOCID MINER */
         .nocid-miner { overflow: hidden; border: 1px solid rgba(255,136,0,0.3); box-shadow: 0 0 25px rgba(255,136,0,0.1); }
         .nm-header { background: linear-gradient(90deg, rgba(30,15,5,0.9), rgba(15,5,0,0.9)); border-bottom: 1px solid rgba(255,136,0,0.2); padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
         .nm-header-left { display: flex; align-items: center; gap: 12px; }
@@ -172,7 +166,6 @@
         .nm-log-item .type { color: var(--green); font-weight: 800; font-size: 8px; }
         .nm-log-item .reward { color: #fff; text-align: right; font-size: 9px; font-weight: 600;}
 
-        /* SYSTEM & NETWORK */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px;}
         .box { padding: 10px 12px; }
         .box-title { font-size: 8px; color: var(--text-dim); margin-bottom: 8px; border-bottom: 1px dashed var(--border); padding-bottom: 4px; font-weight: 800; letter-spacing: 0.5px;}
@@ -181,7 +174,6 @@
         .bar-bg { background: rgba(0,0,0,0.8); height: 5px; border-radius: 3px; overflow: hidden; margin-top: 2px; margin-bottom: 6px; border: 1px solid #222;}
         .bar-fill { height: 100%; transition: width 0.6s ease; }
 
-        /* WITHDRAWAL MONITOR */
         .wd-hub { border-left: 3px solid var(--yellow); padding: 12px; }
         .wd-hub-header { font-size: 8px; color: var(--text-dim); letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; margin-bottom: 8px;}
         .wd-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -193,7 +185,6 @@
         .wd-item.miner .status { color: var(--green); }
         .wd-status { font-size: 8px; font-weight: 800; color: var(--yellow); display: block; border-top: 1px dashed #333; padding-top: 8px; margin-top: 8px; text-align: center; letter-spacing: 1px;}
 
-        /* TOAST */
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 8px; pointer-events: none;}
         .toast { background: rgba(0,255,136,0.95); color: #000; font-size: 10px; font-weight: 800; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,255,136,0.5); animation: slideDown 0.3s ease forwards; text-align: center;}
         @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
@@ -393,13 +384,10 @@
 
 <script>
     const UPSTASH_URL = "https://vast-bear-200826.upstash.io";
+    // Token yang sama dengan Python, tapi kita bypass lewat URL
     const UPSTASH_TOKEN = "ggAAAAAAAxB6AAIgcDFUWuLENNttmwL-DTgiTVp2odi07trzwnbXGcKqAZv7fg"; 
 
-    const upstashHeaders = {
-        "Authorization": `Bearer ${UPSTASH_TOKEN}`,
-        "Content-Type": "application/json"
-    };
-
+    // Tidak pakai headers lagi, langsung tembak URL
     let state = { cc_paused: false, lw_paused: false };
     let cacheLogs = JSON.parse(localStorage.getItem('cacheLogs') || "{}");
     let uptimeSeconds = 0;
@@ -479,7 +467,8 @@
             let key = bot === 'cc' ? 'cc_state' : 'lw_state';
             let newState = bot === 'cc' ? !state.cc_paused : !state.lw_paused;
             
-            const res = await fetch(`${UPSTASH_URL}/get/${key}`, { headers: upstashHeaders });
+            // Ambil data dulu via URL
+            const res = await fetch(`${UPSTASH_URL}/get/${key}?_token=${UPSTASH_TOKEN}`);
             const json = await res.json();
             let data = json.result;
             if (typeof data === 'string') data = JSON.parse(data);
@@ -488,9 +477,9 @@
             if (bot === 'cc') data.cc_paused = newState;
             if (bot === 'lw') data.lw_paused = newState;
 
-            await fetch(`${UPSTASH_URL}/set/${key}`, {
+            // Simpan (butuh method POST)
+            await fetch(`${UPSTASH_URL}/set/${key}?_token=${UPSTASH_TOKEN}`, {
                 method: 'POST',
-                headers: upstashHeaders,
                 body: JSON.stringify(data)
             });
 
@@ -524,9 +513,10 @@
         else { t.innerText='STOP'; }
     }
 
+    // === FUNGSI FETCH DIRECT URL (BYPASS) ===
     async function fetchCCState() {
         try {
-            const res = await fetch(`${UPSTASH_URL}/get/cc_state`, { headers: upstashHeaders });
+            const res = await fetch(`${UPSTASH_URL}/get/cc_state?_token=${UPSTASH_TOKEN}`);
             const data = await res.json();
             let result = data.result || {};
             if (typeof result === 'string') { try { result = JSON.parse(result); } catch(e){} }
@@ -535,7 +525,7 @@
     }
     async function fetchLWState() {
         try {
-            const res = await fetch(`${UPSTASH_URL}/get/lw_state`, { headers: upstashHeaders });
+            const res = await fetch(`${UPSTASH_URL}/get/lw_state?_token=${UPSTASH_TOKEN}`);
             const data = await res.json();
             let result = data.result || {};
             if (typeof result === 'string') { try { result = JSON.parse(result); } catch(e){} }
@@ -544,7 +534,7 @@
     }
     async function fetchNOState() {
         try {
-            const res = await fetch(`${UPSTASH_URL}/get/nocid_state`, { headers: upstashHeaders });
+            const res = await fetch(`${UPSTASH_URL}/get/nocid_state?_token=${UPSTASH_TOKEN}`);
             const data = await res.json();
             let result = data.result || {};
             if (typeof result === 'string') { try { result = JSON.parse(result); } catch(e){} }
